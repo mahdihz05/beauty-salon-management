@@ -9,7 +9,7 @@ from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 from core.views import HealthCheckView
 
 urlpatterns = [
-    path("admin/", admin.site.urls),
+    path("django-admin/", admin.site.urls),
     path("api/health/", HealthCheckView.as_view(), name="health-check"),
     path("api/auth/", include("accounts.urls")),
     path("api/management/", include("salons.urls")),
@@ -38,7 +38,7 @@ if (settings.FRONTEND_DIST / "index.html").exists():
     urlpatterns += [
         path("", TemplateView.as_view(template_name="index.html"), name="frontend-home"),
         re_path(
-            r"^(?!api/|admin/|media/|static/).*$",
+            r"^(?!api/|django-admin/|media/|static/).*$",
             TemplateView.as_view(template_name="index.html"),
             name="frontend-spa",
         ),
