@@ -9,6 +9,7 @@ from rest_framework.test import APITestCase
 from accounts.models import BranchMembership, User
 from salons.models import (
     Branch,
+    BranchClosure,
     BranchService,
     City,
     Salon,
@@ -85,6 +86,57 @@ class BookingEngineBase:
 
 
 class BookingEngineTests(BookingEngineBase, TestCase):
+    def test_branch_weekly_hours_limit_staff_shift(self):
+        day = (self.target_date.weekday() + 2) % 7
+        self.branch.working_hours = {str(day): {"is_open": True, "start": "10:00", "end": "12:00"}}
+        self.branch.save(update_fields=("working_hours",))
+
+        slots = get_available_slots(
+            branch=self.branch,
+            service_ids=[self.service_one.id],
+            target_date=self.target_date,
+            staff_id=self.staff_one.id,
+            now=self.reference_now,
+        )
+
+        self.assertTrue(slots)
+        self.assertGreaterEqual(slots[0].start_at, self.at(10))
+        self.assertLessEqual(slots[-1].end_at, self.at(12))
+
+    def test_closed_branch_day_has_no_available_slots(self):
+        day = (self.target_date.weekday() + 2) % 7
+        self.branch.working_hours = {str(day): {"is_open": False, "start": "09:00", "end": "13:00"}}
+        self.branch.save(update_fields=("working_hours",))
+
+        slots = get_available_slots(
+            branch=self.branch,
+            service_ids=[self.service_one.id],
+            target_date=self.target_date,
+            now=self.reference_now,
+        )
+
+        self.assertEqual(slots, [])
+
+    def test_branch_closure_removes_overlapping_slots_for_every_staff(self):
+        BranchClosure.objects.create(
+            branch=self.branch,
+            starts_at=self.at(10),
+            ends_at=self.at(11),
+            reason="تعطیلی موقت مجموعه",
+        )
+
+        slots = get_available_slots(
+            branch=self.branch,
+            service_ids=[self.service_one.id],
+            target_date=self.target_date,
+            now=self.reference_now,
+        )
+
+        self.assertTrue(slots)
+        self.assertTrue(
+            all(slot.end_at <= self.at(10) or slot.start_at >= self.at(11) for slot in slots)
+        )
+
     def test_multiple_services_use_one_qualified_staff_and_sum_duration(self):
         slots = get_available_slots(
             branch=self.branch,

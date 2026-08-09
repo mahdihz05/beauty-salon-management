@@ -13,6 +13,7 @@ from core.audit import record_audit
 
 from .models import (
     Branch,
+    BranchClosure,
     BranchService,
     City,
     District,
@@ -27,6 +28,7 @@ from .models import (
 )
 from .permissions import IsSalonOwnerOrAdmin
 from .serializers import (
+    BranchClosureSerializer,
     BranchSerializer,
     BranchServiceSerializer,
     CitySerializer,
@@ -268,6 +270,24 @@ class BranchServiceViewSet(BranchScopedViewSet):
         return BranchService.objects.filter(
             branch_id__in=accessible_branch_ids(self.request.user)
         ).select_related("branch", "service", "service__category")
+
+
+class BranchClosureViewSet(BranchScopedViewSet):
+    serializer_class = BranchClosureSerializer
+    filterset_fields = ("branch",)
+    ordering_fields = ("starts_at", "ends_at", "created_at")
+    ordering = ("-starts_at",)
+
+    def get_queryset(self):
+        return BranchClosure.objects.filter(
+            branch_id__in=accessible_branch_ids(self.request.user)
+        ).select_related("branch", "branch__salon")
+
+    def perform_update(self, serializer):
+        branch = serializer.validated_data.get("branch", serializer.instance.branch)
+        if branch.id not in set(manageable_branch_ids(self.request.user)):
+            raise PermissionDenied("به این شعبه دسترسی مدیریتی ندارید.")
+        super().perform_update(serializer)
 
 
 class StaffViewSet(BranchScopedViewSet):

@@ -183,3 +183,25 @@ test("mobile pages keep navigation visible without horizontal overflow", async (
   await page.locator(".mobile-filter-actions .button-primary").click();
   await expect(page.locator(".filter-card.open")).toHaveCount(0);
 });
+
+test("salon availability settings are usable on mobile", async ({
+  page,
+}, testInfo) => {
+  test.skip(
+    testInfo.project.name !== "mobile-edge",
+    "Availability responsiveness is verified on the mobile viewport.",
+  );
+  await loginWithMockOtp(page, "09120000002", "/salon/availability");
+  await expect(page.locator("h1")).toContainText("ساعات قابل رزرو");
+  await expect(page.locator(".weekly-hours-row")).toHaveCount(7);
+  await expect(page.locator(".closure-form")).toBeVisible();
+  await page.locator(".closure-reason input").fill("تست تعطیلی موبایل");
+  await page.locator(".closure-form .button-primary").click();
+  const createdClosure = page
+    .locator(".closure-list article")
+    .filter({ hasText: "تست تعطیلی موبایل" });
+  await expect(createdClosure).toBeVisible();
+  await createdClosure.getByRole("button", { name: "حذف بازه بسته" }).click();
+  await expect(createdClosure).toHaveCount(0);
+  await expectNoHorizontalOverflow(page);
+});

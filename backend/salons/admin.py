@@ -2,6 +2,7 @@ from django.contrib import admin
 
 from .models import (
     Branch,
+    BranchClosure,
     BranchService,
     City,
     District,
@@ -42,6 +43,12 @@ class BranchAdmin(admin.ModelAdmin):
     list_display = ("name", "salon", "city", "phone", "is_active")
     list_filter = ("city", "is_active")
     search_fields = ("name", "salon__name", "phone", "address")
+
+
+@admin.register(BranchClosure)
+class BranchClosureAdmin(admin.ModelAdmin):
+    list_display = ("branch", "starts_at", "ends_at", "reason")
+    list_filter = ("branch", "starts_at")
 
 
 @admin.register(SalonImage)

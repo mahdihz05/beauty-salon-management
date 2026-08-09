@@ -2,6 +2,7 @@ from rest_framework import serializers
 
 from .models import (
     Branch,
+    BranchClosure,
     BranchService,
     City,
     District,
@@ -120,6 +121,59 @@ class BranchSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 {"district": "منطقه باید متعلق به شهر انتخاب‌شده باشد."}
             )
+        working_hours = attrs.get("working_hours")
+        if working_hours is not None:
+            attrs["working_hours"] = self._validate_working_hours(working_hours)
+        return attrs
+
+    @staticmethod
+    def _validate_working_hours(value):
+        if not isinstance(value, dict):
+            raise serializers.ValidationError(
+                {"working_hours": "ساعات کاری باید برای روزهای هفته ثبت شود."}
+            )
+        normalized = {}
+        for day in range(7):
+            raw = value.get(str(day), {"is_open": False, "start": "09:00", "end": "18:00"})
+            if isinstance(raw, list) and len(raw) == 2:
+                raw = {"is_open": True, "start": raw[0], "end": raw[1]}
+            if not isinstance(raw, dict):
+                raise serializers.ValidationError(
+                    {"working_hours": f"ساختار ساعات روز {day} معتبر نیست."}
+                )
+            is_open = bool(raw.get("is_open", False))
+            start = raw.get("start", "09:00")
+            end = raw.get("end", "18:00")
+            try:
+                from datetime import time
+
+                start_value = time.fromisoformat(start)
+                end_value = time.fromisoformat(end)
+            except (TypeError, ValueError):
+                raise serializers.ValidationError(
+                    {"working_hours": "ساعت شروع و پایان باید معتبر باشد."}
+                ) from None
+            if is_open and start_value >= end_value:
+                raise serializers.ValidationError(
+                    {"working_hours": "ساعت پایان باید پس از ساعت شروع باشد."}
+                )
+            normalized[str(day)] = {"is_open": is_open, "start": start[:5], "end": end[:5]}
+        return normalized
+
+
+class BranchClosureSerializer(serializers.ModelSerializer):
+    branch_name = serializers.CharField(source="branch.name", read_only=True)
+
+    class Meta:
+        model = BranchClosure
+        fields = ("id", "branch", "branch_name", "starts_at", "ends_at", "reason", "created_at")
+        read_only_fields = ("id", "created_at")
+
+    def validate(self, attrs):
+        starts_at = attrs.get("starts_at", getattr(self.instance, "starts_at", None))
+        ends_at = attrs.get("ends_at", getattr(self.instance, "ends_at", None))
+        if starts_at and ends_at and starts_at >= ends_at:
+            raise serializers.ValidationError("پایان تعطیلی باید پس از شروع آن باشد.")
         return attrs
 
 

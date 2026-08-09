@@ -24,6 +24,7 @@ import { SupportTicketsPage } from "./pages/SupportTicketsPage";
 import { FinancePage } from "./pages/FinancePage";
 import { DashboardPage } from "./pages/salon/DashboardPage";
 import { CalendarPage } from "./pages/salon/CalendarPage";
+import { AvailabilityPage } from "./pages/salon/AvailabilityPage";
 import { OnboardingPage } from "./pages/salon/OnboardingPage";
 import { ServicesPage } from "./pages/salon/ServicesPage";
 import { StaffPage } from "./pages/salon/StaffPage";
@@ -115,6 +116,11 @@ export default function App() {
               roles={["salon_owner", "branch_manager", "receptionist", "staff"]}
             >
               <CalendarPage />
+            </RoleRoute>
+          </Route>
+          <Route path="/salon/availability">
+            <RoleRoute roles={["salon_owner", "branch_manager"]}>
+              <AvailabilityPage />
             </RoleRoute>
           </Route>
           <Route path="/salon/onboarding">

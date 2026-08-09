@@ -1,6 +1,7 @@
 from rest_framework.routers import DefaultRouter
 
 from .views import (
+    BranchClosureViewSet,
     BranchServiceViewSet,
     BranchViewSet,
     CityViewSet,
@@ -23,6 +24,7 @@ router.register("branches", BranchViewSet, basename="branch")
 router.register("categories", ServiceCategoryViewSet, basename="service-category")
 router.register("services", ServiceViewSet, basename="service")
 router.register("branch-services", BranchServiceViewSet, basename="branch-service")
+router.register("branch-closures", BranchClosureViewSet, basename="branch-closure")
 router.register("staff", StaffViewSet, basename="staff")
 router.register("staff-shifts", StaffShiftViewSet, basename="staff-shift")
 router.register("staff-services", StaffServiceViewSet, basename="staff-service")

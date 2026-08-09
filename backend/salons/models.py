@@ -112,6 +112,29 @@ class Branch(models.Model):
         return f"{self.salon} - {self.name}"
 
 
+class BranchClosure(models.Model):
+    branch = models.ForeignKey(Branch, on_delete=models.CASCADE, related_name="closures")
+    starts_at = models.DateTimeField("شروع تعطیلی")
+    ends_at = models.DateTimeField("پایان تعطیلی")
+    reason = models.CharField("علت", max_length=250, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ("-starts_at",)
+        indexes = [models.Index(fields=("branch", "starts_at", "ends_at"))]
+        constraints = [
+            models.CheckConstraint(
+                condition=models.Q(ends_at__gt=models.F("starts_at")),
+                name="branch_closure_ends_after_start",
+            )
+        ]
+        verbose_name = "تعطیلی شعبه"
+        verbose_name_plural = "تعطیلی‌های شعبه"
+
+    def __str__(self) -> str:
+        return f"{self.branch}: {self.starts_at:%Y-%m-%d %H:%M}"
+
+
 class SalonImage(models.Model):
     salon = models.ForeignKey(Salon, on_delete=models.CASCADE, related_name="images")
     image = models.ImageField(upload_to="salons/gallery/%Y/%m/", validators=(validate_image_size,))

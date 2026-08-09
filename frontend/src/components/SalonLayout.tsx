@@ -1,5 +1,6 @@
 import {
   CalendarDays,
+  Clock9,
   ChartNoAxesCombined,
   LayoutDashboard,
   LogOut,
@@ -31,6 +32,12 @@ const navigation: Array<{
     label: "تقویم نوبت‌ها",
     icon: CalendarDays,
     roles: ["salon_owner", "branch_manager", "receptionist", "staff"],
+  },
+  {
+    href: "/salon/availability",
+    label: "ساعات رزرو",
+    icon: Clock9,
+    roles: ["salon_owner", "branch_manager"],
   },
   {
     href: "/salon/services",

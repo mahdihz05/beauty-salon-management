@@ -6,7 +6,15 @@ from django.db.models import Q
 from django.utils import timezone
 from rest_framework.exceptions import ValidationError
 
-from salons.models import Branch, BranchService, Staff, StaffService, StaffShift, StaffTimeOff
+from salons.models import (
+    Branch,
+    BranchClosure,
+    BranchService,
+    Staff,
+    StaffService,
+    StaffShift,
+    StaffTimeOff,
+)
 
 from .models import Booking, BookingItem
 
@@ -52,6 +60,32 @@ def _aware(target_date: date, value: time) -> datetime:
     return timezone.make_aware(
         datetime.combine(target_date, value), timezone.get_current_timezone()
     )
+
+
+def _branch_opening_window(
+    branch: Branch, target_date: date
+) -> tuple[datetime, datetime] | None | bool:
+    raw = (branch.working_hours or {}).get(str(_day_of_week(target_date)))
+    if raw is None:
+        return None
+    if isinstance(raw, list) and len(raw) == 2:
+        start, end = raw
+        is_open = True
+    elif isinstance(raw, dict):
+        is_open = raw.get("is_open", False)
+        start, end = raw.get("start"), raw.get("end")
+    else:
+        return None
+    if not is_open:
+        return False
+    try:
+        start_time = time.fromisoformat(start)
+        end_time = time.fromisoformat(end)
+    except (TypeError, ValueError):
+        return False
+    if start_time >= end_time:
+        return False
+    return _aware(target_date, start_time), _aware(target_date, end_time)
 
 
 def _load_services(branch: Branch, service_ids: list[int]) -> list[BranchService]:
@@ -117,6 +151,9 @@ def get_available_slots(
     services = _load_services(branch, service_ids)
     candidates = _candidate_staff(branch, services, staff_id)
     slots: list[AvailableSlot] = []
+    branch_window = _branch_opening_window(branch, target_date)
+    if branch_window is False:
+        return slots
 
     for staff in candidates:
         shift = StaffShift.objects.filter(
@@ -129,6 +166,12 @@ def get_available_slots(
         total_price = sum(item[2] for item in values)
         shift_start = _aware(target_date, shift.start_time)
         shift_end = _aware(target_date, shift.end_time)
+        if branch_window not in (None, False):
+            branch_start, branch_end = branch_window
+            shift_start = max(shift_start, branch_start)
+            shift_end = min(shift_end, branch_end)
+            if shift_start >= shift_end:
+                continue
         cursor = _ceil_to_grid(max(shift_start, now), branch.slot_interval_minutes)
         busy = list(
             Booking.objects.filter(
@@ -147,6 +190,11 @@ def get_available_slots(
                 staff=staff, starts_at__lt=shift_end, ends_at__gt=shift_start
             ).only("starts_at", "ends_at")
         )
+        branch_closures = list(
+            BranchClosure.objects.filter(
+                branch=branch, starts_at__lt=shift_end, ends_at__gt=shift_start
+            ).only("starts_at", "ends_at")
+        )
         while cursor + timedelta(minutes=duration) <= shift_end:
             slot_end = cursor + timedelta(minutes=duration)
             buffer_end = slot_end + timedelta(minutes=branch.preparation_buffer_minutes)
@@ -159,7 +207,16 @@ def get_available_slots(
                 cursor < time_off.ends_at and slot_end > time_off.starts_at
                 for time_off in time_offs
             )
-            if cursor >= now and not conflicts_booking and not conflicts_time_off:
+            conflicts_branch_closure = any(
+                cursor < closure.ends_at and slot_end > closure.starts_at
+                for closure in branch_closures
+            )
+            if (
+                cursor >= now
+                and not conflicts_booking
+                and not conflicts_time_off
+                and not conflicts_branch_closure
+            ):
                 slots.append(
                     AvailableSlot(
                         start_at=cursor,

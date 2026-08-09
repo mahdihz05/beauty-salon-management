@@ -1455,6 +1455,168 @@ paths:
               schema:
                 $ref: '#/components/schemas/HealthCheckResponse'
           description: ''
+  /api/management/branch-closures/:
+    get:
+      operationId: management_branch_closures_list
+      parameters:
+      - in: query
+        name: branch
+        schema:
+          type: integer
+      - name: ordering
+        required: false
+        in: query
+        description: کدام فیلد باید هنگام مرتب‌سازی نتایج استفاده شود.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: یک شماره صفحه‌ در مجموعه نتایج صفحه‌بندی شده.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: یک عبارت جستجو.
+        schema:
+          type: string
+      tags:
+      - management
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedBranchClosureList'
+          description: ''
+    post:
+      operationId: management_branch_closures_create
+      tags:
+      - management
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BranchClosure'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/BranchClosure'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/BranchClosure'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BranchClosure'
+          description: ''
+  /api/management/branch-closures/{id}/:
+    get:
+      operationId: management_branch_closures_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: یک مقداد عدد یکتا که این تعطیلی شعبه را شناسایی میکند.
+        required: true
+      tags:
+      - management
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BranchClosure'
+          description: ''
+    put:
+      operationId: management_branch_closures_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: یک مقداد عدد یکتا که این تعطیلی شعبه را شناسایی میکند.
+        required: true
+      tags:
+      - management
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BranchClosure'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/BranchClosure'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/BranchClosure'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BranchClosure'
+          description: ''
+    patch:
+      operationId: management_branch_closures_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: یک مقداد عدد یکتا که این تعطیلی شعبه را شناسایی میکند.
+        required: true
+      tags:
+      - management
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedBranchClosure'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedBranchClosure'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedBranchClosure'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BranchClosure'
+          description: ''
+    delete:
+      operationId: management_branch_closures_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: یک مقداد عدد یکتا که این تعطیلی شعبه را شناسایی میکند.
+        required: true
+      tags:
+      - management
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
   /api/management/branch-services/:
     get:
       operationId: management_branch_services_list
@@ -4572,6 +4734,40 @@ components:
       - salon
       - salon_name
       - updated_at
+    BranchClosure:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        branch:
+          type: integer
+        branch_name:
+          type: string
+          readOnly: true
+        starts_at:
+          type: string
+          format: date-time
+          title: شروع تعطیلی
+        ends_at:
+          type: string
+          format: date-time
+          title: پایان تعطیلی
+        reason:
+          type: string
+          title: علت
+          maxLength: 250
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - branch
+      - branch_name
+      - created_at
+      - ends_at
+      - id
+      - starts_at
     BranchService:
       type: object
       properties:
@@ -5196,6 +5392,29 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Booking'
+    PaginatedBranchClosureList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/BranchClosure'
     PaginatedBranchList:
       type: object
       required:
@@ -5810,6 +6029,33 @@ components:
           format: date-time
           readOnly: true
           title: آخرین ویرایش
+    PatchedBranchClosure:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        branch:
+          type: integer
+        branch_name:
+          type: string
+          readOnly: true
+        starts_at:
+          type: string
+          format: date-time
+          title: شروع تعطیلی
+        ends_at:
+          type: string
+          format: date-time
+          title: پایان تعطیلی
+        reason:
+          type: string
+          title: علت
+          maxLength: 250
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
     PatchedBranchService:
       type: object
       properties:

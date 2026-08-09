@@ -9,7 +9,16 @@ from rest_framework.test import APITestCase
 from accounts.models import BranchMembership, User
 from core.models import AuditLog
 
-from .models import Branch, BranchService, City, Salon, Service, ServiceCategory, Staff
+from .models import (
+    Branch,
+    BranchClosure,
+    BranchService,
+    City,
+    Salon,
+    Service,
+    ServiceCategory,
+    Staff,
+)
 
 
 class SalonManagementAPITests(APITestCase):
@@ -79,6 +88,44 @@ class SalonManagementAPITests(APITestCase):
         self.assertTrue(
             AuditLog.objects.filter(action="salon.submitted", target_id=str(salon.id)).exists()
         )
+
+    def test_owner_can_manage_branch_closures_but_outsider_cannot(self):
+        _, branch = self.create_salon_and_branch()
+        response = self.client.post(
+            reverse("branch-closure-list"),
+            {
+                "branch": branch.id,
+                "starts_at": "2030-03-20T09:00:00+03:30",
+                "ends_at": "2030-03-20T13:00:00+03:30",
+                "reason": "تعطیلی مناسبتی",
+            },
+        )
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(BranchClosure.objects.count(), 1)
+
+        self.client.force_authenticate(self.outsider)
+        list_response = self.client.get(reverse("branch-closure-list"))
+        create_response = self.client.post(
+            reverse("branch-closure-list"),
+            {
+                "branch": branch.id,
+                "starts_at": "2030-03-21T09:00:00+03:30",
+                "ends_at": "2030-03-21T13:00:00+03:30",
+            },
+        )
+        self.assertEqual(list_response.data["count"], 0)
+        self.assertEqual(create_response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_branch_rejects_invalid_weekly_hours(self):
+        _, branch = self.create_salon_and_branch()
+
+        response = self.client.patch(
+            reverse("branch-detail", args=(branch.id,)),
+            {"working_hours": {"0": {"is_open": True, "start": "18:00", "end": "09:00"}}},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_outsider_cannot_see_or_modify_salon(self):
         salon, _ = self.create_salon_and_branch()

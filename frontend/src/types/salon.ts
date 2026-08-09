@@ -30,7 +30,21 @@ export interface Branch {
   city_name: string;
   address: string;
   phone: string;
+  working_hours: Record<
+    string,
+    { is_open: boolean; start: string; end: string } | [string, string]
+  >;
   is_active: boolean;
+}
+
+export interface BranchClosure {
+  id: number;
+  branch: number;
+  branch_name: string;
+  starts_at: string;
+  ends_at: string;
+  reason: string;
+  created_at: string;
 }
 
 export interface Category {

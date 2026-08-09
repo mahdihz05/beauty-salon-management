@@ -1541,6 +1541,265 @@ p {
   }
 }
 
+/* Salon availability management */
+.availability-branch-card,
+.availability-card {
+  margin-bottom: 20px;
+  padding: 24px;
+  border: 1px solid var(--outline);
+  border-radius: var(--radius-lg);
+  background: white;
+}
+.availability-branch-card {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+.availability-branch-card label {
+  margin: 0;
+  white-space: nowrap;
+}
+.availability-branch-card select {
+  max-width: 420px;
+}
+.availability-heading {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  margin-bottom: 22px;
+}
+.availability-heading > span {
+  display: grid;
+  width: 44px;
+  height: 44px;
+  flex: 0 0 auto;
+  place-items: center;
+  color: var(--primary);
+  border-radius: 12px;
+  background: var(--primary-soft);
+}
+.availability-heading h2,
+.availability-heading p {
+  margin-bottom: 0;
+}
+.availability-heading h2 {
+  font-size: 20px;
+}
+.availability-heading p {
+  margin-top: 4px;
+  color: var(--ink-muted);
+  font-size: 13px;
+}
+.weekly-hours-list {
+  overflow: hidden;
+  border: 1px solid var(--outline);
+  border-radius: var(--radius-md);
+}
+.weekly-hours-row {
+  min-height: 68px;
+  display: grid;
+  grid-template-columns: minmax(130px, 1fr) 2fr;
+  align-items: center;
+  gap: 20px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--outline);
+}
+.weekly-hours-row:last-child {
+  border-bottom: 0;
+}
+.weekly-hours-row.closed {
+  background: #faf9f6;
+}
+.day-switch {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  font-weight: 700;
+}
+.day-switch input,
+.full-day-check input {
+  width: 20px;
+  height: 20px;
+  flex: 0 0 auto;
+  accent-color: var(--primary);
+}
+.weekly-time-range {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(130px, 1fr));
+  gap: 14px;
+}
+.weekly-time-range label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  color: var(--ink-muted);
+  font-size: 13px;
+}
+.weekly-time-range input {
+  min-height: 42px;
+}
+.closed-label {
+  color: #9a473d;
+  font-size: 13px;
+}
+.availability-save {
+  margin-top: 18px;
+}
+.inline-success {
+  display: inline-block;
+  margin: 0 14px 0 0;
+  color: #267044;
+  font-size: 13px;
+  font-weight: 700;
+}
+.closure-form {
+  display: grid;
+  grid-template-columns: 1.25fr 1fr 1fr 1fr;
+  align-items: end;
+  gap: 16px;
+  padding: 18px;
+  border-radius: var(--radius-md);
+  background: #faf9f6;
+}
+.closure-form label {
+  margin: 0;
+}
+.full-day-check {
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+.closure-reason {
+  grid-column: span 3;
+}
+.closure-form .button {
+  min-height: 48px;
+}
+.closure-list {
+  margin-top: 24px;
+}
+.closure-list h3 {
+  margin-bottom: 12px;
+  font-size: 16px;
+}
+.closure-list article {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--outline);
+}
+.closure-list article > div {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+.closure-list article span,
+.closure-list article small {
+  color: var(--ink-muted);
+}
+.closure-list article button {
+  width: 42px;
+  height: 42px;
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  color: #a33f34;
+  border: 0;
+  border-radius: 10px;
+  background: #fff0ee;
+  cursor: pointer;
+}
+.closure-list article button svg {
+  width: 18px;
+}
+.panel-empty.compact {
+  min-height: 0;
+  padding: 22px;
+}
+
+@media (max-width: 760px) {
+  .availability-branch-card,
+  .availability-card {
+    padding: 16px;
+    border-radius: 14px;
+  }
+  .availability-branch-card {
+    display: grid;
+    gap: 8px;
+  }
+  .availability-branch-card select {
+    width: 100%;
+    max-width: none;
+    min-height: 50px;
+    font-size: 16px;
+  }
+  .availability-heading h2 {
+    font-size: 18px;
+  }
+  .weekly-hours-row {
+    grid-template-columns: 1fr;
+    gap: 10px;
+    padding: 14px;
+  }
+  .weekly-time-range {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .weekly-time-range label {
+    display: grid;
+    gap: 5px;
+  }
+  .weekly-time-range input {
+    width: 100%;
+    min-width: 0;
+    min-height: 48px;
+    padding-inline: 7px;
+    font-size: 16px;
+  }
+  .availability-save {
+    width: 100%;
+  }
+  .inline-success {
+    display: block;
+    margin: 10px 0 0;
+    text-align: center;
+  }
+  .closure-form {
+    grid-template-columns: 1fr 1fr;
+    gap: 14px 10px;
+    padding: 14px;
+  }
+  .closure-form .jalali-field-label,
+  .closure-form .full-day-check,
+  .closure-form .closure-reason,
+  .closure-form .button {
+    grid-column: 1 / -1;
+  }
+  .closure-form input,
+  .closure-form button {
+    min-height: 50px;
+    font-size: 16px;
+  }
+  .closure-list article strong,
+  .closure-list article span {
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 360px) {
+  .weekly-time-range,
+  .closure-form {
+    grid-template-columns: 1fr;
+  }
+  .closure-form > * {
+    grid-column: 1 !important;
+  }
+}
+
 /* Public customer experience */
 .customer-page {
   min-height: 100vh;
