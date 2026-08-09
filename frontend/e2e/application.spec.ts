@@ -23,8 +23,19 @@ async function loginWithMockOtp(page: Page, phone: string, next: string) {
   await expect(page).toHaveURL(new RegExp(`${next.replaceAll("/", "\\/")}$`));
 }
 
-test("public customer journey renders live demo data", async ({ page }) => {
+test("public customer journey renders live demo data", async ({
+  page,
+}, testInfo) => {
   await page.goto("/");
+  if (testInfo.project.name === "desktop-edge") {
+    await expect(page.locator(".public-logo .brand-logo-mark")).toBeVisible();
+    await expect(page.locator(".public-logo")).toContainText("نوبت‌آرا");
+  } else {
+    await expect(
+      page.locator(".mobile-home-brand .brand-logo-mark"),
+    ).toBeVisible();
+    await expect(page.locator(".mobile-home-brand")).toContainText("نوبت‌آرا");
+  }
   await expect(page.locator(".home-salon-grid article").first()).toBeVisible();
   await expect(page.locator("body")).toContainText("سالن رزگلد");
   await expect
@@ -64,7 +75,17 @@ test("customer completes service selection, OTP, hold and mock payment", async (
   await page.locator(".select-service-card").first().click();
   await page.locator(".booking-summary .button-primary").click();
 
-  const firstSlot = page.locator(".time-grid button").first();
+  const slots = page.locator(".time-grid button");
+  const dateButtons = page.locator(".date-strip button");
+  for (let index = 1; index < (await dateButtons.count()); index += 1) {
+    if ((await slots.count()) > 0) break;
+    const availabilityResponse = page.waitForResponse((response) =>
+      response.url().includes("/api/bookings/availability/"),
+    );
+    await dateButtons.nth(index).click();
+    await availabilityResponse;
+  }
+  const firstSlot = slots.first();
   await expect(firstSlot).toBeVisible();
   await firstSlot.click();
   await page.locator(".booking-summary button.button-primary").click();
@@ -162,6 +183,10 @@ test("mobile pages keep navigation visible without horizontal overflow", async (
   );
   await page.goto("/");
   await expect(page.locator(".customer-mobile-nav")).toBeVisible();
+  await expect(page.locator(".mobile-home-brand")).toContainText("نوبت‌آرا");
+  await expect(
+    page.locator(".mobile-home-brand .brand-logo-mark"),
+  ).toBeVisible();
   await expectNoHorizontalOverflow(page);
   await page.goto("/salons/demo-rose-gold");
   await expect(page.locator(".profile-actions .button-primary")).toBeVisible();

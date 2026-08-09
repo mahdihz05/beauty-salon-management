@@ -1,6 +1,7 @@
 import { ArrowRight } from "lucide-react";
 import type { PropsWithChildren } from "react";
 import { Link } from "wouter";
+import { BrandLogo } from "./BrandLogo";
 
 export function BookingShell({
   children,
@@ -13,9 +14,7 @@ export function BookingShell({
         <Link aria-label="بازگشت" href={backHref}>
           <ArrowRight />
         </Link>
-        <Link className="booking-logo" href="/">
-          استیچ
-        </Link>
+        <BrandLogo className="booking-logo" subtitle="" />
         <span>رزرو آنلاین</span>
       </header>
       <div className="booking-progress">

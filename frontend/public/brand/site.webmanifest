@@ -1,0 +1,23 @@
+{
+  "name": "نوبت‌آرا | نوبت‌دهی آنلاین سالن‌های زیبایی",
+  "short_name": "نوبت‌آرا",
+  "description": "نوبت‌دهی آنلاین آرایشگاه‌ها و سالن‌های زیبایی",
+  "lang": "fa",
+  "dir": "rtl",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f8f3ed",
+  "theme_color": "#171717",
+  "icons": [
+    {
+      "src": "/brand/nobatara-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/brand/nobatara-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

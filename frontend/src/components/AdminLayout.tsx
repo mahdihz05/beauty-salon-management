@@ -11,6 +11,7 @@ import {
 import type { PropsWithChildren } from "react";
 import { Link, useLocation } from "wouter";
 import { useAuth } from "../auth/useAuth";
+import { BrandLogo } from "./BrandLogo";
 
 const links = [
   { href: "/admin/dashboard", label: "نمای کلی", icon: LayoutDashboard },
@@ -35,9 +36,11 @@ export function AdminLayout({
   return (
     <div className="admin-shell">
       <aside className="admin-sidebar">
-        <Link className="panel-brand" href="/admin/dashboard">
-          استیچ <small>مدیریت مرکزی</small>
-        </Link>
+        <BrandLogo
+          className="panel-brand"
+          href="/admin/dashboard"
+          subtitle="مدیریت مرکزی"
+        />
         <nav>
           {links.map(({ href, label, icon: Icon }) => (
             <Link

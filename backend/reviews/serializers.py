@@ -57,7 +57,7 @@ class ReviewSerializer(serializers.ModelSerializer):
         )
 
     def get_customer_name(self, obj) -> str:
-        return obj.customer.name or "کاربر استیچ"
+        return obj.customer.name or "کاربر نوبت‌آرا"
 
     def validate_booking(self, booking):
         request = self.context["request"]

@@ -11,6 +11,7 @@ import { useLocation } from "wouter";
 import { z } from "zod";
 import { api, getApiError } from "../api/client";
 import { useAuth } from "../auth/useAuth";
+import { BrandLogo } from "../components/BrandLogo";
 import type { AuthResponse, User } from "../types/auth";
 
 const phoneSchema = z.object({
@@ -87,9 +88,7 @@ export function LoginPage() {
   return (
     <main className="auth-page">
       <section className="auth-card" aria-labelledby="login-title">
-        <a className="brand-mark" href="/">
-          استیچ
-        </a>
+        <BrandLogo className="brand-mark" />
         {!phone ? (
           <>
             <span className="auth-icon">
@@ -169,7 +168,7 @@ export function LoginPage() {
                 {codeForm.formState.isSubmitting && (
                   <LoaderCircle className="spin" size={18} />
                 )}
-                ورود به استیچ
+                ورود به نوبت‌آرا
               </button>
               <button className="text-button" type="button" onClick={editPhone}>
                 <ArrowRight size={16} /> اصلاح شماره موبایل

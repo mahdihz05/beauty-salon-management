@@ -14,6 +14,7 @@ import type { PropsWithChildren } from "react";
 import { Link, useLocation } from "wouter";
 import { useAuth } from "../auth/useAuth";
 import type { UserRole } from "../types/auth";
+import { BrandLogo } from "./BrandLogo";
 
 const navigation: Array<{
   href: string;
@@ -97,9 +98,11 @@ export function SalonLayout({
   return (
     <div className="panel-shell">
       <aside className="panel-sidebar">
-        <Link className="panel-brand" href="/salon/dashboard">
-          استیچ <small>مدیریت سالن</small>
-        </Link>
+        <BrandLogo
+          className="panel-brand"
+          href="/salon/dashboard"
+          subtitle="مدیریت سالن"
+        />
         <nav aria-label="منوی پنل سالن">
           {allowedNavigation.map(({ href, label, icon: Icon }) => (
             <Link
@@ -126,9 +129,11 @@ export function SalonLayout({
       </aside>
       <div className="panel-main">
         <header className="panel-mobile-header">
-          <Link className="panel-brand" href="/salon/dashboard">
-            استیچ
-          </Link>
+          <BrandLogo
+            className="panel-brand"
+            href="/salon/dashboard"
+            subtitle=""
+          />
           <button aria-label="تنظیمات">
             <Settings size={22} />
           </button>

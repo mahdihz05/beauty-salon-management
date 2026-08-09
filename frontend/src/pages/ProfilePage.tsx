@@ -7,6 +7,7 @@ import { useLocation } from "wouter";
 import { z } from "zod";
 import { api, getApiError } from "../api/client";
 import { useAuth } from "../auth/useAuth";
+import { BrandLogo } from "../components/BrandLogo";
 import type { User } from "../types/auth";
 
 const profileSchema = z.object({
@@ -58,9 +59,7 @@ export function ProfilePage() {
   return (
     <main className="profile-page">
       <header className="simple-header">
-        <a className="brand-mark" href="/">
-          استیچ
-        </a>
+        <BrandLogo className="brand-mark" />
       </header>
       <section className="profile-card container">
         <div className="profile-heading">

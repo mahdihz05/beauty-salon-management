@@ -1,4 +1,4 @@
-"""Django settings for the Beauty Salon Management API."""
+"""Django settings for the NobatAra salon booking API."""
 
 import os
 from datetime import timedelta
@@ -163,8 +163,8 @@ SIMPLE_JWT = {
 }
 
 SPECTACULAR_SETTINGS = {
-    "TITLE": "Stitch Salon Booking API",
-    "DESCRIPTION": "API سامانه رزرو و مدیریت چندآرایشگاهی استیچ",
+    "TITLE": "NobatAra Salon Booking API",
+    "DESCRIPTION": "API سامانه نوبت‌دهی آنلاین آرایشگاه‌ها و سالن‌های زیبایی نوبت‌آرا",
     "VERSION": "1.0.0",
     "SERVE_INCLUDE_SCHEMA": False,
     "ENUM_NAME_OVERRIDES": {

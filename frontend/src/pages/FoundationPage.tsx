@@ -10,6 +10,7 @@ import {
 import { Link } from "wouter";
 import { api, getApiError } from "../api/client";
 import { MobileBottomNav, PublicHeader } from "../components/PublicHeader";
+import { BrandLogo } from "../components/BrandLogo";
 import { SalonCard } from "../components/SalonCard";
 import type { Paginated } from "../types/salon";
 import type { PublicCategory, PublicSalon } from "../types/public";
@@ -39,6 +40,7 @@ export function FoundationPage() {
     <div className="customer-page">
       <PublicHeader />
       <main className="home-main container">
+        <BrandLogo className="mobile-home-brand" />
         <Link className="hero-search" href="/salons">
           <Search />
           <span>جستجوی آرایشگاه، خدمات...</span>
@@ -82,7 +84,7 @@ export function FoundationPage() {
         </section>
         {featured && (
           <section className="featured-section">
-            <h2>پیشنهاد ویژه استیچ</h2>
+            <h2>پیشنهاد ویژه نوبت‌آرا</h2>
             <Link className="featured-card" href={`/salons/${featured.slug}`}>
               <img
                 src={featured.cover_image || "/images/salon-03.jpg"}

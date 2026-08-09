@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { useAuth } from "../auth/useAuth";
+import { BrandLogo } from "./BrandLogo";
 
 export function PublicHeader() {
   const [location] = useLocation();
@@ -26,9 +27,7 @@ export function PublicHeader() {
           <Link href="/favorites">علاقه‌مندی‌ها</Link>
           <Link href="/account/support">پشتیبانی</Link>
         </nav>
-        <Link className="public-logo" href="/">
-          Stitch
-        </Link>
+        <BrandLogo className="public-logo" />
         <div className="header-actions">
           <Link aria-label="جستجو" href="/salons">
             <Search />

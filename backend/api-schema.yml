@@ -1,8 +1,8 @@
 openapi: 3.0.3
 info:
-  title: Stitch Salon Booking API
+  title: NobatAra Salon Booking API
   version: 1.0.0
-  description: API سامانه رزرو و مدیریت چندآرایشگاهی استیچ
+  description: API سامانه نوبت‌دهی آنلاین آرایشگاه‌ها و سالن‌های زیبایی نوبت‌آرا
 paths:
   /api/admin-panel/categories/:
     get:
