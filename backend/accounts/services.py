@@ -36,7 +36,8 @@ def request_otp(*, phone: str, request) -> OTPDispatch:
         request_ip=get_client_ip(request),
     )
     get_sms_provider(settings.OTP_PROVIDER).send_otp(phone, code)
-    return OTPDispatch(challenge=challenge, debug_code=code if settings.DEBUG else None)
+    expose_mock_code = settings.OTP_PROVIDER == "mock" and settings.OTP_EXPOSE_MOCK_CODE
+    return OTPDispatch(challenge=challenge, debug_code=code if expose_mock_code else None)
 
 
 def verify_otp(*, phone: str, code: str) -> tuple[User, bool]:

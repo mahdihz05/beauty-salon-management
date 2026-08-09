@@ -37,6 +37,20 @@ class OTPAuthenticationTests(APITestCase):
         self.assertTrue(CustomerProfile.objects.filter(user=user).exists())
         self.assertTrue(AuditLog.objects.filter(actor=user, action="auth.otp_verified").exists())
 
+    @override_settings(DEBUG=False, OTP_PROVIDER="mock", OTP_EXPOSE_MOCK_CODE=True)
+    def test_mock_code_can_be_exposed_without_enabling_django_debug(self):
+        response = self.request_code("09121234568")
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertRegex(response.data["debug_code"], r"^\d{6}$")
+
+    @override_settings(DEBUG=True, OTP_PROVIDER="mock", OTP_EXPOSE_MOCK_CODE=False)
+    def test_mock_code_is_hidden_when_temporary_switch_is_disabled(self):
+        response = self.request_code("09121234569")
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertNotIn("debug_code", response.data)
+
     def test_consumed_code_cannot_be_reused(self):
         response = self.request_code()
         payload = {"phone": self.phone, "code": response.data["debug_code"]}

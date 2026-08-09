@@ -142,7 +142,7 @@ export function LoginPage() {
             </p>
             {debugCode && (
               <p className="alert alert-info">
-                کد محیط توسعه: <bdi>{debugCode}</bdi>
+                کد ورود موقت تا اتصال پنل پیامکی: <bdi>{debugCode}</bdi>
               </p>
             )}
             <form onSubmit={codeForm.handleSubmit(verifyCode)} noValidate>
