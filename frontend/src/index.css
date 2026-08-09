@@ -1461,6 +1461,36 @@ p {
   border-bottom: 1px solid #eeeae4;
   font-size: 13px;
 }
+.admin-module-intro {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+  padding: 16px 18px;
+  color: var(--ink-muted);
+  border: 1px solid var(--outline);
+  border-radius: var(--radius-md);
+  background: white;
+}
+.admin-module-intro svg {
+  flex: 0 0 auto;
+  color: var(--primary);
+}
+.admin-module-intro p {
+  margin: 0;
+}
+.admin-embedded-page .customer-heading {
+  margin-bottom: 20px;
+}
+.admin-embedded-page .customer-booking-list {
+  max-width: none;
+}
+.admin-embedded-page.finance-page {
+  padding: 0;
+}
+.admin-embedded-page .finance-section .admin-table {
+  min-width: 850px;
+}
 
 @media (max-width: 800px) {
   .admin-sidebar {
@@ -1470,13 +1500,18 @@ p {
     padding: 16px;
   }
   .admin-sidebar nav {
-    grid-template-columns: repeat(4, 1fr);
+    display: flex;
+    gap: 8px;
     margin-top: 18px;
+    padding-bottom: 5px;
+    overflow-x: auto;
+    scrollbar-width: thin;
   }
   .admin-sidebar .panel-nav-item {
+    min-width: max-content;
     justify-content: center;
-    padding: 0 8px;
-    font-size: 10px;
+    padding: 0 12px;
+    font-size: 11px;
   }
   .admin-sidebar .panel-brand {
     align-items: center;
@@ -1497,6 +1532,9 @@ p {
   .admin-content {
     width: calc(100% - 32px);
     padding-top: 24px;
+  }
+  .admin-content > .page-heading {
+    flex-wrap: wrap;
   }
   .admin-stat-grid {
     grid-template-columns: repeat(2, 1fr);
@@ -1523,8 +1561,29 @@ p {
 }
 
 @media (max-width: 520px) {
-  .admin-sidebar nav {
-    grid-template-columns: repeat(2, 1fr);
+  .admin-sidebar {
+    padding-inline: 12px;
+  }
+  .admin-content {
+    width: calc(100% - 20px);
+  }
+  .admin-module-intro {
+    align-items: flex-start;
+    padding: 14px;
+    font-size: 13px;
+  }
+  .admin-embedded-page .customer-heading {
+    display: none;
+  }
+  .admin-embedded-page .panel-card,
+  .admin-embedded-page .customer-booking-card {
+    padding: 14px;
+  }
+  .admin-embedded-page .success-actions {
+    flex-direction: column;
+  }
+  .admin-embedded-page .success-actions .button {
+    width: 100%;
   }
   .admin-salon-identity {
     padding: 16px;

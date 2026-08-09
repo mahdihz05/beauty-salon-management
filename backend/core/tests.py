@@ -19,7 +19,7 @@ class SupportTicketAPITests(APITestCase):
     def setUp(self):
         self.customer = User.objects.create_user(phone="09129999001")
         self.other = User.objects.create_user(phone="09129999002")
-        self.support = User.objects.create_user(phone="09129999003", role=User.Role.SUPPORT)
+        self.admin = User.objects.create_user(phone="09129999003", role=User.Role.ADMIN)
 
     def test_customer_creates_and_only_sees_own_ticket(self):
         SupportTicket.objects.create(customer=self.other, subject="دیگر", message="پیام")
@@ -34,7 +34,7 @@ class SupportTicketAPITests(APITestCase):
         self.assertEqual(listing.data["count"], 1)
         self.assertTrue(AuditLog.objects.filter(action="support.ticket_created").exists())
 
-    def test_support_lists_and_resolves_tickets_but_customer_cannot_update(self):
+    def test_admin_lists_and_resolves_tickets_but_customer_cannot_update(self):
         ticket = SupportTicket.objects.create(
             customer=self.customer, subject="پرداخت", message="نیاز به بررسی"
         )
@@ -43,14 +43,14 @@ class SupportTicketAPITests(APITestCase):
             reverse("support-ticket-detail", args=(ticket.pk,)),
             {"status": SupportTicket.Status.RESOLVED},
         )
-        self.client.force_authenticate(self.support)
+        self.client.force_authenticate(self.admin)
         listing = self.client.get(reverse("support-ticket-list"))
         resolved = self.client.patch(
             reverse("support-ticket-detail", args=(ticket.pk,)),
             {
                 "status": SupportTicket.Status.RESOLVED,
                 "response": "بررسی و رفع شد.",
-                "assigned_to": self.support.pk,
+                "assigned_to": self.admin.pk,
             },
         )
 

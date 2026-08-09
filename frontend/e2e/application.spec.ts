@@ -117,6 +117,20 @@ test("admin dashboard loads protected live statistics", async ({
   await expect(page.locator(".admin-salon-metrics article")).toHaveCount(8);
   await expect(page.locator(".admin-detail-tabs button")).toHaveCount(7);
   await expectNoHorizontalOverflow(page);
+
+  await page.goto("/admin/finance");
+  await expect(page.locator(".finance-section")).toHaveCount(2);
+  await expect(
+    page.locator('.panel-nav-item[href="/admin/finance"]'),
+  ).toHaveClass(/active/);
+  await expectNoHorizontalOverflow(page);
+
+  await page.goto("/admin/support");
+  await expect(page.locator("h1")).toContainText("پشتیبانی و تیکت‌ها");
+  await expect(
+    page.locator('.panel-nav-item[href="/admin/support"]'),
+  ).toHaveClass(/active/);
+  await expectNoHorizontalOverflow(page);
 });
 
 test("receptionist can use calendar but cannot open financial or customer pages", async ({
@@ -137,23 +151,6 @@ test("receptionist can use calendar but cannot open financial or customer pages"
 
   await page.goto("/salon/reports");
   await expect(page).toHaveURL(/\/$/);
-});
-
-test("finance and support accounts open their dedicated workspaces", async ({
-  page,
-}, testInfo) => {
-  test.skip(
-    testInfo.project.name !== "desktop-edge",
-    "Role workspaces are covered once on desktop.",
-  );
-  await loginWithMockOtp(page, "09120000004", "/finance/payments");
-  await expect(page.locator("h1")).toContainText("پرداخت‌ها و تسویه‌ها");
-  await expect(page.locator(".finance-section")).toHaveCount(2);
-
-  await page.context().clearCookies();
-  await page.evaluate(() => localStorage.clear());
-  await loginWithMockOtp(page, "09120000005", "/support/tickets");
-  await expect(page.locator("h1")).toContainText("مدیریت تیکت‌های پشتیبانی");
 });
 
 test("mobile pages keep navigation visible without horizontal overflow", async ({
@@ -182,6 +179,31 @@ test("mobile pages keep navigation visible without horizontal overflow", async (
   await expectNoHorizontalOverflow(page);
   await page.locator(".mobile-filter-actions .button-primary").click();
   await expect(page.locator(".filter-card.open")).toHaveCount(0);
+});
+
+test("admin finance and support tabs stay responsive on mobile", async ({
+  page,
+}, testInfo) => {
+  test.skip(
+    testInfo.project.name !== "mobile-edge",
+    "Integrated admin tabs are verified on the mobile viewport.",
+  );
+  await loginWithMockOtp(page, "09120000001", "/admin/dashboard");
+  await expect(
+    page.locator('.panel-nav-item[href="/admin/finance"]'),
+  ).toBeVisible();
+  await expect(
+    page.locator('.panel-nav-item[href="/admin/support"]'),
+  ).toBeVisible();
+  await expectNoHorizontalOverflow(page);
+
+  await page.goto("/admin/finance");
+  await expect(page.locator(".finance-section")).toHaveCount(2);
+  await expectNoHorizontalOverflow(page);
+
+  await page.goto("/admin/support");
+  await expect(page.locator("h1")).toContainText("پشتیبانی و تیکت‌ها");
+  await expectNoHorizontalOverflow(page);
 });
 
 test("salon availability settings are usable on mobile", async ({

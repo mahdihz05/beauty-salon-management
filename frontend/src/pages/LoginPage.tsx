@@ -35,10 +35,6 @@ function homeForUser(user: User, isNewUser: boolean) {
     case "receptionist":
     case "staff":
       return "/salon/calendar";
-    case "finance":
-      return "/finance/payments";
-    case "support":
-      return "/support/tickets";
     default:
       return "/";
   }

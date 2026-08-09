@@ -917,11 +917,9 @@ paths:
           - admin
           - branch_manager
           - customer
-          - finance
           - receptionist
           - salon_owner
           - staff
-          - support
         description: |-
           * `customer` - مشتری
           * `salon_owner` - مالک سالن
@@ -929,8 +927,6 @@ paths:
           * `receptionist` - پذیرش
           * `staff` - آرایشگر
           * `admin` - مدیر کل
-          * `support` - پشتیبانی
-          * `finance` - مالی
       - name: search
         required: false
         in: query
@@ -7098,8 +7094,6 @@ components:
       - receptionist
       - staff
       - admin
-      - support
-      - finance
       type: string
       description: |-
         * `customer` - مشتری
@@ -7108,8 +7102,6 @@ components:
         * `receptionist` - پذیرش
         * `staff` - آرایشگر
         * `admin` - مدیر کل
-        * `support` - پشتیبانی
-        * `finance` - مالی
     Salon:
       type: object
       properties:

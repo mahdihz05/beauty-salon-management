@@ -6,7 +6,7 @@ import {
   XCircle,
 } from "lucide-react";
 import { api, getApiError } from "../api/client";
-import { PublicHeader } from "../components/PublicHeader";
+import { AdminLayout } from "../components/AdminLayout";
 import { formatPersianDateTime } from "../lib/date";
 import type { Payment, Settlement } from "../types/booking";
 import type { Paginated } from "../types/salon";
@@ -41,15 +41,11 @@ export function FinancePage() {
   const error = payments.error || settlements.error || processSettlement.error;
 
   return (
-    <div className="customer-page finance-page">
-      <PublicHeader />
-      <main className="container my-bookings">
-        <div className="page-heading customer-heading">
-          <div>
-            <p className="eyebrow">کنترل عملیات مالی</p>
-            <h1>پرداخت‌ها و تسویه‌ها</h1>
-          </div>
-          <BadgeDollarSign size={38} />
+    <AdminLayout title="مالی و تسویه‌ها">
+      <div className="admin-embedded-page finance-page">
+        <div className="admin-module-intro">
+          <BadgeDollarSign size={30} />
+          <p>کنترل درخواست‌های تسویه و مشاهده همه پرداخت‌های سامانه</p>
         </div>
         {error && <p className="alert alert-error">{getApiError(error)}</p>}
 
@@ -177,7 +173,7 @@ export function FinancePage() {
             </table>
           </div>
         </section>
-      </main>
-    </div>
+      </div>
+    </AdminLayout>
   );
 }

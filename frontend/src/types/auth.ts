@@ -4,9 +4,7 @@ export type UserRole =
   | "branch_manager"
   | "receptionist"
   | "staff"
-  | "admin"
-  | "support"
-  | "finance";
+  | "admin";
 
 export interface CustomerProfile {
   email: string;

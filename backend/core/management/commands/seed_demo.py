@@ -45,8 +45,6 @@ class Command(BaseCommand):
             "admin": ("09120000001", "مدیر سامانه", User.Role.ADMIN),
             "owner": ("09120000002", "مالک سالن دمو", User.Role.SALON_OWNER),
             "customer": ("09120000003", "مشتری دمو", User.Role.CUSTOMER),
-            "finance": ("09120000004", "کارشناس مالی", User.Role.FINANCE),
-            "support": ("09120000005", "پشتیبان سامانه", User.Role.SUPPORT),
             "manager": ("09120000006", "مدیر شعبه دمو", User.Role.BRANCH_MANAGER),
             "receptionist": ("09120000007", "پذیرش شعبه دمو", User.Role.RECEPTIONIST),
             "staff": ("09120000008", "آرایشگر دمو", User.Role.STAFF),
@@ -301,7 +299,7 @@ class Command(BaseCommand):
             customer=users["customer"],
             subject="پرسش درباره تغییر زمان نوبت",
             defaults={
-                "assigned_to": users["support"],
+                "assigned_to": users["admin"],
                 "message": "برای تغییر زمان نوبت آینده به راهنمایی نیاز دارم.",
                 "response": "درخواست شما دریافت شد و در حال بررسی است.",
                 "status": SupportTicket.Status.IN_PROGRESS,

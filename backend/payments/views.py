@@ -41,7 +41,7 @@ class PaymentListView(ListAPIView):
         queryset = Payment.objects.select_related("booking__customer", "booking__branch__salon")
         if not user.is_authenticated:
             return queryset.none()
-        if user.is_superuser or user.role in (User.Role.ADMIN, User.Role.FINANCE):
+        if user.is_superuser or user.role == User.Role.ADMIN:
             return queryset
         branch_ids = manageable_branch_ids(user)
         if branch_ids:
@@ -165,9 +165,7 @@ class SettlementListCreateView(GenericAPIView):
 
     def get(self, request):
         queryset = Settlement.objects.select_related("wallet__user")
-        if not (
-            request.user.is_superuser or request.user.role in (User.Role.ADMIN, User.Role.FINANCE)
-        ):
+        if not (request.user.is_superuser or request.user.role == User.Role.ADMIN):
             queryset = queryset.filter(wallet__user=request.user)
         return Response(SettlementSerializer(queryset, many=True).data)
 
@@ -194,9 +192,7 @@ class ProcessSettlementView(GenericAPIView):
 
     @extend_schema(request=SettlementProcessSerializer, responses=SettlementSerializer)
     def post(self, request, pk):
-        if not (
-            request.user.is_superuser or request.user.role in (User.Role.ADMIN, User.Role.FINANCE)
-        ):
+        if not (request.user.is_superuser or request.user.role == User.Role.ADMIN):
             return Response({"detail": "اجازه پردازش تسویه را ندارید."}, status=403)
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)

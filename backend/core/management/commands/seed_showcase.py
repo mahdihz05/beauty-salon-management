@@ -159,7 +159,7 @@ class Command(BaseCommand):
         )
         self._ensure_product_salon_coverage()
         self._ensure_service_coverage()
-        self._create_social_and_support(customers, salons, users["support"], rng)
+        self._create_social_and_support(customers, salons, users["admin"], rng)
         self._create_settlements(users["owners"], wallets, rng)
         AuditLog.objects.create(
             actor=users["admin"],
@@ -286,7 +286,6 @@ class Command(BaseCommand):
             batch_size=500,
         )
         admin = User.objects.filter(role=User.Role.ADMIN).first()
-        support = User.objects.filter(role=User.Role.SUPPORT).first()
         return {
             "customers": customers,
             "owners": [user_map[phone] for phone in role_phones["owners"]],
@@ -294,7 +293,6 @@ class Command(BaseCommand):
             "receptionists": [user_map[phone] for phone in role_phones["receptionists"]],
             "staff": [user_map[phone] for phone in role_phones["staff"]],
             "admin": admin,
-            "support": support,
         }
 
     def _create_salons(

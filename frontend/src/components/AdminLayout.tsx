@@ -1,5 +1,7 @@
 import {
   Building2,
+  BadgeDollarSign,
+  Headphones,
   LayoutDashboard,
   ListTree,
   LogOut,
@@ -15,6 +17,8 @@ const links = [
   { href: "/admin/salons", label: "همه سالن‌ها", icon: Building2 },
   { href: "/admin/settings", label: "شهرها و دسته‌بندی", icon: MapPinned },
   { href: "/admin/reviews", label: "مدیریت نظرات", icon: MessageSquareText },
+  { href: "/admin/finance", label: "مالی و تسویه", icon: BadgeDollarSign },
+  { href: "/admin/support", label: "پشتیبانی", icon: Headphones },
 ];
 
 export function AdminLayout({

@@ -20,7 +20,7 @@ class PaymentAPITests(APITestCase):
         self.customer = User.objects.create_user(phone="09120000101")
         self.other_customer = User.objects.create_user(phone="09120000102")
         self.owner = User.objects.create_user(phone="09120000103", role=User.Role.SALON_OWNER)
-        self.finance = User.objects.create_user(phone="09120000104", role=User.Role.FINANCE)
+        self.admin = User.objects.create_user(phone="09120000104", role=User.Role.ADMIN)
         city = City.objects.create(name="شهر پرداخت", slug="payment-city")
         salon = Salon.objects.create(
             owner=self.owner,
@@ -183,7 +183,7 @@ class PaymentAPITests(APITestCase):
         log = AuditLog.objects.get(action="booking.status_changed")
         self.assertEqual(log.metadata["credited_amount"], 90_000)
 
-    def test_owner_requests_settlement_and_finance_marks_it_paid(self):
+    def test_owner_requests_settlement_and_admin_marks_it_paid(self):
         wallet = Wallet.objects.create(user=self.owner, balance=300_000)
         self.client.force_authenticate(self.owner)
         requested = self.client.post(
@@ -194,7 +194,7 @@ class PaymentAPITests(APITestCase):
         self.assertEqual(requested.status_code, status.HTTP_201_CREATED)
         self.assertEqual(wallet.balance, 100_000)
 
-        self.client.force_authenticate(self.finance)
+        self.client.force_authenticate(self.admin)
         processed = self.client.post(
             reverse("settlement-process", args=(requested.data["id"],)),
             {"status": Settlement.Status.PAID, "note": "واریز شد"},
@@ -247,16 +247,16 @@ class PaymentAPITests(APITestCase):
         self.assertEqual(remainder.status_code, status.HTTP_403_FORBIDDEN)
         self.assertEqual(customer_directory.data["count"], 0)
 
-    def test_finance_sees_payments_but_not_booking_directory(self):
+    def test_admin_sees_payments_and_booking_directory(self):
         booking = self.make_booking()
         self.pay(booking)
-        self.client.force_authenticate(self.finance)
+        self.client.force_authenticate(self.admin)
 
         payments = self.client.get(reverse("payment-list"))
         bookings = self.client.get(reverse("booking-list"))
 
         self.assertEqual(payments.data["count"], 1)
-        self.assertEqual(bookings.data["count"], 0)
+        self.assertEqual(bookings.data["count"], 1)
 
     def test_rejected_settlement_returns_reserved_balance(self):
         wallet = Wallet.objects.create(user=self.owner, balance=250_000)
@@ -265,7 +265,7 @@ class PaymentAPITests(APITestCase):
             reverse("settlement-list"),
             {"amount": 200_000, "bank_account": "IR000000000000000000000000"},
         )
-        self.client.force_authenticate(self.finance)
+        self.client.force_authenticate(self.admin)
         self.client.post(
             reverse("settlement-process", args=(requested.data["id"],)),
             {"status": Settlement.Status.REJECTED},

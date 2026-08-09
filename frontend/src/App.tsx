@@ -96,16 +96,6 @@ export default function App() {
               <SupportTicketsPage />
             </ProtectedRoute>
           </Route>
-          <Route path="/support/tickets">
-            <RoleRoute roles={["support", "admin"]}>
-              <SupportTicketsPage />
-            </RoleRoute>
-          </Route>
-          <Route path="/finance/payments">
-            <RoleRoute roles={["finance", "admin"]}>
-              <FinancePage />
-            </RoleRoute>
-          </Route>
           <Route path="/salon/dashboard">
             <RoleRoute roles={["salon_owner", "branch_manager"]}>
               <DashboardPage />
@@ -190,6 +180,16 @@ export default function App() {
           <Route path="/admin/reviews">
             <RoleRoute roles={["admin"]}>
               <AdminReviewsPage />
+            </RoleRoute>
+          </Route>
+          <Route path="/admin/finance">
+            <RoleRoute roles={["admin"]}>
+              <FinancePage />
+            </RoleRoute>
+          </Route>
+          <Route path="/admin/support">
+            <RoleRoute roles={["admin"]}>
+              <SupportTicketsPage />
             </RoleRoute>
           </Route>
           <Route component={NotFoundPage} />

@@ -142,10 +142,7 @@ class BookingViewSet(viewsets.ReadOnlyModelViewSet):
         ).prefetch_related("items__branch_service__service", "items__staff", "payments")
         if not user.is_authenticated:
             return queryset.none()
-        if user.is_superuser or user.role in (
-            User.Role.ADMIN,
-            User.Role.SUPPORT,
-        ):
+        if user.is_superuser or user.role == User.Role.ADMIN:
             return queryset
         branch_ids = accessible_branch_ids(user)
         if user.role == User.Role.STAFF:

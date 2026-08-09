@@ -28,7 +28,7 @@ class SupportTicketViewSet(
         queryset = SupportTicket.objects.select_related("customer", "assigned_to")
         if not user.is_authenticated:
             return queryset.none()
-        if user.is_superuser or user.role in (User.Role.ADMIN, User.Role.SUPPORT):
+        if user.is_superuser or user.role == User.Role.ADMIN:
             return queryset
         return queryset.filter(customer=user)
 
@@ -48,7 +48,7 @@ class SupportTicketViewSet(
 
     def perform_update(self, serializer):
         user = self.request.user
-        if not (user.is_superuser or user.role in (User.Role.ADMIN, User.Role.SUPPORT)):
+        if not (user.is_superuser or user.role == User.Role.ADMIN):
             raise PermissionDenied("فقط واحد پشتیبانی می‌تواند تیکت را به‌روزرسانی کند.")
         ticket = serializer.save()
         record_audit(

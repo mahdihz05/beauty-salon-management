@@ -33,8 +33,6 @@ class User(AbstractUser):
         RECEPTIONIST = "receptionist", "پذیرش"
         STAFF = "staff", "آرایشگر"
         ADMIN = "admin", "مدیر کل"
-        SUPPORT = "support", "پشتیبانی"
-        FINANCE = "finance", "مالی"
 
     username = None
     phone = models.CharField("شماره موبایل", max_length=11, unique=True, db_index=True)

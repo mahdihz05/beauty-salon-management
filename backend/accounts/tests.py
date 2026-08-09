@@ -149,14 +149,14 @@ class BranchPermissionTests(APITestCase):
 
 class PlatformUserDirectoryTests(APITestCase):
     def setUp(self):
-        self.support = User.objects.create_user(phone="09128888001", role=User.Role.SUPPORT)
-        self.finance = User.objects.create_user(phone="09128888002", role=User.Role.FINANCE)
+        self.admin = User.objects.create_user(phone="09128888001", role=User.Role.ADMIN)
+        self.owner = User.objects.create_user(phone="09128888002", role=User.Role.SALON_OWNER)
         self.customer = User.objects.create_user(phone="09128888003", name="کاربر قابل جستجو")
 
-    def test_support_can_search_users_but_finance_cannot_access_directory(self):
-        self.client.force_authenticate(self.support)
+    def test_admin_can_search_users_but_owner_cannot_access_directory(self):
+        self.client.force_authenticate(self.admin)
         allowed = self.client.get(reverse("platform-user-list"), {"search": "قابل جستجو"})
-        self.client.force_authenticate(self.finance)
+        self.client.force_authenticate(self.owner)
         denied = self.client.get(reverse("platform-user-list"))
 
         self.assertEqual(allowed.status_code, status.HTTP_200_OK)

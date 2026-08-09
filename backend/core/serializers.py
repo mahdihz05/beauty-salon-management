@@ -11,7 +11,7 @@ class SupportTicketSerializer(serializers.ModelSerializer):
     assigned_to_name = serializers.CharField(source="assigned_to.name", read_only=True)
     status_label = serializers.CharField(source="get_status_display", read_only=True)
     assigned_to = serializers.PrimaryKeyRelatedField(
-        queryset=User.objects.filter(role=User.Role.SUPPORT), required=False, allow_null=True
+        queryset=User.objects.filter(role=User.Role.ADMIN), required=False, allow_null=True
     )
 
     class Meta:

@@ -19,7 +19,7 @@ class NotificationViewSet(viewsets.ReadOnlyModelViewSet):
         user = self.request.user
         if not user.is_authenticated:
             return queryset.none()
-        if user.is_superuser or user.role in (User.Role.ADMIN, User.Role.SUPPORT):
+        if user.is_superuser or user.role == User.Role.ADMIN:
             return queryset
         branch_ids = manageable_branch_ids(user, include_receptionist=True)
         if branch_ids:

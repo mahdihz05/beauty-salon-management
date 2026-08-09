@@ -16,7 +16,7 @@ from .services import request_otp, verify_otp
 class PlatformUserDirectoryView(ListAPIView):
     serializer_class = UserSerializer
     permission_classes = (HasAnyRole,)
-    allowed_roles = (User.Role.ADMIN, User.Role.SUPPORT)
+    allowed_roles = (User.Role.ADMIN,)
     search_fields = ("phone", "name")
     filterset_fields = ("role", "is_active")
     ordering_fields = ("created_at", "name")
