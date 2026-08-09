@@ -1,0 +1,7553 @@
+openapi: 3.0.3
+info:
+  title: Stitch Salon Booking API
+  version: 1.0.0
+  description: API سامانه رزرو و مدیریت چندآرایشگاهی استیچ
+paths:
+  /api/admin-panel/categories/:
+    get:
+      operationId: admin_panel_categories_list
+      parameters:
+      - in: query
+        name: is_active
+        schema:
+          type: boolean
+      - name: ordering
+        required: false
+        in: query
+        description: کدام فیلد باید هنگام مرتب‌سازی نتایج استفاده شود.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: یک شماره صفحه‌ در مجموعه نتایج صفحه‌بندی شده.
+        schema:
+          type: integer
+      - in: query
+        name: parent
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: یک عبارت جستجو.
+        schema:
+          type: string
+      tags:
+      - admin-panel
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedAdminCategoryList'
+          description: ''
+    post:
+      operationId: admin_panel_categories_create
+      tags:
+      - admin-panel
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminCategory'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/AdminCategory'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/AdminCategory'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminCategory'
+          description: ''
+  /api/admin-panel/categories/{id}/:
+    get:
+      operationId: admin_panel_categories_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: یک مقداد عدد یکتا که این دسته‌بندی خدمت را شناسایی میکند.
+        required: true
+      tags:
+      - admin-panel
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminCategory'
+          description: ''
+    put:
+      operationId: admin_panel_categories_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: یک مقداد عدد یکتا که این دسته‌بندی خدمت را شناسایی میکند.
+        required: true
+      tags:
+      - admin-panel
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminCategory'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/AdminCategory'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/AdminCategory'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminCategory'
+          description: ''
+    patch:
+      operationId: admin_panel_categories_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: یک مقداد عدد یکتا که این دسته‌بندی خدمت را شناسایی میکند.
+        required: true
+      tags:
+      - admin-panel
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedAdminCategory'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedAdminCategory'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedAdminCategory'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminCategory'
+          description: ''
+    delete:
+      operationId: admin_panel_categories_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: یک مقداد عدد یکتا که این دسته‌بندی خدمت را شناسایی میکند.
+        required: true
+      tags:
+      - admin-panel
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/admin-panel/cities/:
+    get:
+      operationId: admin_panel_cities_list
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: کدام فیلد باید هنگام مرتب‌سازی نتایج استفاده شود.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: یک شماره صفحه‌ در مجموعه نتایج صفحه‌بندی شده.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: یک عبارت جستجو.
+        schema:
+          type: string
+      tags:
+      - admin-panel
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedAdminCityList'
+          description: ''
+    post:
+      operationId: admin_panel_cities_create
+      tags:
+      - admin-panel
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminCity'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/AdminCity'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/AdminCity'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminCity'
+          description: ''
+  /api/admin-panel/cities/{id}/:
+    get:
+      operationId: admin_panel_cities_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: یک مقداد عدد یکتا که این شهر را شناسایی میکند.
+        required: true
+      tags:
+      - admin-panel
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminCity'
+          description: ''
+    put:
+      operationId: admin_panel_cities_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: یک مقداد عدد یکتا که این شهر را شناسایی میکند.
+        required: true
+      tags:
+      - admin-panel
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminCity'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/AdminCity'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/AdminCity'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminCity'
+          description: ''
+    patch:
+      operationId: admin_panel_cities_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: یک مقداد عدد یکتا که این شهر را شناسایی میکند.
+        required: true
+      tags:
+      - admin-panel
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedAdminCity'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedAdminCity'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedAdminCity'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminCity'
+          description: ''
+    delete:
+      operationId: admin_panel_cities_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: یک مقداد عدد یکتا که این شهر را شناسایی میکند.
+        required: true
+      tags:
+      - admin-panel
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/admin-panel/dashboard/:
+    get:
+      operationId: admin_panel_dashboard_retrieve
+      tags:
+      - admin-panel
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminDashboard'
+          description: ''
+  /api/admin-panel/districts/:
+    get:
+      operationId: admin_panel_districts_list
+      parameters:
+      - in: query
+        name: city
+        schema:
+          type: integer
+      - in: query
+        name: is_active
+        schema:
+          type: boolean
+      - name: ordering
+        required: false
+        in: query
+        description: کدام فیلد باید هنگام مرتب‌سازی نتایج استفاده شود.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: یک شماره صفحه‌ در مجموعه نتایج صفحه‌بندی شده.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: یک عبارت جستجو.
+        schema:
+          type: string
+      tags:
+      - admin-panel
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedAdminDistrictList'
+          description: ''
+    post:
+      operationId: admin_panel_districts_create
+      tags:
+      - admin-panel
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminDistrict'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/AdminDistrict'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/AdminDistrict'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminDistrict'
+          description: ''
+  /api/admin-panel/districts/{id}/:
+    get:
+      operationId: admin_panel_districts_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: یک مقداد عدد یکتا که این منطقه را شناسایی میکند.
+        required: true
+      tags:
+      - admin-panel
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminDistrict'
+          description: ''
+    put:
+      operationId: admin_panel_districts_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: یک مقداد عدد یکتا که این منطقه را شناسایی میکند.
+        required: true
+      tags:
+      - admin-panel
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminDistrict'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/AdminDistrict'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/AdminDistrict'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminDistrict'
+          description: ''
+    patch:
+      operationId: admin_panel_districts_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: یک مقداد عدد یکتا که این منطقه را شناسایی میکند.
+        required: true
+      tags:
+      - admin-panel
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedAdminDistrict'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedAdminDistrict'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedAdminDistrict'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminDistrict'
+          description: ''
+    delete:
+      operationId: admin_panel_districts_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: یک مقداد عدد یکتا که این منطقه را شناسایی میکند.
+        required: true
+      tags:
+      - admin-panel
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/admin-panel/salons/:
+    get:
+      operationId: admin_panel_salons_list
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: کدام فیلد باید هنگام مرتب‌سازی نتایج استفاده شود.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: یک شماره صفحه‌ در مجموعه نتایج صفحه‌بندی شده.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: تعداد نتایج برای نمایش در هر صفحه.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: یک عبارت جستجو.
+        schema:
+          type: string
+      - in: query
+        name: status
+        schema:
+          type: string
+          title: وضعیت
+          enum:
+          - approved
+          - draft
+          - pending
+          - rejected
+          - suspended
+        description: |-
+          * `draft` - پیش‌نویس
+          * `pending` - در انتظار بررسی
+          * `approved` - تأییدشده
+          * `rejected` - ردشده
+          * `suspended` - تعلیق‌شده
+      - in: query
+        name: type
+        schema:
+          type: string
+          title: نوع سالن
+          enum:
+          - men
+          - unisex
+          - women
+        description: |-
+          * `women` - زنانه
+          * `men` - مردانه
+          * `unisex` - مشترک
+      tags:
+      - admin-panel
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedSalonList'
+          description: ''
+  /api/admin-panel/salons/{id}/:
+    get:
+      operationId: admin_panel_salons_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: یک مقداد عدد یکتا که این سالن را شناسایی میکند.
+        required: true
+      tags:
+      - admin-panel
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Salon'
+          description: ''
+  /api/admin-panel/salons/{id}/approve/:
+    post:
+      operationId: admin_panel_salons_approve_create
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: یک مقداد عدد یکتا که این سالن را شناسایی میکند.
+        required: true
+      tags:
+      - admin-panel
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Salon'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Salon'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Salon'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Salon'
+          description: ''
+  /api/admin-panel/salons/{id}/overview/:
+    get:
+      operationId: admin_panel_salons_overview_retrieve
+      description: Complete read-only operational view of one salon for platform admins.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: یک مقداد عدد یکتا که این سالن را شناسایی میکند.
+        required: true
+      tags:
+      - admin-panel
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Salon'
+          description: ''
+  /api/admin-panel/salons/{id}/reject/:
+    post:
+      operationId: admin_panel_salons_reject_create
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: یک مقداد عدد یکتا که این سالن را شناسایی میکند.
+        required: true
+      tags:
+      - admin-panel
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Salon'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Salon'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Salon'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Salon'
+          description: ''
+  /api/admin-panel/salons/{id}/suspend/:
+    post:
+      operationId: admin_panel_salons_suspend_create
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: یک مقداد عدد یکتا که این سالن را شناسایی میکند.
+        required: true
+      tags:
+      - admin-panel
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Salon'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Salon'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Salon'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Salon'
+          description: ''
+  /api/auth/logout/:
+    post:
+      operationId: auth_logout_create
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Logout'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Logout'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Logout'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Logout'
+          description: ''
+  /api/auth/me/:
+    get:
+      operationId: auth_me_retrieve
+      tags:
+      - auth
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+    put:
+      operationId: auth_me_update
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/User'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/User'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+    patch:
+      operationId: auth_me_partial_update
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedUser'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedUser'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedUser'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+  /api/auth/otp/request/:
+    post:
+      operationId: auth_otp_request_create
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OTPRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/OTPRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/OTPRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OTPRequest'
+          description: ''
+  /api/auth/otp/verify/:
+    post:
+      operationId: auth_otp_verify_create
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OTPVerify'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/OTPVerify'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/OTPVerify'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+  /api/auth/token/refresh/:
+    post:
+      operationId: auth_token_refresh_create
+      description: |-
+        Takes a refresh type JSON web token and returns an access type JSON web
+        token if the refresh token is valid.
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenRefresh'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TokenRefresh'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TokenRefresh'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenRefresh'
+          description: ''
+  /api/auth/users/:
+    get:
+      operationId: auth_users_list
+      parameters:
+      - in: query
+        name: is_active
+        schema:
+          type: boolean
+      - name: ordering
+        required: false
+        in: query
+        description: کدام فیلد باید هنگام مرتب‌سازی نتایج استفاده شود.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: یک شماره صفحه‌ در مجموعه نتایج صفحه‌بندی شده.
+        schema:
+          type: integer
+      - in: query
+        name: role
+        schema:
+          type: string
+          title: نقش
+          enum:
+          - admin
+          - branch_manager
+          - customer
+          - finance
+          - receptionist
+          - salon_owner
+          - staff
+          - support
+        description: |-
+          * `customer` - مشتری
+          * `salon_owner` - مالک سالن
+          * `branch_manager` - مدیر شعبه
+          * `receptionist` - پذیرش
+          * `staff` - آرایشگر
+          * `admin` - مدیر کل
+          * `support` - پشتیبانی
+          * `finance` - مالی
+      - name: search
+        required: false
+        in: query
+        description: یک عبارت جستجو.
+        schema:
+          type: string
+      tags:
+      - auth
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedUserList'
+          description: ''
+  /api/bookings/availability/:
+    get:
+      operationId: bookings_availability_list
+      parameters:
+      - in: query
+        name: branch
+        schema:
+          type: integer
+        required: true
+      - in: query
+        name: date
+        schema:
+          type: string
+          format: date
+        required: true
+      - name: ordering
+        required: false
+        in: query
+        description: کدام فیلد باید هنگام مرتب‌سازی نتایج استفاده شود.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: یک شماره صفحه‌ در مجموعه نتایج صفحه‌بندی شده.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: یک عبارت جستجو.
+        schema:
+          type: string
+      - in: query
+        name: services
+        schema:
+          type: string
+          minLength: 1
+        description: شناسه خدمات شعبه، جداشده با کاما
+        required: true
+      - in: query
+        name: staff
+        schema:
+          type: integer
+          minimum: 1
+      tags:
+      - bookings
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedAvailableSlotList'
+          description: ''
+  /api/bookings/customers/:
+    get:
+      operationId: bookings_customers_list
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: کدام فیلد باید هنگام مرتب‌سازی نتایج استفاده شود.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: یک شماره صفحه‌ در مجموعه نتایج صفحه‌بندی شده.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: یک عبارت جستجو.
+        schema:
+          type: string
+      tags:
+      - bookings
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedCustomerSummaryList'
+          description: ''
+  /api/bookings/customers/{id}/:
+    get:
+      operationId: bookings_customers_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: یک مقداد عدد یکتا که این کاربر را شناسایی میکند.
+        required: true
+      tags:
+      - bookings
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerSummary'
+          description: ''
+  /api/bookings/discounts/:
+    get:
+      operationId: bookings_discounts_list
+      parameters:
+      - in: query
+        name: is_active
+        schema:
+          type: boolean
+      - name: ordering
+        required: false
+        in: query
+        description: کدام فیلد باید هنگام مرتب‌سازی نتایج استفاده شود.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: یک شماره صفحه‌ در مجموعه نتایج صفحه‌بندی شده.
+        schema:
+          type: integer
+      - in: query
+        name: salon
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: یک عبارت جستجو.
+        schema:
+          type: string
+      - in: query
+        name: type
+        schema:
+          type: string
+          enum:
+          - fixed
+          - percent
+        description: |-
+          * `percent` - درصدی
+          * `fixed` - مبلغ ثابت
+      tags:
+      - bookings
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedDiscountCodeList'
+          description: ''
+    post:
+      operationId: bookings_discounts_create
+      tags:
+      - bookings
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DiscountCode'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/DiscountCode'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/DiscountCode'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DiscountCode'
+          description: ''
+  /api/bookings/discounts/{id}/:
+    get:
+      operationId: bookings_discounts_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: یک مقداد عدد یکتا که این کد تخفیف را شناسایی میکند.
+        required: true
+      tags:
+      - bookings
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DiscountCode'
+          description: ''
+    put:
+      operationId: bookings_discounts_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: یک مقداد عدد یکتا که این کد تخفیف را شناسایی میکند.
+        required: true
+      tags:
+      - bookings
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DiscountCode'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/DiscountCode'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/DiscountCode'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DiscountCode'
+          description: ''
+    patch:
+      operationId: bookings_discounts_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: یک مقداد عدد یکتا که این کد تخفیف را شناسایی میکند.
+        required: true
+      tags:
+      - bookings
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedDiscountCode'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedDiscountCode'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedDiscountCode'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DiscountCode'
+          description: ''
+    delete:
+      operationId: bookings_discounts_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: یک مقداد عدد یکتا که این کد تخفیف را شناسایی میکند.
+        required: true
+      tags:
+      - bookings
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/bookings/holds/:
+    post:
+      operationId: bookings_holds_create
+      tags:
+      - bookings
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateHold'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CreateHold'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CreateHold'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Booking'
+          description: ''
+  /api/bookings/items/:
+    get:
+      operationId: bookings_items_list
+      parameters:
+      - in: query
+        name: branch
+        schema:
+          type: integer
+      - in: query
+        name: end_date
+        schema:
+          type: string
+          format: date
+      - name: ordering
+        required: false
+        in: query
+        description: کدام فیلد باید هنگام مرتب‌سازی نتایج استفاده شود.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: یک شماره صفحه‌ در مجموعه نتایج صفحه‌بندی شده.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: یک عبارت جستجو.
+        schema:
+          type: string
+      - in: query
+        name: staff
+        schema:
+          type: integer
+      - in: query
+        name: start_date
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: status
+        schema:
+          type: string
+          enum:
+          - cancelled
+          - completed
+          - confirmed
+          - no_show
+          - pending_payment
+        description: |-
+          * `pending_payment` - در انتظار پرداخت
+          * `confirmed` - تأییدشده
+          * `completed` - انجام‌شده
+          * `cancelled` - لغوشده
+          * `no_show` - عدم حضور
+      tags:
+      - bookings
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedBookingList'
+          description: ''
+  /api/bookings/items/{id}/:
+    get:
+      operationId: bookings_items_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: یک مقداد عدد یکتا که این رزرو را شناسایی میکند.
+        required: true
+      tags:
+      - bookings
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Booking'
+          description: ''
+  /api/bookings/items/{id}/cancel/:
+    post:
+      operationId: bookings_items_cancel_create
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: یک مقداد عدد یکتا که این رزرو را شناسایی میکند.
+        required: true
+      tags:
+      - bookings
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Booking'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Booking'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Booking'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Booking'
+          description: ''
+  /api/bookings/items/{id}/set-status/:
+    post:
+      operationId: bookings_items_set_status_create
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: یک مقداد عدد یکتا که این رزرو را شناسایی میکند.
+        required: true
+      tags:
+      - bookings
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Booking'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Booking'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Booking'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Booking'
+          description: ''
+  /api/bookings/manual/:
+    post:
+      operationId: bookings_manual_create
+      tags:
+      - bookings
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateManualBooking'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CreateManualBooking'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CreateManualBooking'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Booking'
+          description: ''
+  /api/health/:
+    get:
+      operationId: health_retrieve
+      description: Public liveness check including the embedded SQLite connection.
+      tags:
+      - health
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthCheckResponse'
+          description: ''
+  /api/management/branch-services/:
+    get:
+      operationId: management_branch_services_list
+      parameters:
+      - in: query
+        name: branch
+        schema:
+          type: integer
+      - in: query
+        name: is_active
+        schema:
+          type: boolean
+      - name: ordering
+        required: false
+        in: query
+        description: کدام فیلد باید هنگام مرتب‌سازی نتایج استفاده شود.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: یک شماره صفحه‌ در مجموعه نتایج صفحه‌بندی شده.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: یک عبارت جستجو.
+        schema:
+          type: string
+      - in: query
+        name: service
+        schema:
+          type: integer
+      tags:
+      - management
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedBranchServiceList'
+          description: ''
+    post:
+      operationId: management_branch_services_create
+      tags:
+      - management
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BranchService'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/BranchService'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/BranchService'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BranchService'
+          description: ''
+  /api/management/branch-services/{id}/:
+    get:
+      operationId: management_branch_services_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: یک مقداد عدد یکتا که این خدمت شعبه را شناسایی میکند.
+        required: true
+      tags:
+      - management
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BranchService'
+          description: ''
+    put:
+      operationId: management_branch_services_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: یک مقداد عدد یکتا که این خدمت شعبه را شناسایی میکند.
+        required: true
+      tags:
+      - management
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BranchService'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/BranchService'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/BranchService'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BranchService'
+          description: ''
+    patch:
+      operationId: management_branch_services_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: یک مقداد عدد یکتا که این خدمت شعبه را شناسایی میکند.
+        required: true
+      tags:
+      - management
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedBranchService'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedBranchService'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedBranchService'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BranchService'
+          description: ''
+    delete:
+      operationId: management_branch_services_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: یک مقداد عدد یکتا که این خدمت شعبه را شناسایی میکند.
+        required: true
+      tags:
+      - management
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/management/branches/:
+    get:
+      operationId: management_branches_list
+      parameters:
+      - in: query
+        name: city
+        schema:
+          type: integer
+      - in: query
+        name: is_active
+        schema:
+          type: boolean
+      - name: ordering
+        required: false
+        in: query
+        description: کدام فیلد باید هنگام مرتب‌سازی نتایج استفاده شود.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: یک شماره صفحه‌ در مجموعه نتایج صفحه‌بندی شده.
+        schema:
+          type: integer
+      - in: query
+        name: salon
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: یک عبارت جستجو.
+        schema:
+          type: string
+      tags:
+      - management
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedBranchList'
+          description: ''
+    post:
+      operationId: management_branches_create
+      tags:
+      - management
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Branch'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Branch'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Branch'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Branch'
+          description: ''
+  /api/management/branches/{id}/:
+    get:
+      operationId: management_branches_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: یک مقداد عدد یکتا که این شعبه را شناسایی میکند.
+        required: true
+      tags:
+      - management
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Branch'
+          description: ''
+    put:
+      operationId: management_branches_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: یک مقداد عدد یکتا که این شعبه را شناسایی میکند.
+        required: true
+      tags:
+      - management
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Branch'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Branch'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Branch'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Branch'
+          description: ''
+    patch:
+      operationId: management_branches_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: یک مقداد عدد یکتا که این شعبه را شناسایی میکند.
+        required: true
+      tags:
+      - management
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedBranch'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedBranch'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedBranch'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Branch'
+          description: ''
+    delete:
+      operationId: management_branches_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: یک مقداد عدد یکتا که این شعبه را شناسایی میکند.
+        required: true
+      tags:
+      - management
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/management/categories/:
+    get:
+      operationId: management_categories_list
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: کدام فیلد باید هنگام مرتب‌سازی نتایج استفاده شود.
+        schema:
+          type: string
+      - name: search
+        required: false
+        in: query
+        description: یک عبارت جستجو.
+        schema:
+          type: string
+      tags:
+      - management
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ServiceCategory'
+          description: ''
+  /api/management/categories/{id}/:
+    get:
+      operationId: management_categories_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: یک مقداد عدد یکتا که این دسته‌بندی خدمت را شناسایی میکند.
+        required: true
+      tags:
+      - management
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceCategory'
+          description: ''
+  /api/management/cities/:
+    get:
+      operationId: management_cities_list
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: کدام فیلد باید هنگام مرتب‌سازی نتایج استفاده شود.
+        schema:
+          type: string
+      - name: search
+        required: false
+        in: query
+        description: یک عبارت جستجو.
+        schema:
+          type: string
+      tags:
+      - management
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/City'
+          description: ''
+  /api/management/cities/{id}/:
+    get:
+      operationId: management_cities_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: یک مقداد عدد یکتا که این شهر را شناسایی میکند.
+        required: true
+      tags:
+      - management
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/City'
+          description: ''
+  /api/management/districts/:
+    get:
+      operationId: management_districts_list
+      parameters:
+      - in: query
+        name: city
+        schema:
+          type: integer
+      - name: ordering
+        required: false
+        in: query
+        description: کدام فیلد باید هنگام مرتب‌سازی نتایج استفاده شود.
+        schema:
+          type: string
+      - name: search
+        required: false
+        in: query
+        description: یک عبارت جستجو.
+        schema:
+          type: string
+      tags:
+      - management
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/District'
+          description: ''
+  /api/management/districts/{id}/:
+    get:
+      operationId: management_districts_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: یک مقداد عدد یکتا که این منطقه را شناسایی میکند.
+        required: true
+      tags:
+      - management
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/District'
+          description: ''
+  /api/management/salon-images/:
+    get:
+      operationId: management_salon_images_list
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: کدام فیلد باید هنگام مرتب‌سازی نتایج استفاده شود.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: یک شماره صفحه‌ در مجموعه نتایج صفحه‌بندی شده.
+        schema:
+          type: integer
+      - in: query
+        name: salon
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: یک عبارت جستجو.
+        schema:
+          type: string
+      tags:
+      - management
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedSalonImageList'
+          description: ''
+    post:
+      operationId: management_salon_images_create
+      tags:
+      - management
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SalonImage'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/SalonImage'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SalonImage'
+          description: ''
+  /api/management/salon-images/{id}/:
+    delete:
+      operationId: management_salon_images_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: یک مقداد عدد یکتا که این تصویر سالن را شناسایی میکند.
+        required: true
+      tags:
+      - management
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/management/salons/:
+    get:
+      operationId: management_salons_list
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: کدام فیلد باید هنگام مرتب‌سازی نتایج استفاده شود.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: یک شماره صفحه‌ در مجموعه نتایج صفحه‌بندی شده.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: یک عبارت جستجو.
+        schema:
+          type: string
+      - in: query
+        name: status
+        schema:
+          type: string
+          title: وضعیت
+          enum:
+          - approved
+          - draft
+          - pending
+          - rejected
+          - suspended
+        description: |-
+          * `draft` - پیش‌نویس
+          * `pending` - در انتظار بررسی
+          * `approved` - تأییدشده
+          * `rejected` - ردشده
+          * `suspended` - تعلیق‌شده
+      - in: query
+        name: type
+        schema:
+          type: string
+          title: نوع سالن
+          enum:
+          - men
+          - unisex
+          - women
+        description: |-
+          * `women` - زنانه
+          * `men` - مردانه
+          * `unisex` - مشترک
+      tags:
+      - management
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedSalonList'
+          description: ''
+    post:
+      operationId: management_salons_create
+      tags:
+      - management
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Salon'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Salon'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Salon'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Salon'
+          description: ''
+  /api/management/salons/{id}/:
+    get:
+      operationId: management_salons_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: یک مقداد عدد یکتا که این سالن را شناسایی میکند.
+        required: true
+      tags:
+      - management
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Salon'
+          description: ''
+    put:
+      operationId: management_salons_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: یک مقداد عدد یکتا که این سالن را شناسایی میکند.
+        required: true
+      tags:
+      - management
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Salon'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Salon'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Salon'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Salon'
+          description: ''
+    patch:
+      operationId: management_salons_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: یک مقداد عدد یکتا که این سالن را شناسایی میکند.
+        required: true
+      tags:
+      - management
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedSalon'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedSalon'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedSalon'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Salon'
+          description: ''
+    delete:
+      operationId: management_salons_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: یک مقداد عدد یکتا که این سالن را شناسایی میکند.
+        required: true
+      tags:
+      - management
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/management/salons/{id}/submit/:
+    post:
+      operationId: management_salons_submit_create
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: یک مقداد عدد یکتا که این سالن را شناسایی میکند.
+        required: true
+      tags:
+      - management
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Salon'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Salon'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Salon'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Salon'
+          description: ''
+  /api/management/services/:
+    get:
+      operationId: management_services_list
+      parameters:
+      - in: query
+        name: category
+        schema:
+          type: integer
+      - in: query
+        name: is_active
+        schema:
+          type: boolean
+      - name: ordering
+        required: false
+        in: query
+        description: کدام فیلد باید هنگام مرتب‌سازی نتایج استفاده شود.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: یک شماره صفحه‌ در مجموعه نتایج صفحه‌بندی شده.
+        schema:
+          type: integer
+      - in: query
+        name: salon
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: یک عبارت جستجو.
+        schema:
+          type: string
+      tags:
+      - management
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedServiceList'
+          description: ''
+    post:
+      operationId: management_services_create
+      tags:
+      - management
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Service'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Service'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Service'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Service'
+          description: ''
+  /api/management/services/{id}/:
+    get:
+      operationId: management_services_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: یک مقداد عدد یکتا که این خدمت را شناسایی میکند.
+        required: true
+      tags:
+      - management
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Service'
+          description: ''
+    put:
+      operationId: management_services_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: یک مقداد عدد یکتا که این خدمت را شناسایی میکند.
+        required: true
+      tags:
+      - management
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Service'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Service'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Service'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Service'
+          description: ''
+    patch:
+      operationId: management_services_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: یک مقداد عدد یکتا که این خدمت را شناسایی میکند.
+        required: true
+      tags:
+      - management
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedService'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedService'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedService'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Service'
+          description: ''
+    delete:
+      operationId: management_services_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: یک مقداد عدد یکتا که این خدمت را شناسایی میکند.
+        required: true
+      tags:
+      - management
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/management/staff/:
+    get:
+      operationId: management_staff_list
+      parameters:
+      - in: query
+        name: branch
+        schema:
+          type: integer
+      - in: query
+        name: is_active
+        schema:
+          type: boolean
+      - name: ordering
+        required: false
+        in: query
+        description: کدام فیلد باید هنگام مرتب‌سازی نتایج استفاده شود.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: یک شماره صفحه‌ در مجموعه نتایج صفحه‌بندی شده.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: یک عبارت جستجو.
+        schema:
+          type: string
+      tags:
+      - management
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedStaffList'
+          description: ''
+    post:
+      operationId: management_staff_create
+      tags:
+      - management
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Staff'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Staff'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Staff'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Staff'
+          description: ''
+  /api/management/staff-services/:
+    get:
+      operationId: management_staff_services_list
+      parameters:
+      - in: query
+        name: branch_service
+        schema:
+          type: integer
+      - name: ordering
+        required: false
+        in: query
+        description: کدام فیلد باید هنگام مرتب‌سازی نتایج استفاده شود.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: یک شماره صفحه‌ در مجموعه نتایج صفحه‌بندی شده.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: یک عبارت جستجو.
+        schema:
+          type: string
+      - in: query
+        name: staff
+        schema:
+          type: integer
+      tags:
+      - management
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedStaffServiceList'
+          description: ''
+    post:
+      operationId: management_staff_services_create
+      tags:
+      - management
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StaffService'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/StaffService'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/StaffService'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StaffService'
+          description: ''
+  /api/management/staff-services/{id}/:
+    get:
+      operationId: management_staff_services_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: یک مقداد عدد یکتا که این مهارت آرایشگر را شناسایی میکند.
+        required: true
+      tags:
+      - management
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StaffService'
+          description: ''
+    put:
+      operationId: management_staff_services_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: یک مقداد عدد یکتا که این مهارت آرایشگر را شناسایی میکند.
+        required: true
+      tags:
+      - management
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StaffService'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/StaffService'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/StaffService'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StaffService'
+          description: ''
+    patch:
+      operationId: management_staff_services_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: یک مقداد عدد یکتا که این مهارت آرایشگر را شناسایی میکند.
+        required: true
+      tags:
+      - management
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedStaffService'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedStaffService'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedStaffService'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StaffService'
+          description: ''
+    delete:
+      operationId: management_staff_services_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: یک مقداد عدد یکتا که این مهارت آرایشگر را شناسایی میکند.
+        required: true
+      tags:
+      - management
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/management/staff-shifts/:
+    get:
+      operationId: management_staff_shifts_list
+      parameters:
+      - in: query
+        name: day_of_week
+        schema:
+          type: integer
+          title: روز هفته
+          enum:
+          - 0
+          - 1
+          - 2
+          - 3
+          - 4
+          - 5
+          - 6
+        description: |-
+          * `0` - شنبه
+          * `1` - یکشنبه
+          * `2` - دوشنبه
+          * `3` - سه‌شنبه
+          * `4` - چهارشنبه
+          * `5` - پنجشنبه
+          * `6` - جمعه
+      - in: query
+        name: is_off
+        schema:
+          type: boolean
+      - name: ordering
+        required: false
+        in: query
+        description: کدام فیلد باید هنگام مرتب‌سازی نتایج استفاده شود.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: یک شماره صفحه‌ در مجموعه نتایج صفحه‌بندی شده.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: یک عبارت جستجو.
+        schema:
+          type: string
+      - in: query
+        name: staff
+        schema:
+          type: integer
+      tags:
+      - management
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedStaffShiftList'
+          description: ''
+    post:
+      operationId: management_staff_shifts_create
+      tags:
+      - management
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StaffShift'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/StaffShift'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/StaffShift'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StaffShift'
+          description: ''
+  /api/management/staff-shifts/{id}/:
+    get:
+      operationId: management_staff_shifts_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: یک مقداد عدد یکتا که این شیفت آرایشگر را شناسایی میکند.
+        required: true
+      tags:
+      - management
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StaffShift'
+          description: ''
+    put:
+      operationId: management_staff_shifts_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: یک مقداد عدد یکتا که این شیفت آرایشگر را شناسایی میکند.
+        required: true
+      tags:
+      - management
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StaffShift'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/StaffShift'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/StaffShift'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StaffShift'
+          description: ''
+    patch:
+      operationId: management_staff_shifts_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: یک مقداد عدد یکتا که این شیفت آرایشگر را شناسایی میکند.
+        required: true
+      tags:
+      - management
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedStaffShift'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedStaffShift'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedStaffShift'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StaffShift'
+          description: ''
+    delete:
+      operationId: management_staff_shifts_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: یک مقداد عدد یکتا که این شیفت آرایشگر را شناسایی میکند.
+        required: true
+      tags:
+      - management
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/management/staff-time-offs/:
+    get:
+      operationId: management_staff_time_offs_list
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: کدام فیلد باید هنگام مرتب‌سازی نتایج استفاده شود.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: یک شماره صفحه‌ در مجموعه نتایج صفحه‌بندی شده.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: یک عبارت جستجو.
+        schema:
+          type: string
+      - in: query
+        name: staff
+        schema:
+          type: integer
+      tags:
+      - management
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedStaffTimeOffList'
+          description: ''
+    post:
+      operationId: management_staff_time_offs_create
+      tags:
+      - management
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StaffTimeOff'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/StaffTimeOff'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/StaffTimeOff'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StaffTimeOff'
+          description: ''
+  /api/management/staff-time-offs/{id}/:
+    get:
+      operationId: management_staff_time_offs_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: یک مقداد عدد یکتا که این مرخصی آرایشگر را شناسایی میکند.
+        required: true
+      tags:
+      - management
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StaffTimeOff'
+          description: ''
+    put:
+      operationId: management_staff_time_offs_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: یک مقداد عدد یکتا که این مرخصی آرایشگر را شناسایی میکند.
+        required: true
+      tags:
+      - management
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StaffTimeOff'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/StaffTimeOff'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/StaffTimeOff'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StaffTimeOff'
+          description: ''
+    patch:
+      operationId: management_staff_time_offs_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: یک مقداد عدد یکتا که این مرخصی آرایشگر را شناسایی میکند.
+        required: true
+      tags:
+      - management
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedStaffTimeOff'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedStaffTimeOff'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedStaffTimeOff'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StaffTimeOff'
+          description: ''
+    delete:
+      operationId: management_staff_time_offs_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: یک مقداد عدد یکتا که این مرخصی آرایشگر را شناسایی میکند.
+        required: true
+      tags:
+      - management
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/management/staff/{id}/:
+    get:
+      operationId: management_staff_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: یک مقداد عدد یکتا که این آرایشگر را شناسایی میکند.
+        required: true
+      tags:
+      - management
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Staff'
+          description: ''
+    put:
+      operationId: management_staff_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: یک مقداد عدد یکتا که این آرایشگر را شناسایی میکند.
+        required: true
+      tags:
+      - management
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Staff'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Staff'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Staff'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Staff'
+          description: ''
+    patch:
+      operationId: management_staff_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: یک مقداد عدد یکتا که این آرایشگر را شناسایی میکند.
+        required: true
+      tags:
+      - management
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedStaff'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedStaff'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedStaff'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Staff'
+          description: ''
+    delete:
+      operationId: management_staff_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: یک مقداد عدد یکتا که این آرایشگر را شناسایی میکند.
+        required: true
+      tags:
+      - management
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/notifications/logs/:
+    get:
+      operationId: notifications_logs_list
+      parameters:
+      - in: query
+        name: channel
+        schema:
+          type: string
+          enum:
+          - in_app
+          - sms
+        description: |-
+          * `sms` - پیامک
+          * `in_app` - داخل برنامه
+      - in: query
+        name: event
+        schema:
+          type: string
+          enum:
+          - booking_cancelled
+          - booking_confirmed
+          - booking_reminder
+        description: |-
+          * `booking_confirmed` - تأیید رزرو
+          * `booking_reminder` - یادآوری رزرو
+          * `booking_cancelled` - لغو رزرو
+      - name: ordering
+        required: false
+        in: query
+        description: کدام فیلد باید هنگام مرتب‌سازی نتایج استفاده شود.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: یک شماره صفحه‌ در مجموعه نتایج صفحه‌بندی شده.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: یک عبارت جستجو.
+        schema:
+          type: string
+      - in: query
+        name: status
+        schema:
+          type: string
+          enum:
+          - failed
+          - pending
+          - sent
+        description: |-
+          * `pending` - در انتظار
+          * `sent` - ارسال‌شده
+          * `failed` - ناموفق
+      tags:
+      - notifications
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedNotificationList'
+          description: ''
+  /api/notifications/logs/{id}/:
+    get:
+      operationId: notifications_logs_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: یک مقداد عدد یکتا که این اعلان را شناسایی میکند.
+        required: true
+      tags:
+      - notifications
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Notification'
+          description: ''
+  /api/payments/:
+    get:
+      operationId: payments_list
+      parameters:
+      - in: query
+        name: booking__branch
+        schema:
+          type: integer
+      - in: query
+        name: method
+        schema:
+          type: string
+          enum:
+          - cash
+          - online
+          - wallet
+        description: |-
+          * `online` - آنلاین
+          * `cash` - نقدی
+          * `wallet` - کیف پول
+      - name: ordering
+        required: false
+        in: query
+        description: کدام فیلد باید هنگام مرتب‌سازی نتایج استفاده شود.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: یک شماره صفحه‌ در مجموعه نتایج صفحه‌بندی شده.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: یک عبارت جستجو.
+        schema:
+          type: string
+      - in: query
+        name: status
+        schema:
+          type: string
+          enum:
+          - failed
+          - paid
+          - pending
+          - refunded
+        description: |-
+          * `pending` - در انتظار
+          * `paid` - پرداخت‌شده
+          * `failed` - ناموفق
+          * `refunded` - بازپرداخت‌شده
+      - in: query
+        name: type
+        schema:
+          type: string
+          enum:
+          - deposit
+          - full
+          - remainder
+        description: |-
+          * `deposit` - بیعانه
+          * `full` - پرداخت کامل
+          * `remainder` - مانده
+      tags:
+      - payments
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedPaymentList'
+          description: ''
+  /api/payments/{id}/callback/:
+    get:
+      operationId: payments_callback_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - payments
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '302':
+          description: No response body
+    post:
+      operationId: payments_callback_create
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - payments
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '302':
+          description: No response body
+  /api/payments/{id}/confirm/:
+    post:
+      operationId: payments_confirm_create
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - payments
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Payment'
+          description: ''
+  /api/payments/remainder/:
+    post:
+      operationId: payments_remainder_create
+      tags:
+      - payments
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RecordRemainderPayment'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/RecordRemainderPayment'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/RecordRemainderPayment'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Payment'
+          description: ''
+  /api/payments/settlements/:
+    get:
+      operationId: payments_settlements_retrieve
+      tags:
+      - payments
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SettlementRequest'
+          description: ''
+    post:
+      operationId: payments_settlements_create
+      tags:
+      - payments
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SettlementRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/SettlementRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SettlementRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Settlement'
+          description: ''
+  /api/payments/settlements/{id}/process/:
+    post:
+      operationId: payments_settlements_process_create
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - payments
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SettlementProcess'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/SettlementProcess'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SettlementProcess'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Settlement'
+          description: ''
+  /api/payments/start/:
+    post:
+      operationId: payments_start_create
+      tags:
+      - payments
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StartPayment'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/StartPayment'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/StartPayment'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Payment'
+          description: ''
+  /api/payments/wallet/:
+    get:
+      operationId: payments_wallet_retrieve
+      tags:
+      - payments
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Wallet'
+          description: ''
+  /api/public/branches/:
+    get:
+      operationId: public_branches_list
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: کدام فیلد باید هنگام مرتب‌سازی نتایج استفاده شود.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: یک شماره صفحه‌ در مجموعه نتایج صفحه‌بندی شده.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: یک عبارت جستجو.
+        schema:
+          type: string
+      tags:
+      - public
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedPublicBranchList'
+          description: ''
+  /api/public/branches/{id}/:
+    get:
+      operationId: public_branches_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: یک مقداد عدد یکتا که این شعبه را شناسایی میکند.
+        required: true
+      tags:
+      - public
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicBranch'
+          description: ''
+  /api/public/categories/:
+    get:
+      operationId: public_categories_list
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: کدام فیلد باید هنگام مرتب‌سازی نتایج استفاده شود.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: یک شماره صفحه‌ در مجموعه نتایج صفحه‌بندی شده.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: یک عبارت جستجو.
+        schema:
+          type: string
+      tags:
+      - public
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedPublicCategoryList'
+          description: ''
+  /api/public/categories/{id}/:
+    get:
+      operationId: public_categories_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: یک مقداد عدد یکتا که این دسته‌بندی خدمت را شناسایی میکند.
+        required: true
+      tags:
+      - public
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicCategory'
+          description: ''
+  /api/public/favorites/:
+    get:
+      operationId: public_favorites_list
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: کدام فیلد باید هنگام مرتب‌سازی نتایج استفاده شود.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: یک شماره صفحه‌ در مجموعه نتایج صفحه‌بندی شده.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: یک عبارت جستجو.
+        schema:
+          type: string
+      tags:
+      - public
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedFavoriteSalonList'
+          description: ''
+    post:
+      operationId: public_favorites_create
+      tags:
+      - public
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FavoriteSalon'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/FavoriteSalon'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/FavoriteSalon'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FavoriteSalon'
+          description: ''
+  /api/public/favorites/{id}/:
+    delete:
+      operationId: public_favorites_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: یک مقداد عدد یکتا که این سالن مورد علاقه را شناسایی میکند.
+        required: true
+      tags:
+      - public
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/public/salons/:
+    get:
+      operationId: public_salons_list
+      parameters:
+      - in: query
+        name: category
+        schema:
+          type: number
+      - in: query
+        name: city
+        schema:
+          type: number
+      - in: query
+        name: district
+        schema:
+          type: number
+      - in: query
+        name: featured
+        schema:
+          type: boolean
+      - in: query
+        name: max_price
+        schema:
+          type: integer
+      - in: query
+        name: min_price
+        schema:
+          type: integer
+      - name: ordering
+        required: false
+        in: query
+        description: کدام فیلد باید هنگام مرتب‌سازی نتایج استفاده شود.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: یک شماره صفحه‌ در مجموعه نتایج صفحه‌بندی شده.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: یک عبارت جستجو.
+        schema:
+          type: string
+      - in: query
+        name: type
+        schema:
+          type: string
+          title: نوع سالن
+          enum:
+          - men
+          - unisex
+          - women
+        description: |-
+          * `women` - زنانه
+          * `men` - مردانه
+          * `unisex` - مشترک
+      tags:
+      - public
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedPublicSalonListList'
+          description: ''
+  /api/public/salons/{slug}/:
+    get:
+      operationId: public_salons_retrieve
+      parameters:
+      - in: path
+        name: slug
+        schema:
+          type: string
+          title: شناسه URL
+        required: true
+      tags:
+      - public
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicSalonDetail'
+          description: ''
+  /api/reports/financial.csv:
+    get:
+      operationId: reports_financial.csv_retrieve
+      parameters:
+      - in: query
+        name: branch
+        schema:
+          type: integer
+          minimum: 1
+      - in: query
+        name: date_from
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: date_to
+        schema:
+          type: string
+          format: date
+      tags:
+      - reports
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            text/csv:
+              schema:
+                type: string
+                format: binary
+          description: ''
+  /api/reports/summary/:
+    get:
+      operationId: reports_summary_retrieve
+      parameters:
+      - in: query
+        name: branch
+        schema:
+          type: integer
+          minimum: 1
+      - in: query
+        name: date_from
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: date_to
+        schema:
+          type: string
+          format: date
+      tags:
+      - reports
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReportSummary'
+          description: ''
+  /api/reviews/mine/:
+    get:
+      operationId: reviews_mine_list
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: کدام فیلد باید هنگام مرتب‌سازی نتایج استفاده شود.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: یک شماره صفحه‌ در مجموعه نتایج صفحه‌بندی شده.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: یک عبارت جستجو.
+        schema:
+          type: string
+      tags:
+      - reviews
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedReviewList'
+          description: ''
+    post:
+      operationId: reviews_mine_create
+      tags:
+      - reviews
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Review'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Review'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Review'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Review'
+          description: ''
+  /api/reviews/mine/{id}/:
+    get:
+      operationId: reviews_mine_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: یک مقداد عدد یکتا که این نظر را شناسایی میکند.
+        required: true
+      tags:
+      - reviews
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Review'
+          description: ''
+  /api/reviews/moderation/:
+    get:
+      operationId: reviews_moderation_list
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: کدام فیلد باید هنگام مرتب‌سازی نتایج استفاده شود.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: یک شماره صفحه‌ در مجموعه نتایج صفحه‌بندی شده.
+        schema:
+          type: integer
+      - in: query
+        name: salon
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: یک عبارت جستجو.
+        schema:
+          type: string
+      - in: query
+        name: status
+        schema:
+          type: string
+          enum:
+          - hidden
+          - pending
+          - published
+        description: |-
+          * `pending` - در انتظار بررسی
+          * `published` - منتشرشده
+          * `hidden` - مخفی
+      tags:
+      - reviews
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedReviewList'
+          description: ''
+  /api/reviews/moderation/{id}/:
+    get:
+      operationId: reviews_moderation_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: یک مقداد عدد یکتا که این نظر را شناسایی میکند.
+        required: true
+      tags:
+      - reviews
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Review'
+          description: ''
+  /api/reviews/moderation/{id}/moderate/:
+    post:
+      operationId: reviews_moderation_moderate_create
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: یک مقداد عدد یکتا که این نظر را شناسایی میکند.
+        required: true
+      tags:
+      - reviews
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReviewModeration'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ReviewModeration'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ReviewModeration'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Review'
+          description: ''
+  /api/reviews/public/:
+    get:
+      operationId: reviews_public_list
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: کدام فیلد باید هنگام مرتب‌سازی نتایج استفاده شود.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: یک شماره صفحه‌ در مجموعه نتایج صفحه‌بندی شده.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: یک عبارت جستجو.
+        schema:
+          type: string
+      tags:
+      - reviews
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedReviewList'
+          description: ''
+  /api/reviews/public/{id}/:
+    get:
+      operationId: reviews_public_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: یک مقداد عدد یکتا که این نظر را شناسایی میکند.
+        required: true
+      tags:
+      - reviews
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Review'
+          description: ''
+  /api/support/tickets/:
+    get:
+      operationId: support_tickets_list
+      parameters:
+      - in: query
+        name: assigned_to
+        schema:
+          type: integer
+      - name: ordering
+        required: false
+        in: query
+        description: کدام فیلد باید هنگام مرتب‌سازی نتایج استفاده شود.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: یک شماره صفحه‌ در مجموعه نتایج صفحه‌بندی شده.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: یک عبارت جستجو.
+        schema:
+          type: string
+      - in: query
+        name: status
+        schema:
+          type: string
+          enum:
+          - closed
+          - in_progress
+          - open
+          - resolved
+        description: |-
+          * `open` - باز
+          * `in_progress` - در حال بررسی
+          * `resolved` - حل‌شده
+          * `closed` - بسته
+      tags:
+      - support
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedSupportTicketList'
+          description: ''
+    post:
+      operationId: support_tickets_create
+      tags:
+      - support
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SupportTicket'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/SupportTicket'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SupportTicket'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SupportTicket'
+          description: ''
+  /api/support/tickets/{id}/:
+    get:
+      operationId: support_tickets_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: یک مقداد عدد یکتا که این تیکت پشتیبانی را شناسایی میکند.
+        required: true
+      tags:
+      - support
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SupportTicket'
+          description: ''
+    put:
+      operationId: support_tickets_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: یک مقداد عدد یکتا که این تیکت پشتیبانی را شناسایی میکند.
+        required: true
+      tags:
+      - support
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SupportTicket'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/SupportTicket'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SupportTicket'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SupportTicket'
+          description: ''
+    patch:
+      operationId: support_tickets_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: یک مقداد عدد یکتا که این تیکت پشتیبانی را شناسایی میکند.
+        required: true
+      tags:
+      - support
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedSupportTicket'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedSupportTicket'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedSupportTicket'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SupportTicket'
+          description: ''
+components:
+  schemas:
+    AdminCategory:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          title: نام دسته‌بندی
+          maxLength: 120
+        slug:
+          type: string
+          title: شناسه URL
+          maxLength: 140
+          pattern: ^[-a-zA-Z0-9_]+$
+        parent:
+          type: integer
+          nullable: true
+        parent_name:
+          type: string
+          readOnly: true
+        icon:
+          type: string
+          title: نام آیکن
+          maxLength: 60
+        is_active:
+          type: boolean
+          title: فعال
+        sort_order:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+          title: ترتیب
+      required:
+      - id
+      - name
+      - parent_name
+      - slug
+    AdminCity:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          title: نام شهر
+          maxLength: 100
+        slug:
+          type: string
+          title: شناسه URL
+          maxLength: 120
+          pattern: ^[-a-zA-Z0-9_]+$
+        is_active:
+          type: boolean
+          title: فعال
+      required:
+      - id
+      - name
+      - slug
+    AdminDashboard:
+      type: object
+      properties:
+        users:
+          type: integer
+        salons:
+          type: integer
+        pending_salons:
+          type: integer
+        approved_salons:
+          type: integer
+        branches:
+          type: integer
+        services:
+          type: integer
+      required:
+      - approved_salons
+      - branches
+      - pending_salons
+      - salons
+      - services
+      - users
+    AdminDistrict:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        city:
+          type: integer
+        city_name:
+          type: string
+          readOnly: true
+        name:
+          type: string
+          title: نام منطقه
+          maxLength: 100
+        slug:
+          type: string
+          title: شناسه URL
+          maxLength: 120
+          pattern: ^[-a-zA-Z0-9_]+$
+        is_active:
+          type: boolean
+          title: فعال
+      required:
+      - city
+      - city_name
+      - id
+      - name
+      - slug
+    AvailableSlot:
+      type: object
+      properties:
+        start_at:
+          type: string
+          format: date-time
+        end_at:
+          type: string
+          format: date-time
+        staff_id:
+          type: integer
+        staff_name:
+          type: string
+        total_price:
+          type: integer
+        duration_minutes:
+          type: integer
+      required:
+      - duration_minutes
+      - end_at
+      - staff_id
+      - staff_name
+      - start_at
+      - total_price
+    Booking:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        customer:
+          type: integer
+          readOnly: true
+        branch:
+          type: integer
+          readOnly: true
+        branch_name:
+          type: string
+          readOnly: true
+        salon_name:
+          type: string
+          readOnly: true
+        staff:
+          type: integer
+          readOnly: true
+        staff_name:
+          type: string
+          readOnly: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/BookingStatusEnum'
+          readOnly: true
+        status_label:
+          type: string
+          readOnly: true
+        start_at:
+          type: string
+          format: date-time
+          readOnly: true
+        end_at:
+          type: string
+          format: date-time
+          readOnly: true
+        total_price:
+          type: integer
+          readOnly: true
+        deposit_amount:
+          type: integer
+          readOnly: true
+        discount_code:
+          type: integer
+          readOnly: true
+          nullable: true
+        discount_amount:
+          type: integer
+          readOnly: true
+        paid_amount:
+          type: integer
+          readOnly: true
+        remaining_amount:
+          type: integer
+          readOnly: true
+        notes:
+          type: string
+          readOnly: true
+        hold_expires_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        cancelled_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        cancellation_reason:
+          type: string
+          readOnly: true
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/BookingItem'
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - branch
+      - branch_name
+      - cancellation_reason
+      - cancelled_at
+      - created_at
+      - customer
+      - deposit_amount
+      - discount_amount
+      - discount_code
+      - end_at
+      - hold_expires_at
+      - id
+      - items
+      - notes
+      - paid_amount
+      - remaining_amount
+      - salon_name
+      - staff
+      - staff_name
+      - start_at
+      - status
+      - status_label
+      - total_price
+    BookingItem:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        branch_service:
+          type: integer
+        service_name:
+          type: string
+          readOnly: true
+        staff:
+          type: integer
+        staff_name:
+          type: string
+          readOnly: true
+        price:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+        duration_minutes:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+      required:
+      - branch_service
+      - duration_minutes
+      - id
+      - price
+      - service_name
+      - staff
+      - staff_name
+    BookingStatusEnum:
+      enum:
+      - pending_payment
+      - confirmed
+      - completed
+      - cancelled
+      - no_show
+      type: string
+      description: |-
+        * `pending_payment` - در انتظار پرداخت
+        * `confirmed` - تأییدشده
+        * `completed` - انجام‌شده
+        * `cancelled` - لغوشده
+        * `no_show` - عدم حضور
+    Branch:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        salon:
+          type: integer
+        salon_name:
+          type: string
+          readOnly: true
+        name:
+          type: string
+          default: شعبه مرکزی
+          title: نام شعبه
+          maxLength: 120
+        city:
+          type: integer
+        city_name:
+          type: string
+          readOnly: true
+        district:
+          type: integer
+          nullable: true
+        district_name:
+          type: string
+          readOnly: true
+        address:
+          type: string
+          title: نشانی
+        latitude:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,7})?$
+          nullable: true
+        longitude:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,7})?$
+          nullable: true
+        phone:
+          type: string
+          title: تلفن
+          maxLength: 16
+        working_hours:
+          title: ساعات کاری
+        amenities:
+          title: امکانات
+        slot_interval_minutes:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+          title: گام تقویم
+        preparation_buffer_minutes:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+          title: زمان آماده‌سازی
+        deposit_percent:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+          title: درصد بیعانه
+        is_active:
+          type: boolean
+          title: فعال
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: زمان ایجاد
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: آخرین ویرایش
+      required:
+      - address
+      - city
+      - city_name
+      - created_at
+      - district_name
+      - id
+      - phone
+      - salon
+      - salon_name
+      - updated_at
+    BranchService:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        branch:
+          type: integer
+        branch_name:
+          type: string
+          readOnly: true
+        service:
+          type: integer
+        service_name:
+          type: string
+          readOnly: true
+        category_name:
+          type: string
+          readOnly: true
+        price:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+          title: قیمت (تومان)
+        price_type:
+          allOf:
+          - $ref: '#/components/schemas/PriceTypeEnum'
+          title: نوع قیمت
+        price_type_label:
+          type: string
+          readOnly: true
+        duration_minutes:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+          title: مدت (دقیقه)
+        preparation_buffer_minutes:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+          nullable: true
+          title: زمان آماده‌سازی اختصاصی
+        is_active:
+          type: boolean
+          title: فعال
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - branch
+      - branch_name
+      - category_name
+      - created_at
+      - duration_minutes
+      - id
+      - price
+      - price_type_label
+      - service
+      - service_name
+      - updated_at
+    BranchSummary:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          title: نام شعبه
+          maxLength: 120
+        city_name:
+          type: string
+          readOnly: true
+        address:
+          type: string
+          title: نشانی
+        phone:
+          type: string
+          title: تلفن
+          maxLength: 16
+        is_active:
+          type: boolean
+          title: فعال
+      required:
+      - address
+      - city_name
+      - id
+      - phone
+    ChannelEnum:
+      enum:
+      - sms
+      - in_app
+      type: string
+      description: |-
+        * `sms` - پیامک
+        * `in_app` - داخل برنامه
+    City:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          title: نام شهر
+          maxLength: 100
+        slug:
+          type: string
+          title: شناسه URL
+          maxLength: 120
+          pattern: ^[-a-zA-Z0-9_]+$
+      required:
+      - id
+      - name
+      - slug
+    CreateHold:
+      type: object
+      properties:
+        branch:
+          type: integer
+        service_ids:
+          type: array
+          items:
+            type: integer
+            minimum: 1
+          minItems: 1
+        staff_id:
+          type: integer
+          minimum: 1
+        start_at:
+          type: string
+          format: date-time
+        notes:
+          type: string
+          maxLength: 1000
+      required:
+      - branch
+      - service_ids
+      - staff_id
+      - start_at
+    CreateManualBooking:
+      type: object
+      properties:
+        branch:
+          type: integer
+        service_ids:
+          type: array
+          items:
+            type: integer
+            minimum: 1
+          minItems: 1
+        staff_id:
+          type: integer
+          minimum: 1
+        start_at:
+          type: string
+          format: date-time
+        notes:
+          type: string
+          maxLength: 1000
+        customer_phone:
+          type: string
+          maxLength: 20
+        customer_name:
+          type: string
+          maxLength: 150
+      required:
+      - branch
+      - customer_phone
+      - service_ids
+      - staff_id
+      - start_at
+    CustomerProfile:
+      type: object
+      properties:
+        email:
+          title: ایمیل
+          oneOf:
+          - type: string
+            format: email
+            maxLength: 254
+          - type: string
+            maxLength: 0
+        birth_date:
+          type: string
+          format: date
+          nullable: true
+          title: تاریخ تولد
+        gender:
+          allOf:
+          - $ref: '#/components/schemas/GenderEnum'
+          title: جنسیت
+        avatar:
+          type: string
+          format: uri
+          nullable: true
+          title: تصویر
+    CustomerSummary:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        phone:
+          type: string
+        booking_count:
+          type: integer
+        total_spent:
+          type: integer
+        last_booking_at:
+          type: string
+          format: date-time
+          nullable: true
+      required:
+      - booking_count
+      - id
+      - last_booking_at
+      - name
+      - phone
+      - total_spent
+    DailyMetric:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+        bookings:
+          type: integer
+        revenue:
+          type: integer
+      required:
+      - bookings
+      - date
+      - revenue
+    DayOfWeekEnum:
+      enum:
+      - 0
+      - 1
+      - 2
+      - 3
+      - 4
+      - 5
+      - 6
+      type: integer
+      description: |-
+        * `0` - شنبه
+        * `1` - یکشنبه
+        * `2` - دوشنبه
+        * `3` - سه‌شنبه
+        * `4` - چهارشنبه
+        * `5` - پنجشنبه
+        * `6` - جمعه
+    DiscountCode:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        code:
+          type: string
+          maxLength: 32
+        salon:
+          type: integer
+          nullable: true
+          description: کد بدون سالن، سراسری است.
+        salon_name:
+          type: string
+          readOnly: true
+        type:
+          $ref: '#/components/schemas/DiscountCodeTypeEnum'
+        type_label:
+          type: string
+          readOnly: true
+        value:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+        minimum_purchase:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+        maximum_discount:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+          nullable: true
+        usage_limit:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+          nullable: true
+        used_count:
+          type: integer
+          readOnly: true
+        starts_at:
+          type: string
+          format: date-time
+        ends_at:
+          type: string
+          format: date-time
+        is_active:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - code
+      - created_at
+      - ends_at
+      - id
+      - salon_name
+      - starts_at
+      - type
+      - type_label
+      - used_count
+      - value
+    DiscountCodeTypeEnum:
+      enum:
+      - percent
+      - fixed
+      type: string
+      description: |-
+        * `percent` - درصدی
+        * `fixed` - مبلغ ثابت
+    District:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        city:
+          type: integer
+        city_name:
+          type: string
+          readOnly: true
+        name:
+          type: string
+          title: نام منطقه
+          maxLength: 100
+        slug:
+          type: string
+          title: شناسه URL
+          maxLength: 120
+          pattern: ^[-a-zA-Z0-9_]+$
+      required:
+      - city
+      - city_name
+      - id
+      - name
+      - slug
+    EventEnum:
+      enum:
+      - booking_confirmed
+      - booking_reminder
+      - booking_cancelled
+      type: string
+      description: |-
+        * `booking_confirmed` - تأیید رزرو
+        * `booking_reminder` - یادآوری رزرو
+        * `booking_cancelled` - لغو رزرو
+    FavoriteSalon:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        salon:
+          type: integer
+        salon_details:
+          allOf:
+          - $ref: '#/components/schemas/PublicSalonList'
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - id
+      - salon
+      - salon_details
+    GenderEnum:
+      enum:
+      - woman
+      - man
+      - not_specified
+      type: string
+      description: |-
+        * `woman` - زن
+        * `man` - مرد
+        * `not_specified` - ترجیح می‌دهم نگویم
+    HealthCheckResponse:
+      type: object
+      properties:
+        status:
+          type: string
+        database:
+          type: string
+      required:
+      - database
+      - status
+    Logout:
+      type: object
+      properties:
+        refresh:
+          type: string
+      required:
+      - refresh
+    Notification:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        booking:
+          type: integer
+        event:
+          $ref: '#/components/schemas/EventEnum'
+        event_label:
+          type: string
+          readOnly: true
+        channel:
+          $ref: '#/components/schemas/ChannelEnum'
+        status:
+          $ref: '#/components/schemas/NotificationStatusEnum'
+        status_label:
+          type: string
+          readOnly: true
+        customer_name:
+          type: string
+          readOnly: true
+        customer_phone:
+          type: string
+          readOnly: true
+        salon_name:
+          type: string
+          readOnly: true
+        message:
+          type: string
+          maxLength: 500
+        provider_ref:
+          type: string
+          maxLength: 120
+        error:
+          type: string
+          maxLength: 500
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        sent_at:
+          type: string
+          format: date-time
+          nullable: true
+      required:
+      - booking
+      - created_at
+      - customer_name
+      - customer_phone
+      - event
+      - event_label
+      - id
+      - message
+      - salon_name
+      - status_label
+    NotificationStatusEnum:
+      enum:
+      - pending
+      - sent
+      - failed
+      type: string
+      description: |-
+        * `pending` - در انتظار
+        * `sent` - ارسال‌شده
+        * `failed` - ناموفق
+    OTPRequest:
+      type: object
+      properties:
+        phone:
+          type: string
+          maxLength: 20
+      required:
+      - phone
+    OTPVerify:
+      type: object
+      properties:
+        phone:
+          type: string
+          maxLength: 20
+        code:
+          type: string
+          pattern: ^\d{6}$
+      required:
+      - code
+      - phone
+    PaginatedAdminCategoryList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdminCategory'
+    PaginatedAdminCityList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdminCity'
+    PaginatedAdminDistrictList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdminDistrict'
+    PaginatedAvailableSlotList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/AvailableSlot'
+    PaginatedBookingList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Booking'
+    PaginatedBranchList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Branch'
+    PaginatedBranchServiceList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/BranchService'
+    PaginatedCustomerSummaryList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/CustomerSummary'
+    PaginatedDiscountCodeList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/DiscountCode'
+    PaginatedFavoriteSalonList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/FavoriteSalon'
+    PaginatedNotificationList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Notification'
+    PaginatedPaymentList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Payment'
+    PaginatedPublicBranchList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/PublicBranch'
+    PaginatedPublicCategoryList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/PublicCategory'
+    PaginatedPublicSalonListList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/PublicSalonList'
+    PaginatedReviewList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Review'
+    PaginatedSalonImageList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/SalonImage'
+    PaginatedSalonList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Salon'
+    PaginatedServiceList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Service'
+    PaginatedStaffList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Staff'
+    PaginatedStaffServiceList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/StaffService'
+    PaginatedStaffShiftList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/StaffShift'
+    PaginatedStaffTimeOffList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/StaffTimeOff'
+    PaginatedSupportTicketList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/SupportTicket'
+    PaginatedUserList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/User'
+    PatchedAdminCategory:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          title: نام دسته‌بندی
+          maxLength: 120
+        slug:
+          type: string
+          title: شناسه URL
+          maxLength: 140
+          pattern: ^[-a-zA-Z0-9_]+$
+        parent:
+          type: integer
+          nullable: true
+        parent_name:
+          type: string
+          readOnly: true
+        icon:
+          type: string
+          title: نام آیکن
+          maxLength: 60
+        is_active:
+          type: boolean
+          title: فعال
+        sort_order:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+          title: ترتیب
+    PatchedAdminCity:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          title: نام شهر
+          maxLength: 100
+        slug:
+          type: string
+          title: شناسه URL
+          maxLength: 120
+          pattern: ^[-a-zA-Z0-9_]+$
+        is_active:
+          type: boolean
+          title: فعال
+    PatchedAdminDistrict:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        city:
+          type: integer
+        city_name:
+          type: string
+          readOnly: true
+        name:
+          type: string
+          title: نام منطقه
+          maxLength: 100
+        slug:
+          type: string
+          title: شناسه URL
+          maxLength: 120
+          pattern: ^[-a-zA-Z0-9_]+$
+        is_active:
+          type: boolean
+          title: فعال
+    PatchedBranch:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        salon:
+          type: integer
+        salon_name:
+          type: string
+          readOnly: true
+        name:
+          type: string
+          default: شعبه مرکزی
+          title: نام شعبه
+          maxLength: 120
+        city:
+          type: integer
+        city_name:
+          type: string
+          readOnly: true
+        district:
+          type: integer
+          nullable: true
+        district_name:
+          type: string
+          readOnly: true
+        address:
+          type: string
+          title: نشانی
+        latitude:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,7})?$
+          nullable: true
+        longitude:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,7})?$
+          nullable: true
+        phone:
+          type: string
+          title: تلفن
+          maxLength: 16
+        working_hours:
+          title: ساعات کاری
+        amenities:
+          title: امکانات
+        slot_interval_minutes:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+          title: گام تقویم
+        preparation_buffer_minutes:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+          title: زمان آماده‌سازی
+        deposit_percent:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+          title: درصد بیعانه
+        is_active:
+          type: boolean
+          title: فعال
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: زمان ایجاد
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: آخرین ویرایش
+    PatchedBranchService:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        branch:
+          type: integer
+        branch_name:
+          type: string
+          readOnly: true
+        service:
+          type: integer
+        service_name:
+          type: string
+          readOnly: true
+        category_name:
+          type: string
+          readOnly: true
+        price:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+          title: قیمت (تومان)
+        price_type:
+          allOf:
+          - $ref: '#/components/schemas/PriceTypeEnum'
+          title: نوع قیمت
+        price_type_label:
+          type: string
+          readOnly: true
+        duration_minutes:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+          title: مدت (دقیقه)
+        preparation_buffer_minutes:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+          nullable: true
+          title: زمان آماده‌سازی اختصاصی
+        is_active:
+          type: boolean
+          title: فعال
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+    PatchedDiscountCode:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        code:
+          type: string
+          maxLength: 32
+        salon:
+          type: integer
+          nullable: true
+          description: کد بدون سالن، سراسری است.
+        salon_name:
+          type: string
+          readOnly: true
+        type:
+          $ref: '#/components/schemas/DiscountCodeTypeEnum'
+        type_label:
+          type: string
+          readOnly: true
+        value:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+        minimum_purchase:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+        maximum_discount:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+          nullable: true
+        usage_limit:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+          nullable: true
+        used_count:
+          type: integer
+          readOnly: true
+        starts_at:
+          type: string
+          format: date-time
+        ends_at:
+          type: string
+          format: date-time
+        is_active:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+    PatchedSalon:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        owner:
+          type: integer
+          readOnly: true
+        owner_name:
+          type: string
+          readOnly: true
+        name:
+          type: string
+          title: نام سالن
+          maxLength: 180
+        slug:
+          type: string
+          title: شناسه URL
+          maxLength: 200
+          pattern: ^[-a-zA-Z0-9_]+$
+        type:
+          allOf:
+          - $ref: '#/components/schemas/SalonTypeEnum'
+          title: نوع سالن
+        type_label:
+          type: string
+          readOnly: true
+        description:
+          type: string
+          title: معرفی
+        status:
+          allOf:
+          - $ref: '#/components/schemas/SalonStatusEnum'
+          readOnly: true
+          title: وضعیت
+        status_label:
+          type: string
+          readOnly: true
+        rejection_reason:
+          type: string
+          readOnly: true
+          title: علت رد
+        branches:
+          type: array
+          items:
+            $ref: '#/components/schemas/BranchSummary'
+          readOnly: true
+        images:
+          type: array
+          items:
+            $ref: '#/components/schemas/SalonImage'
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: زمان ایجاد
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: آخرین ویرایش
+    PatchedService:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        salon:
+          type: integer
+          nullable: true
+          description: خالی بودن سالن یعنی خدمت مرکزی سامانه است.
+        salon_name:
+          type: string
+          readOnly: true
+        category:
+          type: integer
+        category_name:
+          type: string
+          readOnly: true
+        name:
+          type: string
+          title: نام خدمت
+          maxLength: 150
+        description:
+          type: string
+          title: توضیحات
+        is_active:
+          type: boolean
+          title: فعال
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+    PatchedStaff:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        branch:
+          type: integer
+        branch_name:
+          type: string
+          readOnly: true
+        user:
+          type: integer
+          nullable: true
+        first_name:
+          type: string
+          title: نام
+          maxLength: 80
+        last_name:
+          type: string
+          title: نام خانوادگی
+          maxLength: 100
+        full_name:
+          type: string
+          readOnly: true
+        photo:
+          type: string
+          format: uri
+          nullable: true
+          title: تصویر
+        bio:
+          type: string
+          title: معرفی
+        experience_years:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+          title: سال تجربه
+        is_active:
+          type: boolean
+          title: فعال
+        shifts:
+          type: array
+          items:
+            $ref: '#/components/schemas/StaffShift'
+          readOnly: true
+        staff_services:
+          type: array
+          items:
+            $ref: '#/components/schemas/StaffService'
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+    PatchedStaffService:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        staff:
+          type: integer
+        branch_service:
+          type: integer
+        service_name:
+          type: string
+          readOnly: true
+        price_override:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+          nullable: true
+          title: قیمت اختصاصی
+        duration_override_minutes:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+          nullable: true
+          title: مدت اختصاصی
+    PatchedStaffShift:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        staff:
+          type: integer
+        day_of_week:
+          allOf:
+          - $ref: '#/components/schemas/DayOfWeekEnum'
+          title: روز هفته
+          minimum: 0
+          maximum: 9223372036854775807
+        day_label:
+          type: string
+          readOnly: true
+        start_time:
+          type: string
+          format: time
+          nullable: true
+          title: شروع
+        end_time:
+          type: string
+          format: time
+          nullable: true
+          title: پایان
+        is_off:
+          type: boolean
+          title: تعطیل
+    PatchedStaffTimeOff:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        staff:
+          type: integer
+        starts_at:
+          type: string
+          format: date-time
+          title: شروع مرخصی
+        ends_at:
+          type: string
+          format: date-time
+          title: پایان مرخصی
+        reason:
+          type: string
+          title: علت
+          maxLength: 250
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+    PatchedSupportTicket:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        customer:
+          type: integer
+          readOnly: true
+        customer_name:
+          type: string
+          readOnly: true
+        customer_phone:
+          type: string
+          readOnly: true
+        assigned_to:
+          type: integer
+          nullable: true
+        assigned_to_name:
+          type: string
+          readOnly: true
+        subject:
+          type: string
+          maxLength: 180
+        message:
+          type: string
+          maxLength: 4000
+        response:
+          type: string
+          maxLength: 4000
+        status:
+          $ref: '#/components/schemas/SupportTicketStatusEnum'
+        status_label:
+          type: string
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+    PatchedUser:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        phone:
+          type: string
+          readOnly: true
+          title: شماره موبایل
+        name:
+          type: string
+          title: نام و نام خانوادگی
+          maxLength: 150
+        role:
+          allOf:
+          - $ref: '#/components/schemas/RoleEnum'
+          readOnly: true
+          title: نقش
+        role_label:
+          type: string
+          readOnly: true
+        profile:
+          $ref: '#/components/schemas/CustomerProfile'
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: زمان عضویت
+    Payment:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        booking:
+          type: integer
+          readOnly: true
+        customer_phone:
+          type: string
+          readOnly: true
+        salon_name:
+          type: string
+          readOnly: true
+        branch_name:
+          type: string
+          readOnly: true
+        amount:
+          type: integer
+          readOnly: true
+        type:
+          allOf:
+          - $ref: '#/components/schemas/PaymentTypeEnum'
+          readOnly: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/PaymentStatusEnum'
+          readOnly: true
+        method:
+          allOf:
+          - $ref: '#/components/schemas/PaymentMethodEnum'
+          readOnly: true
+        provider:
+          type: string
+          readOnly: true
+        gateway_ref:
+          type: string
+          readOnly: true
+        redirect_url:
+          type: string
+          readOnly: true
+        paid_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - amount
+      - booking
+      - branch_name
+      - created_at
+      - customer_phone
+      - gateway_ref
+      - id
+      - method
+      - paid_at
+      - provider
+      - redirect_url
+      - salon_name
+      - status
+      - type
+    PaymentMethodEnum:
+      enum:
+      - online
+      - cash
+      - wallet
+      type: string
+      description: |-
+        * `online` - آنلاین
+        * `cash` - نقدی
+        * `wallet` - کیف پول
+    PaymentStatusEnum:
+      enum:
+      - pending
+      - paid
+      - failed
+      - refunded
+      type: string
+      description: |-
+        * `pending` - در انتظار
+        * `paid` - پرداخت‌شده
+        * `failed` - ناموفق
+        * `refunded` - بازپرداخت‌شده
+    PaymentTypeEnum:
+      enum:
+      - deposit
+      - full
+      - remainder
+      type: string
+      description: |-
+        * `deposit` - بیعانه
+        * `full` - پرداخت کامل
+        * `remainder` - مانده
+    PriceTypeEnum:
+      enum:
+      - fixed
+      - starting_from
+      type: string
+      description: |-
+        * `fixed` - ثابت
+        * `starting_from` - شروع از
+    PublicBranch:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          title: نام شعبه
+          maxLength: 120
+        city_name:
+          type: string
+          readOnly: true
+        district_name:
+          type: string
+          readOnly: true
+        address:
+          type: string
+          title: نشانی
+        latitude:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,7})?$
+          nullable: true
+        longitude:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,7})?$
+          nullable: true
+        phone:
+          type: string
+          title: تلفن
+          maxLength: 16
+        working_hours:
+          title: ساعات کاری
+        amenities:
+          title: امکانات
+        services:
+          type: array
+          items:
+            $ref: '#/components/schemas/PublicBranchService'
+          readOnly: true
+        staff:
+          type: array
+          items:
+            $ref: '#/components/schemas/PublicStaff'
+          readOnly: true
+      required:
+      - address
+      - city_name
+      - district_name
+      - id
+      - phone
+      - services
+      - staff
+    PublicBranchService:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        service_name:
+          type: string
+          readOnly: true
+        description:
+          type: string
+          readOnly: true
+        category_id:
+          type: integer
+          readOnly: true
+        category_name:
+          type: string
+          readOnly: true
+        price:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+          title: قیمت (تومان)
+        price_type:
+          allOf:
+          - $ref: '#/components/schemas/PriceTypeEnum'
+          title: نوع قیمت
+        price_type_label:
+          type: string
+          readOnly: true
+        duration_minutes:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+          title: مدت (دقیقه)
+      required:
+      - category_id
+      - category_name
+      - description
+      - duration_minutes
+      - id
+      - price
+      - price_type_label
+      - service_name
+    PublicCategory:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          title: نام دسته‌بندی
+          maxLength: 120
+        slug:
+          type: string
+          title: شناسه URL
+          maxLength: 140
+          pattern: ^[-a-zA-Z0-9_]+$
+        icon:
+          type: string
+          title: نام آیکن
+          maxLength: 60
+        service_count:
+          type: integer
+          readOnly: true
+        salon_count:
+          type: integer
+          readOnly: true
+      required:
+      - id
+      - name
+      - salon_count
+      - service_count
+      - slug
+    PublicSalonDetail:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          title: نام سالن
+          maxLength: 180
+        slug:
+          type: string
+          title: شناسه URL
+          maxLength: 200
+          pattern: ^[-a-zA-Z0-9_]+$
+        type:
+          allOf:
+          - $ref: '#/components/schemas/SalonTypeEnum'
+          title: نوع سالن
+        type_label:
+          type: string
+          readOnly: true
+        description:
+          type: string
+          title: معرفی
+        rating_average:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,1}(?:\.\d{0,2})?$
+          title: میانگین امتیاز
+        review_count:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+          title: تعداد نظر
+        is_featured:
+          type: boolean
+          title: پیشنهاد ویژه
+        city:
+          type: string
+          readOnly: true
+        district:
+          type: string
+          readOnly: true
+        cover_image:
+          type: string
+          nullable: true
+          readOnly: true
+        min_price:
+          type: integer
+          nullable: true
+          readOnly: true
+        is_favorite:
+          type: boolean
+          readOnly: true
+        images:
+          type: array
+          items:
+            $ref: '#/components/schemas/PublicSalonImage'
+          readOnly: true
+        branches:
+          type: array
+          items:
+            $ref: '#/components/schemas/PublicBranch'
+          readOnly: true
+      required:
+      - branches
+      - city
+      - cover_image
+      - district
+      - id
+      - images
+      - is_favorite
+      - min_price
+      - name
+      - slug
+      - type
+      - type_label
+    PublicSalonImage:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        image:
+          type: string
+          format: uri
+        alt_text:
+          type: string
+          title: متن جایگزین
+          maxLength: 180
+        is_cover:
+          type: boolean
+          title: تصویر اصلی
+      required:
+      - id
+      - image
+    PublicSalonList:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          title: نام سالن
+          maxLength: 180
+        slug:
+          type: string
+          title: شناسه URL
+          maxLength: 200
+          pattern: ^[-a-zA-Z0-9_]+$
+        type:
+          allOf:
+          - $ref: '#/components/schemas/SalonTypeEnum'
+          title: نوع سالن
+        type_label:
+          type: string
+          readOnly: true
+        description:
+          type: string
+          title: معرفی
+        rating_average:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,1}(?:\.\d{0,2})?$
+          title: میانگین امتیاز
+        review_count:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+          title: تعداد نظر
+        is_featured:
+          type: boolean
+          title: پیشنهاد ویژه
+        city:
+          type: string
+          readOnly: true
+        district:
+          type: string
+          readOnly: true
+        cover_image:
+          type: string
+          nullable: true
+          readOnly: true
+        min_price:
+          type: integer
+          nullable: true
+          readOnly: true
+        is_favorite:
+          type: boolean
+          readOnly: true
+      required:
+      - city
+      - cover_image
+      - district
+      - id
+      - is_favorite
+      - min_price
+      - name
+      - slug
+      - type
+      - type_label
+    PublicStaff:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        full_name:
+          type: string
+          readOnly: true
+        photo:
+          type: string
+          format: uri
+          nullable: true
+          title: تصویر
+        bio:
+          type: string
+          title: معرفی
+        experience_years:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+          title: سال تجربه
+      required:
+      - full_name
+      - id
+    RecordRemainderPayment:
+      type: object
+      properties:
+        booking:
+          type: integer
+          minimum: 1
+        method:
+          allOf:
+          - $ref: '#/components/schemas/RecordRemainderPaymentMethodEnum'
+          default: cash
+      required:
+      - booking
+    RecordRemainderPaymentMethodEnum:
+      enum:
+      - cash
+      type: string
+      description: '* `cash` - cash'
+    ReportSummary:
+      type: object
+      properties:
+        date_from:
+          type: string
+          format: date
+        date_to:
+          type: string
+          format: date
+        gross_revenue:
+          type: integer
+        commission:
+          type: integer
+        net_revenue:
+          type: integer
+        booking_count:
+          type: integer
+        completed_count:
+          type: integer
+        cancelled_count:
+          type: integer
+        no_show_count:
+          type: integer
+        average_booking_value:
+          type: integer
+        daily:
+          type: array
+          items:
+            $ref: '#/components/schemas/DailyMetric'
+        top_services:
+          type: array
+          items:
+            $ref: '#/components/schemas/TopService'
+      required:
+      - average_booking_value
+      - booking_count
+      - cancelled_count
+      - commission
+      - completed_count
+      - daily
+      - date_from
+      - date_to
+      - gross_revenue
+      - net_revenue
+      - no_show_count
+      - top_services
+    Review:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        booking:
+          type: integer
+        customer_name:
+          type: string
+          readOnly: true
+        salon:
+          type: integer
+          readOnly: true
+        salon_name:
+          type: string
+          readOnly: true
+        staff:
+          type: integer
+          readOnly: true
+          nullable: true
+        staff_name:
+          type: string
+          readOnly: true
+        overall_rating:
+          type: integer
+          maximum: 5
+          minimum: 1
+        quality_rating:
+          type: integer
+          maximum: 5
+          minimum: 1
+        cleanliness_rating:
+          type: integer
+          maximum: 5
+          minimum: 1
+        behavior_rating:
+          type: integer
+          maximum: 5
+          minimum: 1
+        value_rating:
+          type: integer
+          maximum: 5
+          minimum: 1
+        comment:
+          type: string
+          maxLength: 2000
+        status:
+          allOf:
+          - $ref: '#/components/schemas/ReviewStatusEnum'
+          readOnly: true
+        status_label:
+          type: string
+          readOnly: true
+        images:
+          type: array
+          items:
+            $ref: '#/components/schemas/ReviewImage'
+          readOnly: true
+        uploaded_images:
+          type: array
+          items:
+            type: string
+            format: uri
+          writeOnly: true
+          maxItems: 5
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - behavior_rating
+      - booking
+      - cleanliness_rating
+      - comment
+      - created_at
+      - customer_name
+      - id
+      - images
+      - overall_rating
+      - quality_rating
+      - salon
+      - salon_name
+      - staff
+      - staff_name
+      - status
+      - status_label
+    ReviewImage:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        image:
+          type: string
+          format: uri
+      required:
+      - id
+      - image
+    ReviewModeration:
+      type: object
+      properties:
+        status:
+          $ref: '#/components/schemas/ReviewStatusEnum'
+      required:
+      - status
+    ReviewStatusEnum:
+      enum:
+      - pending
+      - published
+      - hidden
+      type: string
+      description: |-
+        * `pending` - در انتظار بررسی
+        * `published` - منتشرشده
+        * `hidden` - مخفی
+    RoleEnum:
+      enum:
+      - customer
+      - salon_owner
+      - branch_manager
+      - receptionist
+      - staff
+      - admin
+      - support
+      - finance
+      type: string
+      description: |-
+        * `customer` - مشتری
+        * `salon_owner` - مالک سالن
+        * `branch_manager` - مدیر شعبه
+        * `receptionist` - پذیرش
+        * `staff` - آرایشگر
+        * `admin` - مدیر کل
+        * `support` - پشتیبانی
+        * `finance` - مالی
+    Salon:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        owner:
+          type: integer
+          readOnly: true
+        owner_name:
+          type: string
+          readOnly: true
+        name:
+          type: string
+          title: نام سالن
+          maxLength: 180
+        slug:
+          type: string
+          title: شناسه URL
+          maxLength: 200
+          pattern: ^[-a-zA-Z0-9_]+$
+        type:
+          allOf:
+          - $ref: '#/components/schemas/SalonTypeEnum'
+          title: نوع سالن
+        type_label:
+          type: string
+          readOnly: true
+        description:
+          type: string
+          title: معرفی
+        status:
+          allOf:
+          - $ref: '#/components/schemas/SalonStatusEnum'
+          readOnly: true
+          title: وضعیت
+        status_label:
+          type: string
+          readOnly: true
+        rejection_reason:
+          type: string
+          readOnly: true
+          title: علت رد
+        branches:
+          type: array
+          items:
+            $ref: '#/components/schemas/BranchSummary'
+          readOnly: true
+        images:
+          type: array
+          items:
+            $ref: '#/components/schemas/SalonImage'
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: زمان ایجاد
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: آخرین ویرایش
+      required:
+      - branches
+      - created_at
+      - id
+      - images
+      - name
+      - owner
+      - owner_name
+      - rejection_reason
+      - status
+      - status_label
+      - type
+      - type_label
+      - updated_at
+    SalonImage:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        salon:
+          type: integer
+        image:
+          type: string
+          format: uri
+        alt_text:
+          type: string
+          title: متن جایگزین
+          maxLength: 180
+        is_cover:
+          type: boolean
+          title: تصویر اصلی
+        sort_order:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+          title: ترتیب
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - id
+      - image
+      - salon
+    SalonStatusEnum:
+      enum:
+      - draft
+      - pending
+      - approved
+      - rejected
+      - suspended
+      type: string
+      description: |-
+        * `draft` - پیش‌نویس
+        * `pending` - در انتظار بررسی
+        * `approved` - تأییدشده
+        * `rejected` - ردشده
+        * `suspended` - تعلیق‌شده
+    SalonTypeEnum:
+      enum:
+      - women
+      - men
+      - unisex
+      type: string
+      description: |-
+        * `women` - زنانه
+        * `men` - مردانه
+        * `unisex` - مشترک
+    Service:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        salon:
+          type: integer
+          nullable: true
+          description: خالی بودن سالن یعنی خدمت مرکزی سامانه است.
+        salon_name:
+          type: string
+          readOnly: true
+        category:
+          type: integer
+        category_name:
+          type: string
+          readOnly: true
+        name:
+          type: string
+          title: نام خدمت
+          maxLength: 150
+        description:
+          type: string
+          title: توضیحات
+        is_active:
+          type: boolean
+          title: فعال
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - category
+      - category_name
+      - created_at
+      - id
+      - name
+      - salon_name
+      - updated_at
+    ServiceCategory:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          title: نام دسته‌بندی
+          maxLength: 120
+        slug:
+          type: string
+          title: شناسه URL
+          maxLength: 140
+          pattern: ^[-a-zA-Z0-9_]+$
+        parent:
+          type: integer
+          nullable: true
+        parent_name:
+          type: string
+          readOnly: true
+        icon:
+          type: string
+          title: نام آیکن
+          maxLength: 60
+        sort_order:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+          title: ترتیب
+      required:
+      - id
+      - name
+      - parent_name
+      - slug
+    Settlement:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        amount:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+        status:
+          allOf:
+          - $ref: '#/components/schemas/SettlementStatusEnum'
+          readOnly: true
+        bank_account:
+          type: string
+          maxLength: 40
+        note:
+          type: string
+          readOnly: true
+        owner_name:
+          type: string
+          readOnly: true
+        owner_phone:
+          type: string
+          readOnly: true
+        requested_at:
+          type: string
+          format: date-time
+          readOnly: true
+        processed_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+      required:
+      - amount
+      - bank_account
+      - id
+      - note
+      - owner_name
+      - owner_phone
+      - processed_at
+      - requested_at
+      - status
+    SettlementProcess:
+      type: object
+      properties:
+        status:
+          $ref: '#/components/schemas/SettlementProcessStatusEnum'
+        note:
+          type: string
+          maxLength: 500
+      required:
+      - status
+    SettlementProcessStatusEnum:
+      enum:
+      - paid
+      - rejected
+      type: string
+      description: |-
+        * `paid` - paid
+        * `rejected` - rejected
+    SettlementRequest:
+      type: object
+      properties:
+        amount:
+          type: integer
+          minimum: 1
+        bank_account:
+          type: string
+          maxLength: 40
+      required:
+      - amount
+      - bank_account
+    SettlementStatusEnum:
+      enum:
+      - requested
+      - paid
+      - rejected
+      type: string
+      description: |-
+        * `requested` - درخواست‌شده
+        * `paid` - واریزشده
+        * `rejected` - ردشده
+    Staff:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        branch:
+          type: integer
+        branch_name:
+          type: string
+          readOnly: true
+        user:
+          type: integer
+          nullable: true
+        first_name:
+          type: string
+          title: نام
+          maxLength: 80
+        last_name:
+          type: string
+          title: نام خانوادگی
+          maxLength: 100
+        full_name:
+          type: string
+          readOnly: true
+        photo:
+          type: string
+          format: uri
+          nullable: true
+          title: تصویر
+        bio:
+          type: string
+          title: معرفی
+        experience_years:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+          title: سال تجربه
+        is_active:
+          type: boolean
+          title: فعال
+        shifts:
+          type: array
+          items:
+            $ref: '#/components/schemas/StaffShift'
+          readOnly: true
+        staff_services:
+          type: array
+          items:
+            $ref: '#/components/schemas/StaffService'
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - branch
+      - branch_name
+      - created_at
+      - first_name
+      - full_name
+      - id
+      - last_name
+      - shifts
+      - staff_services
+      - updated_at
+    StaffService:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        staff:
+          type: integer
+        branch_service:
+          type: integer
+        service_name:
+          type: string
+          readOnly: true
+        price_override:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+          nullable: true
+          title: قیمت اختصاصی
+        duration_override_minutes:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+          nullable: true
+          title: مدت اختصاصی
+      required:
+      - branch_service
+      - id
+      - service_name
+      - staff
+    StaffShift:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        staff:
+          type: integer
+        day_of_week:
+          allOf:
+          - $ref: '#/components/schemas/DayOfWeekEnum'
+          title: روز هفته
+          minimum: 0
+          maximum: 9223372036854775807
+        day_label:
+          type: string
+          readOnly: true
+        start_time:
+          type: string
+          format: time
+          nullable: true
+          title: شروع
+        end_time:
+          type: string
+          format: time
+          nullable: true
+          title: پایان
+        is_off:
+          type: boolean
+          title: تعطیل
+      required:
+      - day_label
+      - day_of_week
+      - id
+      - staff
+    StaffTimeOff:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        staff:
+          type: integer
+        starts_at:
+          type: string
+          format: date-time
+          title: شروع مرخصی
+        ends_at:
+          type: string
+          format: date-time
+          title: پایان مرخصی
+        reason:
+          type: string
+          title: علت
+          maxLength: 250
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - ends_at
+      - id
+      - staff
+      - starts_at
+    StartPayment:
+      type: object
+      properties:
+        booking:
+          type: integer
+          minimum: 1
+        type:
+          $ref: '#/components/schemas/StartPaymentTypeEnum'
+        discount_code:
+          type: string
+          maxLength: 32
+      required:
+      - booking
+      - type
+    StartPaymentTypeEnum:
+      enum:
+      - deposit
+      - full
+      type: string
+      description: |-
+        * `deposit` - deposit
+        * `full` - full
+    SupportTicket:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        customer:
+          type: integer
+          readOnly: true
+        customer_name:
+          type: string
+          readOnly: true
+        customer_phone:
+          type: string
+          readOnly: true
+        assigned_to:
+          type: integer
+          nullable: true
+        assigned_to_name:
+          type: string
+          readOnly: true
+        subject:
+          type: string
+          maxLength: 180
+        message:
+          type: string
+          maxLength: 4000
+        response:
+          type: string
+          maxLength: 4000
+        status:
+          $ref: '#/components/schemas/SupportTicketStatusEnum'
+        status_label:
+          type: string
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - assigned_to_name
+      - created_at
+      - customer
+      - customer_name
+      - customer_phone
+      - id
+      - message
+      - status_label
+      - subject
+      - updated_at
+    SupportTicketStatusEnum:
+      enum:
+      - open
+      - in_progress
+      - resolved
+      - closed
+      type: string
+      description: |-
+        * `open` - باز
+        * `in_progress` - در حال بررسی
+        * `resolved` - حل‌شده
+        * `closed` - بسته
+    TokenRefresh:
+      type: object
+      properties:
+        access:
+          type: string
+          readOnly: true
+        refresh:
+          type: string
+      required:
+      - access
+      - refresh
+    TopService:
+      type: object
+      properties:
+        service_name:
+          type: string
+        count:
+          type: integer
+        revenue:
+          type: integer
+      required:
+      - count
+      - revenue
+      - service_name
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        phone:
+          type: string
+          readOnly: true
+          title: شماره موبایل
+        name:
+          type: string
+          title: نام و نام خانوادگی
+          maxLength: 150
+        role:
+          allOf:
+          - $ref: '#/components/schemas/RoleEnum'
+          readOnly: true
+          title: نقش
+        role_label:
+          type: string
+          readOnly: true
+        profile:
+          $ref: '#/components/schemas/CustomerProfile'
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: زمان عضویت
+      required:
+      - created_at
+      - id
+      - phone
+      - role
+      - role_label
+    Wallet:
+      type: object
+      properties:
+        balance:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        transactions:
+          type: array
+          items:
+            $ref: '#/components/schemas/WalletTransaction'
+          readOnly: true
+      required:
+      - transactions
+      - updated_at
+    WalletTransaction:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        amount:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+          description: مبلغ مثبت برای بستانکار و منفی برای بدهکار
+        type:
+          $ref: '#/components/schemas/WalletTransactionTypeEnum'
+        type_label:
+          type: string
+          readOnly: true
+        related_booking:
+          type: integer
+          nullable: true
+        description:
+          type: string
+          maxLength: 300
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - amount
+      - created_at
+      - id
+      - type
+      - type_label
+    WalletTransactionTypeEnum:
+      enum:
+      - refund
+      - salon_earning
+      - commission
+      - settlement
+      - adjustment
+      type: string
+      description: |-
+        * `refund` - بازپرداخت
+        * `salon_earning` - درآمد سالن
+        * `commission` - کارمزد سامانه
+        * `settlement` - تسویه
+        * `adjustment` - اصلاح دستی
+  securitySchemes:
+    jwtAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

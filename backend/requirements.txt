@@ -1,0 +1,4 @@
+-r requirements-production.txt
+pytest==9.1.1
+pytest-django==4.13.0
+ruff==0.16.1
