@@ -34,12 +34,11 @@ if settings.DEBUG:
 elif settings.SERVE_MEDIA_FILES:
     urlpatterns += [path("media/<path:path>", serve, {"document_root": settings.MEDIA_ROOT})]
 
-if (settings.FRONTEND_DIST / "index.html").exists():
-    urlpatterns += [
-        path("", TemplateView.as_view(template_name="index.html"), name="frontend-home"),
-        re_path(
-            r"^(?!api/|django-admin/|media/|static/).*$",
-            TemplateView.as_view(template_name="index.html"),
-            name="frontend-spa",
-        ),
-    ]
+urlpatterns += [
+    path("", TemplateView.as_view(template_name="index.html"), name="frontend-home"),
+    re_path(
+        r"^(?!api/|django-admin/|media/|static/).*$",
+        TemplateView.as_view(template_name="index.html"),
+        name="frontend-spa",
+    ),
+]

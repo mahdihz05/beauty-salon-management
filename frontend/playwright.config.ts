@@ -6,13 +6,19 @@ process.env.no_proxy = process.env.NO_PROXY;
 delete process.env.HTTP_PROXY;
 delete process.env.http_proxy;
 
+const frontendPort = Number(process.env.E2E_FRONTEND_PORT ?? "5173");
+const backendPort = Number(process.env.E2E_BACKEND_PORT ?? "8000");
+const frontendUrl = `http://127.0.0.1:${frontendPort}`;
+const backendUrl = `http://127.0.0.1:${backendPort}`;
+process.env.VITE_DEV_API_PROXY = backendUrl;
+
 export default defineConfig({
   testDir: "./e2e",
   fullyParallel: false,
   retries: 0,
   reporter: "list",
   use: {
-    baseURL: "http://127.0.0.1:5173",
+    baseURL: frontendUrl,
     channel: "msedge",
     screenshot: "only-on-failure",
     trace: "retain-on-failure",
@@ -23,15 +29,14 @@ export default defineConfig({
   ],
   webServer: [
     {
-      command:
-        "..\\backend\\.venv\\Scripts\\python.exe ..\\backend\\manage.py seed_demo && ..\\backend\\.venv\\Scripts\\python.exe ..\\backend\\manage.py runserver 127.0.0.1:8000 --noreload",
-      url: "http://127.0.0.1:8000/api/health/",
+      command: `..\\backend\\.venv\\Scripts\\python.exe ..\\backend\\manage.py seed_demo && ..\\backend\\.venv\\Scripts\\python.exe ..\\backend\\manage.py runserver 127.0.0.1:${backendPort} --noreload`,
+      url: `${backendUrl}/api/health/`,
       reuseExistingServer: false,
       timeout: 30_000,
     },
     {
-      command: "npm run dev -- --host 127.0.0.1 --port 5173",
-      url: "http://127.0.0.1:5173",
+      command: `npm run dev -- --host 127.0.0.1 --port ${frontendPort}`,
+      url: frontendUrl,
       reuseExistingServer: false,
       timeout: 30_000,
     },

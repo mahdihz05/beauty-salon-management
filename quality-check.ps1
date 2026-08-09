@@ -29,6 +29,17 @@ Invoke-Checked { npm --prefix $frontendPath run format:check }
 Invoke-Checked { npm --prefix $frontendPath run build }
 Invoke-Checked { npm --prefix $frontendPath audit --omit=dev }
 $env:DJANGO_DEBUG = 'true'
+$e2eBackendPort = 8000..8010 | Where-Object {
+    -not (Get-NetTCPConnection -State Listen -LocalPort $_ -ErrorAction SilentlyContinue)
+} | Select-Object -First 1
+$e2eFrontendPort = 5173..5190 | Where-Object {
+    -not (Get-NetTCPConnection -State Listen -LocalPort $_ -ErrorAction SilentlyContinue)
+} | Select-Object -First 1
+if (-not $e2eBackendPort -or -not $e2eFrontendPort) {
+    throw 'No free ports are available for the E2E servers.'
+}
+$env:E2E_BACKEND_PORT = [string]$e2eBackendPort
+$env:E2E_FRONTEND_PORT = [string]$e2eFrontendPort
 Invoke-Checked { npm --prefix $frontendPath run test:e2e }
 
 Write-Host 'All quality checks passed.' -ForegroundColor Green

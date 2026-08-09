@@ -18,6 +18,9 @@ frontend/.env
 frontend/playwright-report/
 frontend/test-results/
 deployment-build/
+artifacts/
+test-results/
+delivery/.review/
 *.tsbuildinfo
 
 # IDE / OS

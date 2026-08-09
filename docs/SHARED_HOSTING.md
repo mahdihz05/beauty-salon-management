@@ -44,7 +44,7 @@ REBUILD_FRONTEND=true bash deploy-shared-host.sh
 - `/` رابط React
 - `/api/health/` پاسخ سلامت SQLite
 - `/api/docs/` مستندات API
-- `/admin/` مدیریت داخلی Django
+- `/django-admin/` مدیریت داخلی Django
 - یک مسیر عمیق مانند `/salons/demo-rose-gold` بدون خطای 404
 
 ## نکات ضروری هاست اشتراکی

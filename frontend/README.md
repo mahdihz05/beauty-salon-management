@@ -1,32 +1,22 @@
-# React + TypeScript + Vite
+# رابط کاربری نوبت‌آرا
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+فرانت‌اند نوبت‌آرا با React 19، TypeScript و Vite پیاده‌سازی شده و تمام صفحات عمومی، حساب مشتری، رزرو، پنل سالن و پنل مدیر کل را پوشش می‌دهد.
 
-Currently, two official plugins are available:
+## فرمان‌ها
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
-
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the Oxlint configuration
-
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
-
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+```powershell
+npm install
+npm run dev
+npm run typecheck
+npm run lint
+npm test
+npm run format:check
+npm run build
+npm run test:e2e
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+در حالت توسعه، درخواست‌های `/api` و `/media` توسط Vite به بک‌اند هدایت می‌شوند. آدرس قابل‌تنظیم پروکسی از متغیر `VITE_DEV_API_PROXY` و آدرس API مستقیم از `VITE_API_URL` خوانده می‌شود.
+
+دارایی‌های برند در `public/brand/` و کد برنامه در `src/` قرار دارند. آزمون‌های مرورگری در `e2e/` نگهداری می‌شوند.
+
+راهنمای کامل نصب، نقش‌ها، داده دمو، کنترل کیفیت و استقرار در [README ریشه پروژه](../README.md) قرار دارد.
