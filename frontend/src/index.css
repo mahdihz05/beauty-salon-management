@@ -1882,15 +1882,6 @@ p {
   min-height: 38px;
   border: 0;
 }
-.explore-toolbar button {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  color: var(--primary);
-  border: 0;
-  background: none;
-  cursor: pointer;
-}
 .explore-layout {
   display: grid;
   grid-template-columns: 270px 1fr;
@@ -2330,9 +2321,6 @@ p {
     min-width: 0;
     flex: 1;
     font-size: 16px;
-  }
-  .explore-toolbar button {
-    display: none;
   }
   .explore-layout {
     display: block;

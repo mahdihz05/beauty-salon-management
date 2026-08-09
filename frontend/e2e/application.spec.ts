@@ -33,11 +33,16 @@ test("public customer journey renders live demo data", async ({ page }) => {
   await page.locator(".category-strip a").nth(2).click();
   await expect(page).toHaveURL(/\/salons\?category=\d+$/);
   await expect(page.locator(".explore-results article").first()).toBeVisible();
+  await expect(page.getByText("نمایش روی نقشه")).toHaveCount(0);
   await expectNoHorizontalOverflow(page);
 
   await page.goto("/salons/demo-rose-gold");
   await expect(page.locator("h1")).toContainText("سالن رزگلد");
   await expect(page.locator(".public-service-row").first()).toBeVisible();
+  await expect(page.locator(".salon-info-card")).toContainText("آدرس");
+  await expect(page.locator(".salon-info-card p").first()).not.toContainText(
+    "ثبت نشده",
+  );
   await expectNoHorizontalOverflow(page);
 });
 

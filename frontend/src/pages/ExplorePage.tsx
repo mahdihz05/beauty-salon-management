@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { ChevronDown, ListFilter, Map, RotateCcw, Search } from "lucide-react";
+import { ChevronDown, ListFilter, RotateCcw, Search } from "lucide-react";
 import { useMemo, useState } from "react";
 import { api, getApiError } from "../api/client";
 import { MobileBottomNav, PublicHeader } from "../components/PublicHeader";
@@ -62,9 +62,6 @@ export function ExplorePage() {
               <option value="-created_at">جدیدترین</option>
             </select>
           </label>
-          <button>
-            <Map /> نمایش روی نقشه
-          </button>
         </div>
         <div className="explore-layout">
           <button
