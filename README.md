@@ -218,9 +218,11 @@ backend\.venv\Scripts\python.exe backend\manage.py process_booking_tasks
 ### سرور فعلی دمو
 
 - آدرس: `http://141.11.1.223:8020/`
-- سرویس مستقل Gunicorn روی پورت `8020`؛
+- Nginx روی پورت عمومی `8020` با gzip، keep-alive و cache فایل‌های استاتیک؛
+- Gunicorn داخلی روی `127.0.0.1:8021` با دو worker و threadهای هم‌زمان؛
 - دیتابیس پایدار خارج از مسیر Git؛
-- build فرانت‌اند توسط Django و WhiteNoise ارائه می‌شود.
+- build فرانت‌اند و media مستقیماً توسط Nginx ارائه می‌شوند و فقط API به Django می‌رود؛
+- نمونه تنظیمات پایدار Nginx و systemd در پوشه `deployment/` نگهداری می‌شود.
 
 ## ساختار پروژه
 
@@ -230,6 +232,7 @@ beauty-salon-management/
 ├── frontend/                React / TypeScript
 ├── docs/                    راهنماهای فنی و تحویل
 ├── delivery/                خروجی قابل‌ارسال برای کارفرما
+├── deployment/              تنظیمات Nginx و systemd سرور VPS
 ├── build-deployment-package.ps1
 ├── quality-check.ps1
 ├── setup.ps1

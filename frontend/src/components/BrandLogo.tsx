@@ -19,7 +19,9 @@ export function BrandLogo({
     >
       <img
         className="brand-logo-mark"
-        src="/brand/nobatara-mark.png"
+        src="/brand/nobatara-icon-192.png"
+        width="192"
+        height="192"
         alt=""
         aria-hidden="true"
       />
