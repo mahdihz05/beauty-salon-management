@@ -14,6 +14,7 @@ backend/.env
 # Node
 frontend/node_modules/
 frontend/dist/
+frontend/dist-responsive-audit/
 frontend/.env
 frontend/playwright-report/
 frontend/test-results/

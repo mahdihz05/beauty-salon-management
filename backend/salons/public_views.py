@@ -1,8 +1,12 @@
-from django.db.models import Count, Min, Prefetch, Q
+import hashlib
+
+from django.core.cache import cache
+from django.db.models import Count, Exists, Min, OuterRef, Prefetch, Q
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 from rest_framework import mixins, viewsets
 from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.response import Response
 
 from accounts.models import FavoriteSalon
 
@@ -91,12 +95,34 @@ class PublicSalonViewSet(viewsets.ReadOnlyModelViewSet):
                 Prefetch("staff", queryset=active_staff),
             )
         )
-        return (
+        queryset = (
             Salon.objects.filter(status=Salon.Status.APPROVED)
             .annotate(min_price=Min("branches__branch_services__price"))
-            .prefetch_related(Prefetch("branches", queryset=branches), "images", "favorited_by")
+            .prefetch_related(Prefetch("branches", queryset=branches), "images")
             .distinct()
         )
+        if self.request.user.is_authenticated:
+            queryset = queryset.annotate(
+                _is_favorite=Exists(
+                    FavoriteSalon.objects.filter(
+                        salon_id=OuterRef("pk"), user=self.request.user
+                    )
+                )
+            )
+        return queryset
+
+    def list(self, request, *args, **kwargs):
+        if request.user.is_authenticated:
+            return super().list(request, *args, **kwargs)
+        raw_key = f"{request.get_host()}:{request.get_full_path()}"
+        cache_key = f"public-salons:{hashlib.sha256(raw_key.encode()).hexdigest()}"
+        cached = cache.get(cache_key)
+        if cached is not None:
+            return Response(cached)
+        response = super().list(request, *args, **kwargs)
+        if response.status_code == 200:
+            cache.set(cache_key, response.data, 60)
+        return response
 
 
 class FavoriteSalonViewSet(

@@ -131,6 +131,9 @@ class PublicSalonListSerializer(serializers.ModelSerializer):
 
     def get_is_favorite(self, obj) -> bool:
         request = self.context.get("request")
+        annotated = getattr(obj, "_is_favorite", None)
+        if annotated is not None:
+            return bool(annotated)
         return bool(
             request
             and request.user.is_authenticated

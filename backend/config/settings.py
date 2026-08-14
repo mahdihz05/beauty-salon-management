@@ -3,6 +3,7 @@
 import os
 from datetime import timedelta
 from pathlib import Path
+from tempfile import gettempdir
 
 from django.core.exceptions import ImproperlyConfigured
 from dotenv import load_dotenv
@@ -163,13 +164,27 @@ REST_FRAMEWORK = {
     "TEST_REQUEST_DEFAULT_FORMAT": "json",
 }
 
-CACHES = {
-    "default": {
-        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
-        "LOCATION": "nobatara-public-cache",
-        "TIMEOUT": 60,
+if DEBUG:
+    CACHES = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+            "LOCATION": "nobatara-public-cache",
+            "TIMEOUT": 60,
+        }
     }
-}
+else:
+    # Shared by all Gunicorn workers. PrivateTmp isolates this path from other services.
+    CACHES = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.filebased.FileBasedCache",
+            "LOCATION": os.getenv(
+                "DJANGO_CACHE_LOCATION",
+                str(Path(gettempdir()) / "nobatara-public-cache"),
+            ),
+            "TIMEOUT": 60,
+            "OPTIONS": {"MAX_ENTRIES": 500},
+        }
+    }
 
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),

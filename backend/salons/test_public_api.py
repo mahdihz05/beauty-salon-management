@@ -87,6 +87,26 @@ class PublicSalonAPITests(APITestCase):
         self.assertEqual(response.data["branches"][0]["services"][0]["price"], 450000)
         self.assertEqual(response.data["branches"][0]["staff"][0]["full_name"], "سارا مریم")
 
+    def test_anonymous_list_is_cached_and_invalidated_after_salon_change(self):
+        url = reverse("public-salon-list")
+        first = self.client.get(url)
+        with self.assertNumQueries(0):
+            cached = self.client.get(url)
+        self.assertEqual(cached.data, first.data)
+
+        self.approved.name = "سالن رویال جدید"
+        self.approved.save(update_fields=("name",))
+        refreshed = self.client.get(url)
+        self.assertEqual(refreshed.data["results"][0]["name"], "سالن رویال جدید")
+
+    def test_authenticated_list_annotates_customer_favorite(self):
+        FavoriteSalon.objects.create(user=self.customer, salon=self.approved)
+        self.client.force_authenticate(self.customer)
+
+        response = self.client.get(reverse("public-salon-list"))
+
+        self.assertIs(response.data["results"][0]["is_favorite"], True)
+
     def test_customer_favorites_are_private_and_unique(self):
         self.assertEqual(
             self.client.get(reverse("favorite-salon-list")).status_code,

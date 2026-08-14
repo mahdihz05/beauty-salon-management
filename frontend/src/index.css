@@ -2563,6 +2563,10 @@ p {
 }
 
 @media (max-width: 900px) {
+  .category-strip {
+    justify-content: flex-start;
+    padding-inline: 20px;
+  }
   .home-salon-grid {
     grid-template-columns: repeat(2, 1fr);
   }
