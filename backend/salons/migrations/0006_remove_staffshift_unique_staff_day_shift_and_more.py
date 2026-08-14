@@ -14,7 +14,11 @@ def normalize_branch_windows(apps, schema_editor):
                     [{"start": raw.get("start", "09:00")[:5], "end": raw.get("end", "18:00")[:5]}]
                     if raw.get("is_open", False) else []
                 )
-            elif isinstance(raw, list) and len(raw) == 2 and all(isinstance(value, str) for value in raw):
+            elif (
+                isinstance(raw, list)
+                and len(raw) == 2
+                and all(isinstance(value, str) for value in raw)
+            ):
                 normalized[str(day)] = [{"start": raw[0][:5], "end": raw[1][:5]}]
             elif isinstance(raw, list):
                 normalized[str(day)] = raw
@@ -24,8 +28,26 @@ def normalize_branch_windows(apps, schema_editor):
         branch.save(update_fields=("working_hours",))
 
 
-def noop_reverse(apps, schema_editor):
-    pass
+def restore_single_branch_window(apps, schema_editor):
+    Branch = apps.get_model("salons", "Branch")
+    for branch in Branch.objects.iterator():
+        restored = {}
+        for day in range(7):
+            windows = (branch.working_hours or {}).get(str(day), [])
+            if windows:
+                restored[str(day)] = {
+                    "is_open": True,
+                    "start": windows[0].get("start", "09:00"),
+                    "end": windows[0].get("end", "18:00"),
+                }
+            else:
+                restored[str(day)] = {
+                    "is_open": False,
+                    "start": "09:00",
+                    "end": "18:00",
+                }
+        branch.working_hours = restored
+        branch.save(update_fields=("working_hours",))
 
 
 class Migration(migrations.Migration):
@@ -43,5 +65,5 @@ class Migration(migrations.Migration):
             model_name='staffshift',
             index=models.Index(fields=['staff', 'day_of_week'], name='staff_day_window_idx'),
         ),
-        migrations.RunPython(normalize_branch_windows, noop_reverse),
+        migrations.RunPython(normalize_branch_windows, restore_single_branch_window),
     ]
