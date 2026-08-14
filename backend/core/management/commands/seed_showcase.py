@@ -106,7 +106,7 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument("--customers", type=int, default=120)
         parser.add_argument("--salons", type=int, default=12)
-        parser.add_argument("--bookings-per-branch", type=int, default=22)
+        parser.add_argument("--bookings-per-branch", type=int, default=20)
         parser.add_argument("--reset-showcase", action="store_true")
         parser.add_argument("--dry-run", action="store_true")
 
@@ -124,8 +124,6 @@ class Command(BaseCommand):
         self._merge_legacy_demo_category()
         marker = AuditLog.objects.filter(action="showcase.seed_completed").first()
         if marker:
-            self._ensure_product_salon_coverage()
-            self._ensure_service_coverage()
             self.stdout.write(
                 self.style.WARNING(
                     "Showcase data already exists; no duplicate records were created."
@@ -166,8 +164,6 @@ class Command(BaseCommand):
             now=now,
             rng=rng,
         )
-        self._ensure_product_salon_coverage()
-        self._ensure_service_coverage()
         self._create_social_and_support(customers, salons, users["admin"], rng)
         self._create_settlements(users["owners"], salons, wallets, rng)
         AuditLog.objects.create(
@@ -208,6 +204,10 @@ class Command(BaseCommand):
         Settlement.objects.filter(salon_id__in=safe_ids).delete()
         WalletTransaction.objects.filter(salon_id__in=safe_ids).delete()
         Salon.objects.filter(id__in=safe_ids).delete()
+        SupportTicket.objects.filter(message__startswith="showcase-seed:").delete()
+        SupportTicket.objects.filter(
+            message__contains="درخواست نمونه برای بررسی عملکرد واحد پشتیبانی"
+        ).delete()
         AuditLog.objects.filter(action="showcase.seed_completed").delete()
 
         removed_users = 0
@@ -801,7 +801,7 @@ class Command(BaseCommand):
                             "اصلاح اطلاعات حساب",
                         )
                     ),
-                    message="این یک درخواست نمونه برای بررسی عملکرد واحد پشتیبانی است.",
+                    message="showcase-seed: درخواست نمایشی برای بررسی عملکرد واحد پشتیبانی.",
                     response=(
                         "درخواست بررسی و پاسخ مناسب برای مشتری ثبت شد."
                         if status == SupportTicket.Status.RESOLVED
