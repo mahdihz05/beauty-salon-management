@@ -8,7 +8,7 @@ from .models import AuditLog, SupportTicket
 
 
 class HealthCheckTests(APITestCase):
-    def test_health_check_is_public_and_reports_sqlite(self):
+    def test_health_check_is_public_and_reports_active_database(self):
         response = self.client.get(reverse("health-check"))
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)

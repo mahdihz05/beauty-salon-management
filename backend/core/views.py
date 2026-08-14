@@ -12,7 +12,7 @@ class HealthCheckResponseSerializer(Serializer):
 
 
 class HealthCheckView(APIView):
-    """Public liveness check including the embedded SQLite connection."""
+    """Public liveness check that verifies and identifies the active database."""
 
     permission_classes = [AllowAny]
 
@@ -21,4 +21,4 @@ class HealthCheckView(APIView):
         with connection.cursor() as cursor:
             cursor.execute("SELECT 1")
             cursor.fetchone()
-        return Response({"status": "ok", "database": "sqlite"})
+        return Response({"status": "ok", "database": connection.vendor})
