@@ -141,11 +141,11 @@ export function MyAvailabilityPage() {
                     (item) => item.day_of_week === index && !item.is_off,
                   ) ?? [];
                 return (
-                  <div className="availability-card" key={day}>
-                    <strong>{day}</strong>
+                  <div className="staff-day-card" key={day}>
+                    <strong className="staff-day-title">{day}</strong>
                     {current.map((window) => (
                       <form
-                        className="weekly-hours-row"
+                        className="weekly-hours-row staff-window-row"
                         key={window.id}
                         onSubmit={(event) => {
                           event.preventDefault();
@@ -182,7 +182,7 @@ export function MyAvailabilityPage() {
                       </form>
                     ))}
                     <form
-                      className="weekly-hours-row"
+                      className="weekly-hours-row staff-window-row staff-window-add-row"
                       onSubmit={(event) => {
                         event.preventDefault();
                         const form = new FormData(event.currentTarget);
@@ -217,11 +217,11 @@ export function MyAvailabilityPage() {
               })}
             </div>
           </section>
-          <section className="availability-card">
+          <section className="availability-card staff-duration-section">
             <h2>مدت اختصاصی خدمات</h2>
             {services.data?.results.map((service) => (
               <form
-                className="weekly-hours-row"
+                className="weekly-hours-row staff-duration-row"
                 key={service.id}
                 onSubmit={(event) => {
                   event.preventDefault();
@@ -257,7 +257,7 @@ export function MyAvailabilityPage() {
               </form>
             ))}
           </section>
-          <section className="availability-card">
+          <section className="availability-card staff-timeoff-section">
             <div className="availability-heading">
               <CalendarOff />
               <h2>مرخصی</h2>
@@ -303,16 +303,19 @@ export function MyAvailabilityPage() {
               <button className="button button-primary">ثبت مرخصی</button>
             </form>
             {timeOffs.data?.results.map((item) => (
-              <p key={item.id}>
-                {new Date(item.starts_at).toLocaleString("fa-IR")} تا{" "}
-                {new Date(item.ends_at).toLocaleString("fa-IR")} — {item.reason}
+              <article className="staff-timeoff-item" key={item.id}>
+                <span>
+                  {new Date(item.starts_at).toLocaleString("fa-IR")} تا{" "}
+                  {new Date(item.ends_at).toLocaleString("fa-IR")} —{" "}
+                  {item.reason}
+                </span>
                 <button
                   className="button button-outline"
                   onClick={() => deleteTimeOff.mutate(item.id)}
                 >
                   <Trash2 size={15} /> حذف
                 </button>
-              </p>
+              </article>
             ))}
           </section>
         </>

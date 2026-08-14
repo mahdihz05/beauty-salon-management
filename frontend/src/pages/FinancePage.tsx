@@ -159,8 +159,9 @@ export function FinancePage() {
 
       <section className="panel-card finance-section">
         <h2>فیلتر و خروجی</h2>
-        <div className="form-grid">
+        <div className="finance-filter-grid">
           <input
+            className="finance-filter-search"
             placeholder="جستجوی مشتری یا شماره رزرو"
             value={filters.search}
             onChange={(e) => setFilters({ ...filters, search: e.target.value })}
@@ -202,20 +203,26 @@ export function FinancePage() {
             <option value="online">آنلاین</option>
             <option value="walk_in">حضوری</option>
           </select>
-          <input
-            type="date"
-            value={filters.date_from}
-            onChange={(e) =>
-              setFilters({ ...filters, date_from: e.target.value })
-            }
-          />
-          <input
-            type="date"
-            value={filters.date_to}
-            onChange={(e) =>
-              setFilters({ ...filters, date_to: e.target.value })
-            }
-          />
+          <label>
+            <span>از تاریخ</span>
+            <input
+              type="date"
+              value={filters.date_from}
+              onChange={(e) =>
+                setFilters({ ...filters, date_from: e.target.value })
+              }
+            />
+          </label>
+          <label>
+            <span>تا تاریخ</span>
+            <input
+              type="date"
+              value={filters.date_to}
+              onChange={(e) =>
+                setFilters({ ...filters, date_to: e.target.value })
+              }
+            />
+          </label>
           <button
             className="button button-outline"
             onClick={async () => {
@@ -288,7 +295,7 @@ export function FinancePage() {
         <section className="panel-card finance-section">
           <h2>درخواست تسویه</h2>
           <form
-            className="form-grid"
+            className="finance-settlement-form"
             onSubmit={(event) => {
               event.preventDefault();
               requestSettlement.mutate();
@@ -394,6 +401,59 @@ export function FinancePage() {
             </tbody>
           </table>
         </div>
+        <div className="finance-mobile-list" aria-label="درخواست‌های تسویه">
+          {settlements.data?.results.map((item) => (
+            <article className="finance-mobile-card" key={item.id}>
+              <header>
+                <strong>{item.owner_name || item.owner_phone}</strong>
+                <span
+                  className={`status-badge ${item.status === "paid" ? "success" : item.status === "rejected" ? "error" : "pending"}`}
+                >
+                  {item.status === "paid"
+                    ? "پرداخت‌شده"
+                    : item.status === "rejected"
+                      ? "ردشده"
+                      : "در انتظار"}
+                </span>
+              </header>
+              <dl>
+                <div>
+                  <dt>مبلغ</dt>
+                  <dd>{money(item.amount)}</dd>
+                </div>
+                <div>
+                  <dt>حساب مقصد</dt>
+                  <dd dir="ltr">{item.bank_account}</dd>
+                </div>
+              </dl>
+              {item.status === "requested" && auth.user?.role === "admin" && (
+                <div className="finance-actions">
+                  <button
+                    className="button button-primary"
+                    disabled={processSettlement.isPending}
+                    onClick={() =>
+                      processSettlement.mutate({ id: item.id, status: "paid" })
+                    }
+                  >
+                    <CheckCircle2 /> تأیید
+                  </button>
+                  <button
+                    className="button button-outline"
+                    disabled={processSettlement.isPending}
+                    onClick={() =>
+                      processSettlement.mutate({
+                        id: item.id,
+                        status: "rejected",
+                      })
+                    }
+                  >
+                    <XCircle /> رد
+                  </button>
+                </div>
+              )}
+            </article>
+          ))}
+        </div>
         {!settlements.isLoading && settlements.data?.count === 0 && (
           <p className="muted">درخواست تسویه‌ای ثبت نشده است.</p>
         )}
@@ -481,6 +541,75 @@ export function FinancePage() {
               ))}
             </tbody>
           </table>
+        </div>
+        <div className="finance-mobile-list" aria-label="آخرین پرداخت‌ها">
+          {payments.data?.results.map((item) => (
+            <article className="finance-mobile-card" key={item.id}>
+              <header>
+                <strong>رزرو #{item.booking}</strong>
+                <span
+                  className={`status-badge ${item.status === "paid" ? "success" : item.status === "pending" ? "pending" : "error"}`}
+                >
+                  {item.status === "paid"
+                    ? "موفق"
+                    : item.status === "pending"
+                      ? "در انتظار"
+                      : item.status === "refunded"
+                        ? "بازپرداخت"
+                        : "ناموفق"}
+                </span>
+              </header>
+              <p>
+                {item.salon_name} / {item.branch_name}
+              </p>
+              <dl>
+                <div>
+                  <dt>مشتری</dt>
+                  <dd dir="ltr">{item.customer_phone}</dd>
+                </div>
+                <div>
+                  <dt>مبلغ</dt>
+                  <dd>{money(item.amount)}</dd>
+                </div>
+                <div>
+                  <dt>روش</dt>
+                  <dd>
+                    {item.method === "in_person" || item.method === "cash"
+                      ? "حضوری"
+                      : item.method === "card_to_card"
+                        ? "کارت‌به‌کارت"
+                        : item.method === "wallet"
+                          ? "کیف پول"
+                          : "آنلاین"}
+                  </dd>
+                </div>
+                <div>
+                  <dt>زمان</dt>
+                  <dd>{formatPersianDateTime(item.created_at)}</dd>
+                </div>
+              </dl>
+              {item.method === "card_to_card" && item.status === "pending" && (
+                <div className="finance-actions">
+                  <button
+                    className="button button-primary"
+                    onClick={() =>
+                      verifyTransfer.mutate({ id: item.id, status: "paid" })
+                    }
+                  >
+                    <CheckCircle2 /> تأیید رسید
+                  </button>
+                  <button
+                    className="button button-outline"
+                    onClick={() =>
+                      verifyTransfer.mutate({ id: item.id, status: "failed" })
+                    }
+                  >
+                    <XCircle /> رد رسید
+                  </button>
+                </div>
+              )}
+            </article>
+          ))}
         </div>
       </section>
     </div>

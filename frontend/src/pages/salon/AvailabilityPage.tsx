@@ -220,10 +220,10 @@ export function AvailabilityPage() {
                   <span>{day}</span>
                 </label>
                 {isOpen ? (
-                  <div>
+                  <div className="availability-windows">
                     {windows.map((window, windowIndex) => (
                       <div
-                        className="weekly-time-range"
+                        className="weekly-time-range availability-window-row"
                         key={`${day}-${windowIndex}`}
                       >
                         <label>
@@ -260,7 +260,7 @@ export function AvailabilityPage() {
                         </label>
                         <button
                           type="button"
-                          className="button button-outline"
+                          className="button button-outline availability-window-delete"
                           onClick={() => {
                             setSaved(false);
                             setHours({
@@ -277,7 +277,7 @@ export function AvailabilityPage() {
                     ))}
                     <button
                       type="button"
-                      className="button button-outline"
+                      className="button button-outline availability-window-add"
                       onClick={() => {
                         setSaved(false);
                         setHours({

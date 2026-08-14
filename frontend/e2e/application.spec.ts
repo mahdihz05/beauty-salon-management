@@ -172,10 +172,6 @@ test("admin dashboard loads protected live statistics", async ({
 test("receptionist can use calendar but cannot open financial or customer pages", async ({
   page,
 }, testInfo) => {
-  test.skip(
-    testInfo.project.name !== "desktop-edge",
-    "Role navigation is covered once on the desktop panel.",
-  );
   await loginWithMockOtp(page, "09120000007", "/salon/calendar");
   await expect(page.locator("h1")).toContainText("تقویم نوبت‌ها");
   await expect(
@@ -184,6 +180,14 @@ test("receptionist can use calendar but cannot open financial or customer pages"
   await expect(
     page.locator('.panel-nav-item[href="/salon/customers"]'),
   ).toHaveCount(0);
+  if (testInfo.project.name === "desktop-edge") {
+    await expect(page.locator(".booking-table-wrap")).toBeVisible();
+    await expect(page.locator(".booking-mobile-list")).toBeHidden();
+  } else {
+    await expect(page.locator(".booking-table-wrap")).toBeHidden();
+    await expect(page.locator(".booking-mobile-list")).toBeVisible();
+  }
+  await expectNoHorizontalOverflow(page);
 
   await page.goto("/salon/reports");
   await expect(page).toHaveURL(/\/$/);
@@ -192,15 +196,18 @@ test("receptionist can use calendar but cannot open financial or customer pages"
 test("staff can open only their personal availability", async ({
   page,
 }, testInfo) => {
-  test.skip(
-    testInfo.project.name !== "desktop-edge",
-    "Staff permissions are covered once on desktop.",
-  );
   await loginWithMockOtp(page, "09120000008", "/salon/my-availability");
   await expect(page.locator("h1")).toContainText("زمان‌های من");
   await expect(
     page.locator('.panel-nav-item[href="/salon/services"]'),
   ).toHaveCount(0);
+  await expect(page.locator(".staff-day-card")).toHaveCount(7);
+  await expect(page.locator(".staff-duration-section")).toBeVisible();
+  await expectNoHorizontalOverflow(page);
+  await page.screenshot({
+    path: testInfo.outputPath("staff-availability-responsive.png"),
+    fullPage: true,
+  });
   await page.goto("/salon/services");
   await expect(page).toHaveURL(/\/$/);
 });
@@ -289,6 +296,7 @@ test("tablet keeps public and panel layouts usable without horizontal overflow",
       await expect(
         page.locator(".finance-salon-grid button").first(),
       ).toBeVisible();
+      await expect(page.locator(".finance-mobile-list").first()).toBeVisible();
       await page.screenshot({
         path: testInfo.outputPath("tablet-admin-finance.png"),
         fullPage: false,
@@ -316,6 +324,7 @@ test("admin finance and support tabs stay responsive on mobile", async ({
   await page.goto("/admin/finance");
   await expect(page.locator(".finance-section")).toHaveCount(4);
   await expectNoHorizontalOverflow(page);
+  await expect(page.locator(".finance-mobile-list").first()).toBeVisible();
   await page.screenshot({
     path: testInfo.outputPath("mobile-admin-finance.png"),
     fullPage: false,
@@ -329,10 +338,6 @@ test("admin finance and support tabs stay responsive on mobile", async ({
 test("salon availability settings are usable on mobile", async ({
   page,
 }, testInfo) => {
-  test.skip(
-    testInfo.project.name !== "mobile-edge",
-    "Availability responsiveness is verified on the mobile viewport.",
-  );
   await loginWithMockOtp(page, "09120000002", "/salon/availability");
   await expect(page.locator("h1")).toContainText("ساعات قابل رزرو");
   await expect(page.locator(".weekly-hours-row")).toHaveCount(7);
@@ -347,7 +352,7 @@ test("salon availability settings are usable on mobile", async ({
   await expect(createdClosure).toHaveCount(0);
   await expectNoHorizontalOverflow(page);
   await page.screenshot({
-    path: testInfo.outputPath("mobile-salon-availability.png"),
+    path: testInfo.outputPath("salon-availability-responsive.png"),
     fullPage: true,
   });
 });
