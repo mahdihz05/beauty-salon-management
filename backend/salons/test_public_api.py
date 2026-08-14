@@ -68,7 +68,8 @@ class PublicSalonAPITests(APITestCase):
 
         self.assertEqual(matching.data["count"], 1)
         self.assertEqual(wrong_city.data["count"], 0)
-        self.assertEqual(high_minimum.data["count"], 0)
+        self.assertEqual(high_minimum.data["count"], 1)
+        self.assertNotIn("min_price", high_minimum.data["results"][0])
         self.assertEqual(service_search.data["count"], 1)
         self.assertEqual(category_filter.data["count"], 1)
 
@@ -85,6 +86,7 @@ class PublicSalonAPITests(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["branches"][0]["services"][0]["price"], 450000)
+        self.assertEqual(response.data["min_price"], 450000)
         self.assertEqual(response.data["branches"][0]["staff"][0]["full_name"], "سارا مریم")
 
     def test_anonymous_list_is_cached_and_invalidated_after_salon_change(self):

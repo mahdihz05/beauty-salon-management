@@ -62,30 +62,29 @@ def _aware(target_date: date, value: time) -> datetime:
     )
 
 
-def _branch_opening_window(
+def _branch_opening_windows(
     branch: Branch, target_date: date
-) -> tuple[datetime, datetime] | None | bool:
+) -> list[tuple[datetime, datetime]] | None:
     raw = (branch.working_hours or {}).get(str(_day_of_week(target_date)))
     if raw is None:
         return None
     if isinstance(raw, list) and len(raw) == 2:
-        start, end = raw
-        is_open = True
+        if all(isinstance(value, str) for value in raw):
+            raw = [{"start": raw[0], "end": raw[1]}]
     elif isinstance(raw, dict):
-        is_open = raw.get("is_open", False)
-        start, end = raw.get("start"), raw.get("end")
+        raw = [raw] if raw.get("is_open", False) else []
     else:
         return None
-    if not is_open:
-        return False
-    try:
-        start_time = time.fromisoformat(start)
-        end_time = time.fromisoformat(end)
-    except (TypeError, ValueError):
-        return False
-    if start_time >= end_time:
-        return False
-    return _aware(target_date, start_time), _aware(target_date, end_time)
+    windows = []
+    for item in raw:
+        try:
+            start_time = time.fromisoformat(item.get("start"))
+            end_time = time.fromisoformat(item.get("end"))
+        except (AttributeError, TypeError, ValueError):
+            continue
+        if start_time < end_time:
+            windows.append((_aware(target_date, start_time), _aware(target_date, end_time)))
+    return windows
 
 
 def _load_services(branch: Branch, service_ids: list[int]) -> list[BranchService]:
@@ -151,33 +150,46 @@ def get_available_slots(
     services = _load_services(branch, service_ids)
     candidates = _candidate_staff(branch, services, staff_id)
     slots: list[AvailableSlot] = []
-    branch_window = _branch_opening_window(branch, target_date)
-    if branch_window is False:
+    branch_windows = _branch_opening_windows(branch, target_date)
+    if branch_windows == []:
         return slots
 
     for staff in candidates:
-        shift = StaffShift.objects.filter(
-            staff=staff, day_of_week=_day_of_week(target_date), is_off=False
-        ).first()
-        if not shift or shift.start_time is None or shift.end_time is None:
+        shifts = (
+            StaffShift.objects.filter(
+                staff=staff, day_of_week=_day_of_week(target_date), is_off=False
+            )
+            .exclude(start_time=None)
+            .exclude(end_time=None)
+        )
+        if not shifts.exists():
             continue
         values = _staff_service_values(staff, services)
         duration = sum(item[1] for item in values)
         total_price = sum(item[2] for item in values)
-        shift_start = _aware(target_date, shift.start_time)
-        shift_end = _aware(target_date, shift.end_time)
-        if branch_window not in (None, False):
-            branch_start, branch_end = branch_window
-            shift_start = max(shift_start, branch_start)
-            shift_end = min(shift_end, branch_end)
-            if shift_start >= shift_end:
-                continue
-        cursor = _ceil_to_grid(max(shift_start, now), branch.slot_interval_minutes)
+        staff_windows = [
+            (_aware(target_date, shift.start_time), _aware(target_date, shift.end_time))
+            for shift in shifts
+        ]
+        effective_windows = (
+            staff_windows
+            if branch_windows is None
+            else [
+                (max(staff_start, branch_start), min(staff_end, branch_end))
+                for staff_start, staff_end in staff_windows
+                for branch_start, branch_end in branch_windows
+                if max(staff_start, branch_start) < min(staff_end, branch_end)
+            ]
+        )
+        if not effective_windows:
+            continue
+        range_start = min(item[0] for item in effective_windows)
+        range_end = max(item[1] for item in effective_windows)
         busy = list(
             Booking.objects.filter(
                 staff=staff,
-                start_at__lt=shift_end,
-                end_at__gt=shift_start,
+                start_at__lt=range_end,
+                end_at__gt=range_start,
             )
             .filter(
                 Q(status=Booking.Status.CONFIRMED)
@@ -188,47 +200,49 @@ def get_available_slots(
         )
         time_offs = list(
             StaffTimeOff.objects.filter(
-                staff=staff, starts_at__lt=shift_end, ends_at__gt=shift_start
+                staff=staff, starts_at__lt=range_end, ends_at__gt=range_start
             ).only("starts_at", "ends_at")
         )
         branch_closures = list(
             BranchClosure.objects.filter(
-                branch=branch, starts_at__lt=shift_end, ends_at__gt=shift_start
+                branch=branch, starts_at__lt=range_end, ends_at__gt=range_start
             ).only("starts_at", "ends_at")
         )
-        while cursor + timedelta(minutes=duration) <= shift_end:
-            slot_end = cursor + timedelta(minutes=duration)
-            buffer_end = slot_end + timedelta(minutes=branch.preparation_buffer_minutes)
-            conflicts_booking = any(
-                cursor < booking.end_at + timedelta(minutes=branch.preparation_buffer_minutes)
-                and buffer_end > booking.start_at
-                for booking in busy
-            )
-            conflicts_time_off = any(
-                cursor < time_off.ends_at and slot_end > time_off.starts_at
-                for time_off in time_offs
-            )
-            conflicts_branch_closure = any(
-                cursor < closure.ends_at and slot_end > closure.starts_at
-                for closure in branch_closures
-            )
-            if (
-                cursor >= now
-                and not conflicts_booking
-                and not conflicts_time_off
-                and not conflicts_branch_closure
-            ):
-                slots.append(
-                    AvailableSlot(
-                        start_at=cursor,
-                        end_at=slot_end,
-                        staff_id=staff.id,
-                        staff_name=staff.full_name,
-                        total_price=total_price,
-                        duration_minutes=duration,
-                    )
+        for shift_start, shift_end in effective_windows:
+            cursor = _ceil_to_grid(max(shift_start, now), branch.slot_interval_minutes)
+            while cursor + timedelta(minutes=duration) <= shift_end:
+                slot_end = cursor + timedelta(minutes=duration)
+                buffer_end = slot_end + timedelta(minutes=branch.preparation_buffer_minutes)
+                conflicts_booking = any(
+                    cursor < booking.end_at + timedelta(minutes=branch.preparation_buffer_minutes)
+                    and buffer_end > booking.start_at
+                    for booking in busy
                 )
-            cursor += timedelta(minutes=branch.slot_interval_minutes)
+                conflicts_time_off = any(
+                    cursor < time_off.ends_at and slot_end > time_off.starts_at
+                    for time_off in time_offs
+                )
+                conflicts_branch_closure = any(
+                    cursor < closure.ends_at and slot_end > closure.starts_at
+                    for closure in branch_closures
+                )
+                if (
+                    cursor >= now
+                    and not conflicts_booking
+                    and not conflicts_time_off
+                    and not conflicts_branch_closure
+                ):
+                    slots.append(
+                        AvailableSlot(
+                            start_at=cursor,
+                            end_at=slot_end,
+                            staff_id=staff.id,
+                            staff_name=staff.full_name,
+                            total_price=total_price,
+                            duration_minutes=duration,
+                        )
+                    )
+                cursor += timedelta(minutes=branch.slot_interval_minutes)
     return sorted(slots, key=lambda slot: (slot.start_at, slot.staff_name))
 
 
@@ -245,12 +259,18 @@ def create_booking_hold(
 ) -> Booking:
     now = timezone.now()
     expire_stale_holds(now)
+    # A stable staff row exists even when the slot has no bookings yet. Locking it
+    # serializes online and walk-in competitors before availability is rechecked.
+    try:
+        staff = Staff.objects.select_for_update().get(pk=staff_id, branch=branch, is_active=True)
+    except Staff.DoesNotExist as exc:
+        raise ValidationError("آرایشگر انتخاب‌شده برای این شعبه معتبر نیست.") from exc
     if timezone.is_naive(start_at):
         start_at = timezone.make_aware(start_at, timezone.get_current_timezone())
     # Acquiring existing rows plus an early write serializes competing SQLite writers.
     list(
         Booking.objects.select_for_update().filter(
-            staff_id=staff_id,
+            staff_id=staff.id,
             start_at__date=start_at.date(),
             status__in=(
                 Booking.Status.PENDING_PAYMENT,

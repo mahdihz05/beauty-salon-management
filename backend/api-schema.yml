@@ -1482,7 +1482,7 @@ paths:
   /api/health/:
     get:
       operationId: health_retrieve
-      description: Public liveness check including the embedded SQLite connection.
+      description: Public liveness check that verifies and identifies the active database.
       tags:
       - health
       security:
@@ -2853,6 +2853,7 @@ paths:
   /api/management/staff-shifts/:
     get:
       operationId: management_staff_shifts_list
+      description: Personal availability is writable only by the linked staff account.
       parameters:
       - in: query
         name: day_of_week
@@ -2914,6 +2915,7 @@ paths:
           description: ''
     post:
       operationId: management_staff_shifts_create
+      description: Personal availability is writable only by the linked staff account.
       tags:
       - management
       requestBody:
@@ -2940,6 +2942,7 @@ paths:
   /api/management/staff-shifts/{id}/:
     get:
       operationId: management_staff_shifts_retrieve
+      description: Personal availability is writable only by the linked staff account.
       parameters:
       - in: path
         name: id
@@ -2960,6 +2963,7 @@ paths:
           description: ''
     put:
       operationId: management_staff_shifts_update
+      description: Personal availability is writable only by the linked staff account.
       parameters:
       - in: path
         name: id
@@ -2992,6 +2996,7 @@ paths:
           description: ''
     patch:
       operationId: management_staff_shifts_partial_update
+      description: Personal availability is writable only by the linked staff account.
       parameters:
       - in: path
         name: id
@@ -3023,6 +3028,7 @@ paths:
           description: ''
     delete:
       operationId: management_staff_shifts_destroy
+      description: Personal availability is writable only by the linked staff account.
       parameters:
       - in: path
         name: id
@@ -3040,6 +3046,7 @@ paths:
   /api/management/staff-time-offs/:
     get:
       operationId: management_staff_time_offs_list
+      description: Personal availability is writable only by the linked staff account.
       parameters:
       - name: ordering
         required: false
@@ -3076,6 +3083,7 @@ paths:
           description: ''
     post:
       operationId: management_staff_time_offs_create
+      description: Personal availability is writable only by the linked staff account.
       tags:
       - management
       requestBody:
@@ -3102,6 +3110,7 @@ paths:
   /api/management/staff-time-offs/{id}/:
     get:
       operationId: management_staff_time_offs_retrieve
+      description: Personal availability is writable only by the linked staff account.
       parameters:
       - in: path
         name: id
@@ -3122,6 +3131,7 @@ paths:
           description: ''
     put:
       operationId: management_staff_time_offs_update
+      description: Personal availability is writable only by the linked staff account.
       parameters:
       - in: path
         name: id
@@ -3154,6 +3164,7 @@ paths:
           description: ''
     patch:
       operationId: management_staff_time_offs_partial_update
+      description: Personal availability is writable only by the linked staff account.
       parameters:
       - in: path
         name: id
@@ -3185,6 +3196,7 @@ paths:
           description: ''
     delete:
       operationId: management_staff_time_offs_destroy
+      description: Personal availability is writable only by the linked staff account.
       parameters:
       - in: path
         name: id
@@ -3391,30 +3403,6 @@ paths:
     get:
       operationId: payments_list
       parameters:
-      - in: query
-        name: booking__branch
-        schema:
-          type: integer
-      - in: query
-        name: booking__branch__salon
-        schema:
-          type: integer
-      - in: query
-        name: method
-        schema:
-          type: string
-          enum:
-          - card_to_card
-          - cash
-          - in_person
-          - online
-          - wallet
-        description: |-
-          * `in_person` - حضوری
-          * `card_to_card` - کارت‌به‌کارت
-          * `online` - آنلاین
-          * `cash` - نقدی
-          * `wallet` - کیف پول
       - name: ordering
         required: false
         in: query
@@ -3433,32 +3421,6 @@ paths:
         description: یک عبارت جستجو.
         schema:
           type: string
-      - in: query
-        name: status
-        schema:
-          type: string
-          enum:
-          - failed
-          - paid
-          - pending
-          - refunded
-        description: |-
-          * `pending` - در انتظار
-          * `paid` - پرداخت‌شده
-          * `failed` - ناموفق
-          * `refunded` - بازپرداخت‌شده
-      - in: query
-        name: type
-        schema:
-          type: string
-          enum:
-          - deposit
-          - full
-          - remainder
-        description: |-
-          * `deposit` - بیعانه
-          * `full` - پرداخت کامل
-          * `remainder` - مانده
       tags:
       - payments
       security:
@@ -3555,6 +3517,20 @@ paths:
               schema:
                 $ref: '#/components/schemas/VerifyTransfer'
           description: ''
+  /api/payments/export.csv:
+    get:
+      operationId: payments_export.csv_retrieve
+      tags:
+      - payments
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Payment'
+          description: ''
   /api/payments/remainder/:
     post:
       operationId: payments_remainder_create
@@ -3583,7 +3559,27 @@ paths:
           description: ''
   /api/payments/salons/:
     get:
-      operationId: payments_salons_retrieve
+      operationId: finance_salon_list
+      tags:
+      - payments
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SalonFinanceSummary'
+          description: ''
+  /api/payments/salons/{salon_id}/:
+    get:
+      operationId: finance_salon_detail
+      parameters:
+      - in: path
+        name: salon_id
+        schema:
+          type: integer
+        required: true
       tags:
       - payments
       security:
@@ -3939,14 +3935,6 @@ paths:
         name: featured
         schema:
           type: boolean
-      - in: query
-        name: max_price
-        schema:
-          type: integer
-      - in: query
-        name: min_price
-        schema:
-          type: integer
       - name: ordering
         required: false
         in: query
@@ -6480,13 +6468,9 @@ components:
         service_name:
           type: string
           readOnly: true
-        price_override:
+        base_duration_minutes:
           type: integer
-          maximum: 9223372036854775807
-          minimum: 0
-          format: int64
-          nullable: true
-          title: قیمت اختصاصی
+          readOnly: true
         duration_override_minutes:
           type: integer
           maximum: 9223372036854775807
@@ -6494,6 +6478,9 @@ components:
           format: int64
           nullable: true
           title: مدت اختصاصی
+        effective_duration_minutes:
+          type: integer
+          readOnly: true
     PatchedStaffShift:
       type: object
       properties:
@@ -6940,12 +6927,12 @@ components:
           type: string
           nullable: true
           readOnly: true
+        is_favorite:
+          type: boolean
+          readOnly: true
         min_price:
           type: integer
           nullable: true
-          readOnly: true
-        is_favorite:
-          type: boolean
           readOnly: true
         images:
           type: array
@@ -7038,10 +7025,6 @@ components:
           type: string
           nullable: true
           readOnly: true
-        min_price:
-          type: integer
-          nullable: true
-          readOnly: true
         is_favorite:
           type: boolean
           readOnly: true
@@ -7051,7 +7034,6 @@ components:
       - district
       - id
       - is_favorite
-      - min_price
       - name
       - slug
       - type
@@ -7712,13 +7694,9 @@ components:
         service_name:
           type: string
           readOnly: true
-        price_override:
+        base_duration_minutes:
           type: integer
-          maximum: 9223372036854775807
-          minimum: 0
-          format: int64
-          nullable: true
-          title: قیمت اختصاصی
+          readOnly: true
         duration_override_minutes:
           type: integer
           maximum: 9223372036854775807
@@ -7726,8 +7704,13 @@ components:
           format: int64
           nullable: true
           title: مدت اختصاصی
+        effective_duration_minutes:
+          type: integer
+          readOnly: true
       required:
+      - base_duration_minutes
       - branch_service
+      - effective_duration_minutes
       - id
       - service_name
       - staff

@@ -32,7 +32,9 @@ export interface Branch {
   phone: string;
   working_hours: Record<
     string,
-    { is_open: boolean; start: string; end: string } | [string, string]
+    | { is_open: boolean; start: string; end: string }
+    | [string, string]
+    | Array<{ start: string; end: string }>
   >;
   is_active: boolean;
 }
@@ -107,8 +109,9 @@ export interface StaffService {
   staff: number;
   branch_service: number;
   service_name: string;
-  price_override: number | null;
+  base_duration_minutes: number;
   duration_override_minutes: number | null;
+  effective_duration_minutes: number;
 }
 
 export interface StaffTimeOff {

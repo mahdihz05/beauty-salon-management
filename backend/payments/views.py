@@ -1,6 +1,8 @@
+import csv
+
 from django.conf import settings
 from django.db.models import Count, Q, Sum
-from django.http import HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
@@ -37,16 +39,48 @@ from .services import (
 )
 
 
+def finance_branch_ids(user):
+    from salons.models import Branch
+
+    if user.is_superuser or user.role == User.Role.ADMIN:
+        return Branch.objects.values_list("id", flat=True)
+    return manageable_branch_ids(user)
+
+
+def filter_payments(request, queryset=None):
+    if queryset is None:
+        queryset = Payment.objects.all()
+    queryset = queryset.filter(booking__branch_id__in=finance_branch_ids(request.user))
+    params = request.query_params
+    filters = {
+        "status": "status",
+        "type": "type",
+        "method": "method",
+        "branch": "booking__branch_id",
+        "salon": "booking__branch__salon_id",
+        "source": "booking__source",
+    }
+    for param, field in filters.items():
+        if params.get(param):
+            queryset = queryset.filter(**{field: params[param]})
+    if params.get("date_from"):
+        queryset = queryset.filter(created_at__date__gte=params["date_from"])
+    if params.get("date_to"):
+        queryset = queryset.filter(created_at__date__lte=params["date_to"])
+    if params.get("search"):
+        term = params["search"]
+        lookup = Q(booking__customer__phone__icontains=term) | Q(
+            booking__customer__name__icontains=term
+        )
+        if term.isdigit():
+            lookup |= Q(booking_id=int(term))
+        queryset = queryset.filter(lookup)
+    return queryset
+
+
 class PaymentListView(ListAPIView):
     permission_classes = (IsAuthenticated,)
     serializer_class = PaymentSerializer
-    filterset_fields = (
-        "status",
-        "type",
-        "method",
-        "booking__branch",
-        "booking__branch__salon",
-    )
     ordering_fields = ("created_at", "paid_at", "amount")
     ordering = ("-created_at",)
 
@@ -55,12 +89,9 @@ class PaymentListView(ListAPIView):
         queryset = Payment.objects.select_related("booking__customer", "booking__branch__salon")
         if not user.is_authenticated:
             return queryset.none()
-        if user.is_superuser or user.role == User.Role.ADMIN:
-            return queryset
-        branch_ids = manageable_branch_ids(user)
-        if branch_ids:
-            return queryset.filter(booking__branch_id__in=branch_ids)
-        return queryset.filter(booking__customer=user)
+        if user.role == User.Role.CUSTOMER:
+            return queryset.filter(booking__customer=user)
+        return filter_payments(self.request, queryset)
 
 
 class StartPaymentView(GenericAPIView):
@@ -69,6 +100,11 @@ class StartPaymentView(GenericAPIView):
 
     @extend_schema(request=StartPaymentSerializer, responses=PaymentSerializer)
     def post(self, request):
+        if not getattr(settings, "ENABLE_LEGACY_PAYMENT_ENDPOINTS", False):
+            return Response(
+                {"detail": "در رزرو جدید فقط پرداخت حضوری یا کارت‌به‌کارت قابل انتخاب است."},
+                status=status.HTTP_410_GONE,
+            )
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         callback_url = request.build_absolute_uri(reverse("payment-callback", args=(0,))).replace(
@@ -237,6 +273,7 @@ class SalonFinanceSummaryView(GenericAPIView):
     permission_classes = (IsAuthenticated,)
     serializer_class = SalonFinanceSummarySerializer
 
+    @extend_schema(operation_id="finance_salon_list")
     def get(self, request):
         from salons.models import Salon
 
@@ -248,15 +285,20 @@ class SalonFinanceSummaryView(GenericAPIView):
                 salons = salons.filter(
                     branches__id__in=manageable_branch_ids(request.user)
                 ).distinct()
+        allowed_branches = set(finance_branch_ids(request.user))
         salon_rows = list(
-            salons.annotate(branch_count=Count("branches", distinct=True)).values(
-                "id", "name", "branch_count"
-            )
+            salons.annotate(
+                branch_count=Count(
+                    "branches", filter=Q(branches__id__in=allowed_branches), distinct=True
+                )
+            ).values("id", "name", "branch_count")
         )
         ids = [row["id"] for row in salon_rows]
         payment_rows = {
             row["booking__branch__salon_id"]: row
-            for row in Payment.objects.filter(booking__branch__salon_id__in=ids)
+            for row in Payment.objects.filter(
+                booking__branch__salon_id__in=ids, booking__branch_id__in=allowed_branches
+            )
             .values("booking__branch__salon_id")
             .annotate(
                 paid=Sum("amount", filter=Q(status=Payment.Status.PAID)),
@@ -292,7 +334,122 @@ class SalonFinanceSummaryView(GenericAPIView):
                     "payment_count": payment.get("payment_count") or 0,
                 }
             )
+        page = self.paginate_queryset(result)
+        if page is not None:
+            return self.get_paginated_response(self.get_serializer(page, many=True).data)
         return Response(self.get_serializer(result, many=True).data)
+
+
+class SalonFinanceDetailView(GenericAPIView):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = SalonFinanceSummarySerializer
+
+    @extend_schema(operation_id="finance_salon_detail")
+    def get(self, request, salon_id):
+        from salons.models import Branch, Salon
+
+        allowed = set(finance_branch_ids(request.user))
+        try:
+            salon = Salon.objects.get(pk=salon_id, branches__id__in=allowed)
+        except Salon.DoesNotExist:
+            return Response({"detail": "اطلاعات مالی سالن در دسترس نیست."}, status=404)
+        branches = Branch.objects.filter(salon=salon, id__in=allowed)
+        payments = filter_payments(request, Payment.objects.filter(booking__branch__salon=salon))
+        commission_percent = int(getattr(settings, "PLATFORM_COMMISSION_PERCENT", 10))
+        summaries = []
+        for branch in branches:
+            aggregate = payments.filter(booking__branch=branch).aggregate(
+                gross=Sum("amount", filter=Q(status=Payment.Status.PAID)),
+                refunded=Sum("amount", filter=Q(status=Payment.Status.REFUNDED)),
+                count=Count("id"),
+            )
+            gross = aggregate["gross"] or 0
+            refunded = aggregate["refunded"] or 0
+            commission = gross * commission_percent // 100
+            summaries.append(
+                {
+                    "id": branch.id,
+                    "name": branch.name,
+                    "payment_count": aggregate["count"],
+                    "gross_revenue": gross,
+                    "refunded_amount": refunded,
+                    "commission": commission,
+                    "net_revenue": gross - commission - refunded,
+                }
+            )
+        totals = {
+            key: sum(row[key] for row in summaries)
+            for key in (
+                "payment_count",
+                "gross_revenue",
+                "refunded_amount",
+                "commission",
+                "net_revenue",
+            )
+        }
+        can_see_settlements = request.user.is_superuser or request.user.role in (
+            User.Role.ADMIN,
+            User.Role.SALON_OWNER,
+        )
+        settlements = (
+            Settlement.objects.filter(salon=salon)
+            if can_see_settlements
+            else Settlement.objects.none()
+        )
+        return Response(
+            {
+                "id": salon.id,
+                "name": salon.name,
+                "totals": totals,
+                "branches": summaries,
+                "settlements": SettlementSerializer(settlements, many=True).data,
+            }
+        )
+
+
+class FinanceCsvView(GenericAPIView):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = PaymentSerializer
+
+    def get(self, request):
+        payments = filter_payments(
+            request,
+            Payment.objects.select_related("booking__customer", "booking__branch__salon"),
+        ).order_by("-created_at")
+        response = HttpResponse(content_type="text/csv; charset=utf-8")
+        response["Content-Disposition"] = 'attachment; filename="finance.csv"'
+        response.write("\ufeff")
+        writer = csv.writer(response)
+        writer.writerow(
+            [
+                "payment_id",
+                "booking_id",
+                "salon",
+                "branch",
+                "customer",
+                "amount",
+                "method",
+                "status",
+                "source",
+                "created_at",
+            ]
+        )
+        for payment in payments.iterator():
+            writer.writerow(
+                [
+                    payment.id,
+                    payment.booking_id,
+                    payment.booking.branch.salon.name,
+                    payment.booking.branch.name,
+                    payment.booking.customer.phone,
+                    payment.amount,
+                    payment.method,
+                    payment.status,
+                    payment.booking.source,
+                    payment.created_at.isoformat(),
+                ]
+            )
+        return response
 
 
 class SettlementListCreateView(GenericAPIView):
@@ -306,6 +463,9 @@ class SettlementListCreateView(GenericAPIView):
         salon_id = request.query_params.get("salon")
         if salon_id:
             queryset = queryset.filter(salon_id=salon_id)
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            return self.get_paginated_response(SettlementSerializer(page, many=True).data)
         return Response(SettlementSerializer(queryset, many=True).data)
 
     @extend_schema(request=SettlementRequestSerializer, responses=SettlementSerializer)

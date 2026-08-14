@@ -63,6 +63,16 @@ class StaffSelfServiceTests(APITestCase):
         self.assertEqual(staff.data["results"][0]["id"], self.staff.id)
         self.assertEqual(shifts.data["count"], 0)
 
+    def test_staff_cannot_read_salon_settings_and_branch_response_is_minimal(self):
+        salons = self.client.get(reverse("salon-list"))
+        branches = self.client.get(reverse("branch-list"))
+        self.assertEqual(salons.data["count"], 0)
+        self.assertEqual(branches.data["count"], 1)
+        self.assertEqual(
+            set(branches.data["results"][0]),
+            {"id", "salon", "salon_name", "name", "is_active"},
+        )
+
     def test_staff_can_set_own_shift_and_duration_but_not_price(self):
         shift = self.client.post(
             reverse("staff-shift-list"),
@@ -86,3 +96,31 @@ class StaffSelfServiceTests(APITestCase):
         self.assertEqual(shift.status_code, status.HTTP_201_CREATED)
         self.assertEqual(duration.status_code, status.HTTP_200_OK)
         self.assertEqual(price.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_staff_can_create_multiple_non_overlapping_windows_but_not_overlap(self):
+        first = self.client.post(
+            reverse("staff-shift-list"),
+            {"staff": self.staff.id, "day_of_week": 1, "start_time": "09:00", "end_time": "12:00"},
+        )
+        second = self.client.post(
+            reverse("staff-shift-list"),
+            {"staff": self.staff.id, "day_of_week": 1, "start_time": "14:00", "end_time": "18:00"},
+        )
+        overlap = self.client.post(
+            reverse("staff-shift-list"),
+            {"staff": self.staff.id, "day_of_week": 1, "start_time": "11:00", "end_time": "15:00"},
+        )
+        self.assertEqual(first.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(second.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(overlap.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_staff_can_restore_base_duration_with_null_override(self):
+        self.staff_service.duration_override_minutes = 60
+        self.staff_service.save(update_fields=("duration_override_minutes",))
+        response = self.client.patch(
+            reverse("staff-service-detail", args=(self.staff_service.id,)),
+            {"duration_override_minutes": None},
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["base_duration_minutes"], 45)
+        self.assertEqual(response.data["effective_duration_minutes"], 45)

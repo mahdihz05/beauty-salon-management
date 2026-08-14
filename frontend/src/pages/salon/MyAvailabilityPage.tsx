@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { CheckCircle2, Clock9, CalendarOff } from "lucide-react";
+import { CheckCircle2, Clock9, CalendarOff, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { api, getApiError } from "../../api/client";
 import { SalonLayout } from "../../components/SalonLayout";
@@ -72,7 +72,13 @@ export function MyAvailabilityPage() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["my-shifts"] }),
   });
   const saveDuration = useMutation({
-    mutationFn: async ({ id, duration }: { id: number; duration: number }) =>
+    mutationFn: async ({
+      id,
+      duration,
+    }: {
+      id: number;
+      duration: number | null;
+    }) =>
       api.patch(`/management/staff-services/${id}/`, {
         duration_override_minutes: duration,
       }),
@@ -89,6 +95,17 @@ export function MyAvailabilityPage() {
       setTimeOff({ starts_at: "", ends_at: "", reason: "" });
       await queryClient.invalidateQueries({ queryKey: ["my-time-offs"] });
     },
+  });
+  const deleteShift = useMutation({
+    mutationFn: async (id: number) =>
+      api.delete(`/management/staff-shifts/${id}/`),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["my-shifts"] }),
+  });
+  const deleteTimeOff = useMutation({
+    mutationFn: async (id: number) =>
+      api.delete(`/management/staff-time-offs/${id}/`),
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: ["my-time-offs"] }),
   });
   const error =
     staffQuery.error ||
@@ -119,52 +136,83 @@ export function MyAvailabilityPage() {
             </div>
             <div className="weekly-hours-list">
               {days.map((day, index) => {
-                const current = shifts.data?.results.find(
-                  (item) => item.day_of_week === index,
-                );
+                const current =
+                  shifts.data?.results.filter(
+                    (item) => item.day_of_week === index && !item.is_off,
+                  ) ?? [];
                 return (
-                  <form
-                    className="weekly-hours-row"
-                    key={day}
-                    onSubmit={(event) => {
-                      event.preventDefault();
-                      const form = new FormData(event.currentTarget);
-                      const isOff = form.get("is_off") === "on";
-                      saveShift.mutate({
-                        id: current?.id ?? 0,
-                        staff: profile.id,
-                        day_of_week: index,
-                        start_time: isOff
-                          ? null
-                          : String(form.get("start_time")),
-                        end_time: isOff ? null : String(form.get("end_time")),
-                        is_off: isOff,
-                      });
-                    }}
-                  >
+                  <div className="availability-card" key={day}>
                     <strong>{day}</strong>
-                    <input
-                      name="start_time"
-                      type="time"
-                      defaultValue={current?.start_time?.slice(0, 5) ?? "09:00"}
-                    />
-                    <input
-                      name="end_time"
-                      type="time"
-                      defaultValue={current?.end_time?.slice(0, 5) ?? "18:00"}
-                    />
-                    <label>
+                    {current.map((window) => (
+                      <form
+                        className="weekly-hours-row"
+                        key={window.id}
+                        onSubmit={(event) => {
+                          event.preventDefault();
+                          const form = new FormData(event.currentTarget);
+                          saveShift.mutate({
+                            ...window,
+                            start_time: String(form.get("start_time")),
+                            end_time: String(form.get("end_time")),
+                          });
+                        }}
+                      >
+                        <input
+                          name="start_time"
+                          type="time"
+                          defaultValue={window.start_time?.slice(0, 5)}
+                          required
+                        />
+                        <input
+                          name="end_time"
+                          type="time"
+                          defaultValue={window.end_time?.slice(0, 5)}
+                          required
+                        />
+                        <button className="button button-outline">
+                          <CheckCircle2 size={16} /> ذخیره
+                        </button>
+                        <button
+                          type="button"
+                          className="button button-outline"
+                          onClick={() => deleteShift.mutate(window.id)}
+                        >
+                          <Trash2 size={16} /> حذف
+                        </button>
+                      </form>
+                    ))}
+                    <form
+                      className="weekly-hours-row"
+                      onSubmit={(event) => {
+                        event.preventDefault();
+                        const form = new FormData(event.currentTarget);
+                        saveShift.mutate({
+                          id: 0,
+                          staff: profile.id,
+                          day_of_week: index,
+                          start_time: String(form.get("start_time")),
+                          end_time: String(form.get("end_time")),
+                          is_off: false,
+                        });
+                      }}
+                    >
                       <input
-                        name="is_off"
-                        type="checkbox"
-                        defaultChecked={current?.is_off ?? false}
-                      />{" "}
-                      تعطیل
-                    </label>
-                    <button className="button button-outline">
-                      <CheckCircle2 size={16} /> ذخیره
-                    </button>
-                  </form>
+                        name="start_time"
+                        type="time"
+                        defaultValue="09:00"
+                        required
+                      />
+                      <input
+                        name="end_time"
+                        type="time"
+                        defaultValue="13:00"
+                        required
+                      />
+                      <button className="button button-outline">
+                        <Plus size={16} /> افزودن بازه
+                      </button>
+                    </form>
+                  </div>
                 );
               })}
             </div>
@@ -177,21 +225,35 @@ export function MyAvailabilityPage() {
                 key={service.id}
                 onSubmit={(event) => {
                   event.preventDefault();
-                  const duration = Number(
-                    new FormData(event.currentTarget).get("duration"),
+                  const raw = String(
+                    new FormData(event.currentTarget).get("duration") ?? "",
                   );
+                  const duration = raw ? Number(raw) : null;
                   saveDuration.mutate({ id: service.id, duration });
                 }}
               >
                 <strong>{service.service_name}</strong>
+                <span>مدت پایه: {service.base_duration_minutes} دقیقه</span>
                 <input
                   name="duration"
                   type="number"
                   min="5"
-                  defaultValue={service.duration_override_minutes ?? 30}
+                  defaultValue={service.duration_override_minutes ?? ""}
+                  placeholder={String(service.base_duration_minutes)}
                 />
-                <span>دقیقه</span>
+                <span>
+                  مدت مؤثر: {service.effective_duration_minutes} دقیقه
+                </span>
                 <button className="button button-outline">ذخیره</button>
+                <button
+                  type="button"
+                  className="button button-outline"
+                  onClick={() =>
+                    saveDuration.mutate({ id: service.id, duration: null })
+                  }
+                >
+                  استفاده از مدت پایه
+                </button>
               </form>
             ))}
           </section>
@@ -244,6 +306,12 @@ export function MyAvailabilityPage() {
               <p key={item.id}>
                 {new Date(item.starts_at).toLocaleString("fa-IR")} تا{" "}
                 {new Date(item.ends_at).toLocaleString("fa-IR")} — {item.reason}
+                <button
+                  className="button button-outline"
+                  onClick={() => deleteTimeOff.mutate(item.id)}
+                >
+                  <Trash2 size={15} /> حذف
+                </button>
               </p>
             ))}
           </section>

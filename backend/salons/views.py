@@ -37,6 +37,7 @@ from .serializers import (
     SalonSerializer,
     ServiceCategorySerializer,
     ServiceSerializer,
+    StaffBranchSerializer,
     StaffSerializer,
     StaffServiceSerializer,
     StaffShiftSerializer,
@@ -100,6 +101,8 @@ class SalonViewSet(viewsets.ModelViewSet):
             return queryset
         if user.role == User.Role.SALON_OWNER:
             return queryset.filter(owner=user)
+        if user.role == User.Role.STAFF:
+            return queryset.none()
         allowed_branches = Branch.objects.filter(
             memberships__user=user, memberships__is_active=True
         ).select_related("city")
@@ -151,6 +154,11 @@ class BranchViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated, HasBranchAccess]
     filterset_fields = ("salon", "city", "is_active")
     search_fields = ("name", "address", "phone")
+
+    def get_serializer_class(self):
+        if getattr(self.request.user, "role", None) == User.Role.STAFF:
+            return StaffBranchSerializer
+        return BranchSerializer
 
     def get_queryset(self):
         return Branch.objects.filter(
@@ -256,6 +264,9 @@ class BranchScopedViewSet(viewsets.ModelViewSet):
         )
 
     def perform_update(self, serializer):
+        branch_id = self.branch_id_from_validated_data(serializer)
+        if branch_id is not None and branch_id not in set(manageable_branch_ids(self.request.user)):
+            raise PermissionDenied("به شعبه مقصد دسترسی مدیریتی ندارید.")
         instance = serializer.save()
         record_audit(
             request=self.request,
@@ -344,7 +355,27 @@ class SelfStaffWritableMixin:
         super().perform_update(serializer)
 
 
-class StaffShiftViewSet(SelfStaffWritableMixin, BranchScopedViewSet):
+class OwnStaffScheduleWriteMixin(SelfStaffWritableMixin):
+    """Personal availability is writable only by the linked staff account."""
+
+    def _require_own_staff(self, staff):
+        if not self._is_own_staff(staff):
+            raise PermissionDenied("فقط خود آرایشگر می‌تواند برنامه شخصی خود را تغییر دهد.")
+
+    def perform_create(self, serializer):
+        self._require_own_staff(serializer.validated_data.get("staff"))
+        serializer.save()
+
+    def perform_update(self, serializer):
+        self._require_own_staff(serializer.instance)
+        serializer.save()
+
+    def perform_destroy(self, instance):
+        self._require_own_staff(instance)
+        instance.delete()
+
+
+class StaffShiftViewSet(OwnStaffScheduleWriteMixin, BranchScopedViewSet):
     serializer_class = StaffShiftSerializer
     filterset_fields = ("staff", "day_of_week", "is_off")
 
@@ -373,14 +404,17 @@ class StaffServiceViewSet(SelfStaffWritableMixin, BranchScopedViewSet):
 
     def perform_update(self, serializer):
         if self._is_own_staff(serializer.instance):
-            if "price_override" in serializer.validated_data:
+            if "price_override" in self.request.data:
                 raise ValidationError("آرایشگر اجازه تغییر قیمت خدمت را ندارد.")
+            forbidden = set(serializer.validated_data) - {"duration_override_minutes"}
+            if forbidden:
+                raise ValidationError("آرایشگر فقط اجازه تغییر مدت اختصاصی خدمت را دارد.")
             serializer.save()
             return
         super().perform_update(serializer)
 
 
-class StaffTimeOffViewSet(SelfStaffWritableMixin, BranchScopedViewSet):
+class StaffTimeOffViewSet(OwnStaffScheduleWriteMixin, BranchScopedViewSet):
     serializer_class = StaffTimeOffSerializer
     filterset_fields = ("staff",)
 

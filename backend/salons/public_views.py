@@ -1,7 +1,7 @@
 import hashlib
 
 from django.core.cache import cache
-from django.db.models import Count, Exists, Min, OuterRef, Prefetch, Q
+from django.db.models import Count, Exists, OuterRef, Prefetch, Q
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 from rest_framework import mixins, viewsets
@@ -74,7 +74,7 @@ class PublicSalonViewSet(viewsets.ReadOnlyModelViewSet):
         "branches__branch_services__service__name",
         "branches__branch_services__service__category__name",
     )
-    ordering_fields = ("rating_average", "review_count", "created_at", "min_price")
+    ordering_fields = ("rating_average", "review_count", "created_at")
     ordering = ("-is_featured", "-rating_average", "name")
 
     def get_serializer_class(self):
@@ -97,16 +97,13 @@ class PublicSalonViewSet(viewsets.ReadOnlyModelViewSet):
         )
         queryset = (
             Salon.objects.filter(status=Salon.Status.APPROVED)
-            .annotate(min_price=Min("branches__branch_services__price"))
             .prefetch_related(Prefetch("branches", queryset=branches), "images")
             .distinct()
         )
         if self.request.user.is_authenticated:
             queryset = queryset.annotate(
                 _is_favorite=Exists(
-                    FavoriteSalon.objects.filter(
-                        salon_id=OuterRef("pk"), user=self.request.user
-                    )
+                    FavoriteSalon.objects.filter(salon_id=OuterRef("pk"), user=self.request.user)
                 )
             )
         return queryset

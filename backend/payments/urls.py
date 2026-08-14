@@ -2,11 +2,13 @@ from django.urls import path
 
 from .views import (
     ConfirmPaymentView,
+    FinanceCsvView,
     MyWalletView,
     PaymentCallbackView,
     PaymentListView,
     ProcessSettlementView,
     RecordRemainderPaymentView,
+    SalonFinanceDetailView,
     SalonFinanceSummaryView,
     SettlementListCreateView,
     StartPaymentView,
@@ -28,6 +30,8 @@ urlpatterns = [
     path("<int:pk>/callback/", PaymentCallbackView.as_view(), name="payment-callback"),
     path("wallet/", MyWalletView.as_view(), name="my-wallet"),
     path("salons/", SalonFinanceSummaryView.as_view(), name="salon-finance-summary"),
+    path("salons/<int:salon_id>/", SalonFinanceDetailView.as_view(), name="salon-finance-detail"),
+    path("export.csv", FinanceCsvView.as_view(), name="finance-csv"),
     path("settlements/", SettlementListCreateView.as_view(), name="settlement-list"),
     path(
         "settlements/<int:pk>/process/", ProcessSettlementView.as_view(), name="settlement-process"

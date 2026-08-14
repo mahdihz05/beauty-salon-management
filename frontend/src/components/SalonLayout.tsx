@@ -9,6 +9,7 @@ import {
   UsersRound,
   ContactRound,
   BadgePercent,
+  BadgeDollarSign,
 } from "lucide-react";
 import type { PropsWithChildren } from "react";
 import { Link, useLocation } from "wouter";
@@ -69,6 +70,12 @@ const navigation: Array<{
     label: "تخفیف و پیامک",
     icon: BadgePercent,
     roles: ["salon_owner"],
+  },
+  {
+    href: "/salon/finance",
+    label: "مالی و تسویه",
+    icon: BadgeDollarSign,
+    roles: ["salon_owner", "branch_manager"],
   },
   {
     href: "/salon/reports",

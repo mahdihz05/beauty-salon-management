@@ -204,6 +204,8 @@ class BookingViewSet(viewsets.ReadOnlyModelViewSet):
             return Response({"detail": "اجازه پذیرش این نوبت را ندارید."}, status=403)
         if booking.status != Booking.Status.CONFIRMED:
             return Response({"detail": "فقط نوبت تأییدشده قابل پذیرش است."}, status=400)
+        if request.user.role == User.Role.RECEPTIONIST and booking.source != Booking.Source.ONLINE:
+            return Response({"detail": "پذیرش فقط برای نوبت‌های آنلاین قابل ثبت است."}, status=400)
         if booking.checked_in_at is None:
             from django.utils import timezone
 

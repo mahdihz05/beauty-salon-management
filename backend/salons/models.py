@@ -287,9 +287,7 @@ class StaffShift(models.Model):
 
     class Meta:
         ordering = ("day_of_week", "start_time")
-        constraints = [
-            models.UniqueConstraint(fields=("staff", "day_of_week"), name="unique_staff_day_shift")
-        ]
+        indexes = [models.Index(fields=("staff", "day_of_week"), name="staff_day_window_idx")]
         verbose_name = "شیفت آرایشگر"
         verbose_name_plural = "شیفت‌های آرایشگر"
 

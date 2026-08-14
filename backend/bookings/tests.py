@@ -86,6 +86,63 @@ class BookingEngineBase:
 
 
 class BookingEngineTests(BookingEngineBase, TestCase):
+    def test_multiple_branch_and_staff_windows_are_intersected(self):
+        day = (self.target_date.weekday() + 2) % 7
+        self.branch.working_hours = {
+            str(day): [
+                {"start": "09:00", "end": "12:00"},
+                {"start": "14:00", "end": "18:00"},
+            ]
+        }
+        self.branch.save(update_fields=("working_hours",))
+        StaffShift.objects.filter(staff=self.staff_one, day_of_week=day).delete()
+        StaffShift.objects.create(
+            staff=self.staff_one, day_of_week=day, start_time=time(10), end_time=time(13)
+        )
+        StaffShift.objects.create(
+            staff=self.staff_one, day_of_week=day, start_time=time(15), end_time=time(17)
+        )
+
+        slots = get_available_slots(
+            branch=self.branch,
+            service_ids=[self.service_one.id],
+            target_date=self.target_date,
+            staff_id=self.staff_one.id,
+            now=self.reference_now,
+        )
+
+        self.assertTrue(slots)
+        self.assertTrue(
+            all(
+                self.at(10) <= slot.start_at < self.at(12)
+                or self.at(15) <= slot.start_at < self.at(17)
+                for slot in slots
+            )
+        )
+
+    def test_staff_override_is_summed_and_booking_items_keep_snapshot(self):
+        assignment = StaffService.objects.get(staff=self.staff_one, branch_service=self.service_one)
+        assignment.duration_override_minutes = 60
+        assignment.save(update_fields=("duration_override_minutes",))
+        slots = get_available_slots(
+            branch=self.branch,
+            service_ids=[self.service_one.id, self.service_two.id],
+            target_date=self.target_date,
+            staff_id=self.staff_one.id,
+            now=self.reference_now,
+        )
+        self.assertEqual(slots[0].duration_minutes, 105)
+        booking = create_booking_hold(
+            customer=self.customer,
+            branch=self.branch,
+            service_ids=[self.service_one.id, self.service_two.id],
+            staff_id=self.staff_one.id,
+            start_at=slots[0].start_at,
+        )
+        assignment.duration_override_minutes = None
+        assignment.save(update_fields=("duration_override_minutes",))
+        self.assertEqual(list(booking.items.values_list("duration_minutes", flat=True)), [60, 45])
+
     def test_branch_weekly_hours_limit_staff_shift(self):
         day = (self.target_date.weekday() + 2) % 7
         self.branch.working_hours = {str(day): {"is_open": True, "start": "10:00", "end": "12:00"}}

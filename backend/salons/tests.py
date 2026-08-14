@@ -189,7 +189,7 @@ class SalonManagementAPITests(APITestCase):
             },
         )
 
-        self.assertEqual(shift_response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(shift_response.status_code, status.HTTP_403_FORBIDDEN)
         self.assertEqual(skill_response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(BranchService.objects.count(), 1)
         self.assertEqual(Staff.objects.get().full_name, "سارا احمدی")

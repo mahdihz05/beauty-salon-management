@@ -79,7 +79,6 @@ class PublicSalonListSerializer(serializers.ModelSerializer):
     city = serializers.SerializerMethodField()
     district = serializers.SerializerMethodField()
     cover_image = serializers.SerializerMethodField()
-    min_price = serializers.SerializerMethodField()
     is_favorite = serializers.SerializerMethodField()
 
     class Meta:
@@ -97,7 +96,6 @@ class PublicSalonListSerializer(serializers.ModelSerializer):
             "city",
             "district",
             "cover_image",
-            "min_price",
             "is_favorite",
         )
 
@@ -117,18 +115,6 @@ class PublicSalonListSerializer(serializers.ModelSerializer):
         request = self.context.get("request")
         return request.build_absolute_uri(image.image.url) if request else image.image.url
 
-    def get_min_price(self, obj) -> int | None:
-        annotated = getattr(obj, "min_price", None)
-        if annotated is not None:
-            return annotated
-        prices = [
-            service.price
-            for branch in obj.branches.all()
-            for service in branch.branch_services.all()
-            if service.is_active
-        ]
-        return min(prices) if prices else None
-
     def get_is_favorite(self, obj) -> bool:
         request = self.context.get("request")
         annotated = getattr(obj, "_is_favorite", None)
@@ -142,11 +128,22 @@ class PublicSalonListSerializer(serializers.ModelSerializer):
 
 
 class PublicSalonDetailSerializer(PublicSalonListSerializer):
+    min_price = serializers.SerializerMethodField()
     images = PublicSalonImageSerializer(many=True, read_only=True)
     branches = PublicBranchSerializer(many=True, read_only=True)
 
     class Meta(PublicSalonListSerializer.Meta):
-        fields = PublicSalonListSerializer.Meta.fields + ("images", "branches")
+        fields = PublicSalonListSerializer.Meta.fields + ("min_price", "images", "branches")
+
+    @staticmethod
+    def get_min_price(obj) -> int | None:
+        prices = [
+            service.price
+            for branch in obj.branches.all()
+            for service in branch.branch_services.all()
+            if service.is_active
+        ]
+        return min(prices) if prices else None
 
 
 class FavoriteSalonSerializer(serializers.ModelSerializer):

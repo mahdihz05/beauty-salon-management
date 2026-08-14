@@ -12,9 +12,10 @@ from core.models import AuditLog
 from salons.models import Branch, City, Salon, Staff
 
 from .models import Payment, Settlement, Wallet, WalletTransaction
-from .services import credit_salon_for_booking
+from .services import cancel_booking_with_policy, credit_salon_for_booking
 
 
+@override_settings(ENABLE_LEGACY_PAYMENT_ENDPOINTS=True)
 class PaymentAPITests(APITestCase):
     def setUp(self):
         self.customer = User.objects.create_user(phone="09120000101")
@@ -174,6 +175,75 @@ class PaymentAPITests(APITestCase):
         self.assertEqual(checked_in.status_code, status.HTTP_200_OK)
         booking.refresh_from_db()
         self.assertEqual(booking.checked_in_by, receptionist)
+
+    def test_receptionist_cannot_check_in_walk_in_booking(self):
+        receptionist = User.objects.create_user(phone="09120000116", role=User.Role.RECEPTIONIST)
+        BranchMembership.objects.create(
+            user=receptionist, branch=self.branch, role=BranchMembership.Role.RECEPTIONIST
+        )
+        booking = self.make_booking()
+        booking.status = Booking.Status.CONFIRMED
+        booking.source = Booking.Source.WALK_IN
+        booking.hold_expires_at = None
+        booking.save(update_fields=("status", "source", "hold_expires_at"))
+        self.client.force_authenticate(receptionist)
+        response = self.client.post(reverse("booking-check-in", args=(booking.pk,)))
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_exact_24_hour_cancellation_boundary_is_allowed(self):
+        now = timezone.now()
+        booking = self.make_booking()
+        booking.start_at = now + timedelta(hours=24)
+        booking.end_at = booking.start_at + timedelta(hours=1)
+        booking.save(update_fields=("start_at", "end_at"))
+        cancelled, _ = cancel_booking_with_policy(booking_id=booking.id, reason="boundary", now=now)
+        self.assertEqual(cancelled.status, Booking.Status.CANCELLED)
+
+    @override_settings(ENABLE_LEGACY_PAYMENT_ENDPOINTS=False)
+    def test_legacy_gateway_start_is_disabled_for_new_flow(self):
+        self.client.force_authenticate(self.customer)
+        response = self.client.post(
+            reverse("payment-start"), {"booking": self.make_booking().id, "type": Payment.Type.FULL}
+        )
+        self.assertEqual(response.status_code, status.HTTP_410_GONE)
+
+    def test_branch_manager_finance_does_not_include_other_branch(self):
+        manager = User.objects.create_user(phone="09120000117", role=User.Role.BRANCH_MANAGER)
+        BranchMembership.objects.create(
+            user=manager, branch=self.branch, role=BranchMembership.Role.MANAGER
+        )
+        other_branch = Branch.objects.create(
+            salon=self.branch.salon,
+            city=self.branch.city,
+            name="شعبه دوم",
+            address="نشانی",
+            phone="02100000009",
+        )
+        other_staff = Staff.objects.create(branch=other_branch, first_name="مریم")
+        own_booking = self.make_booking()
+        other_booking = Booking.objects.create(
+            customer=self.customer,
+            branch=other_branch,
+            staff=other_staff,
+            start_at=timezone.now() + timedelta(days=3),
+            end_at=timezone.now() + timedelta(days=3, hours=1),
+            total_price=900_000,
+        )
+        Payment.objects.create(
+            booking=own_booking, amount=100_000, type=Payment.Type.FULL, status=Payment.Status.PAID
+        )
+        Payment.objects.create(
+            booking=other_booking,
+            amount=900_000,
+            type=Payment.Type.FULL,
+            status=Payment.Status.PAID,
+        )
+        self.client.force_authenticate(manager)
+        summary = self.client.get(reverse("salon-finance-summary"))
+        detail = self.client.get(reverse("salon-finance-detail", args=(self.branch.salon_id,)))
+        self.assertEqual(summary.data["results"][0]["gross_revenue"], 100_000)
+        self.assertEqual(summary.data["results"][0]["branch_count"], 1)
+        self.assertEqual([row["id"] for row in detail.data["branches"]], [self.branch.id])
 
     def test_card_to_card_receipt_requires_manager_verification(self):
         manager = User.objects.create_user(phone="09120000107", role=User.Role.BRANCH_MANAGER)

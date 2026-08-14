@@ -155,7 +155,7 @@ test("admin dashboard loads protected live statistics", async ({
   });
 
   await page.goto("/admin/finance");
-  await expect(page.locator(".finance-section")).toHaveCount(3);
+  await expect(page.locator(".finance-section")).toHaveCount(4);
   await expect(
     page.locator('.panel-nav-item[href="/admin/finance"]'),
   ).toHaveClass(/active/);
@@ -285,7 +285,7 @@ test("tablet keeps public and panel layouts usable without horizontal overflow",
     await page.goto(path);
     await expectNoHorizontalOverflow(page);
     if (path === "/admin/finance") {
-      await expect(page.locator(".finance-section")).toHaveCount(3);
+      await expect(page.locator(".finance-section")).toHaveCount(4);
       await expect(
         page.locator(".finance-salon-grid button").first(),
       ).toBeVisible();
@@ -314,7 +314,7 @@ test("admin finance and support tabs stay responsive on mobile", async ({
   await expectNoHorizontalOverflow(page);
 
   await page.goto("/admin/finance");
-  await expect(page.locator(".finance-section")).toHaveCount(3);
+  await expect(page.locator(".finance-section")).toHaveCount(4);
   await expectNoHorizontalOverflow(page);
   await page.screenshot({
     path: testInfo.outputPath("mobile-admin-finance.png"),

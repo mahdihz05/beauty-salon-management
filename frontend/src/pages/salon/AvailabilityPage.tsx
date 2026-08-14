@@ -21,14 +21,14 @@ const days = [
   "پنجشنبه",
   "جمعه",
 ];
-type WorkingDay = { is_open: boolean; start: string; end: string };
-type WorkingHours = Record<string, WorkingDay>;
+type WorkingWindow = { start: string; end: string };
+type WorkingHours = Record<string, WorkingWindow[]>;
 
 function defaultHours(): WorkingHours {
   return Object.fromEntries(
     days.map((_, index) => [
       String(index),
-      { is_open: index !== 6, start: "09:00", end: "20:00" },
+      index !== 6 ? [{ start: "09:00", end: "20:00" }] : [],
     ]),
   );
 }
@@ -40,10 +40,14 @@ function normalizeHours(value?: Branch["working_hours"]): WorkingHours {
     days.map((_, index) => {
       const item = value[String(index)];
       const normalized = Array.isArray(item)
-        ? { is_open: true, start: item[0], end: item[1] }
-        : item
-          ? { ...item }
-          : fallback[String(index)];
+        ? typeof item[0] === "string"
+          ? [{ start: item[0], end: item[1] as string }]
+          : (item as WorkingWindow[])
+        : item?.is_open
+          ? [{ start: item.start, end: item.end }]
+          : item
+            ? []
+            : fallback[String(index)];
       return [String(index), normalized];
     }),
   );
@@ -192,65 +196,101 @@ export function AvailabilityPage() {
         </div>
         <div className="weekly-hours-list">
           {days.map((day, index) => {
-            const value = hours[String(index)];
+            const windows = hours[String(index)];
+            const isOpen = windows.length > 0;
             return (
               <div
-                className={`weekly-hours-row ${value.is_open ? "" : "closed"}`}
+                className={`weekly-hours-row ${isOpen ? "" : "closed"}`}
                 key={day}
               >
                 <label className="day-switch">
                   <input
                     type="checkbox"
-                    checked={value.is_open}
+                    checked={isOpen}
                     onChange={(event) => {
                       setSaved(false);
                       setHours({
                         ...hours,
-                        [String(index)]: {
-                          ...value,
-                          is_open: event.target.checked,
-                        },
+                        [String(index)]: event.target.checked
+                          ? [{ start: "09:00", end: "20:00" }]
+                          : [],
                       });
                     }}
                   />
                   <span>{day}</span>
                 </label>
-                {value.is_open ? (
-                  <div className="weekly-time-range">
-                    <label>
-                      از
-                      <input
-                        type="time"
-                        value={value.start}
-                        onChange={(event) => {
-                          setSaved(false);
-                          setHours({
-                            ...hours,
-                            [String(index)]: {
-                              ...value,
-                              start: event.target.value,
-                            },
-                          });
-                        }}
-                      />
-                    </label>
-                    <label>
-                      تا
-                      <input
-                        type="time"
-                        value={value.end}
-                        onChange={(event) => {
-                          setSaved(false);
-                          setHours({
-                            ...hours,
-                            [String(index)]: {
-                              ...value,
-                              end: event.target.value,
-                            },
-                          });
-                        }}
-                      />
-                    </label>
+                {isOpen ? (
+                  <div>
+                    {windows.map((window, windowIndex) => (
+                      <div
+                        className="weekly-time-range"
+                        key={`${day}-${windowIndex}`}
+                      >
+                        <label>
+                          از{" "}
+                          <input
+                            type="time"
+                            value={window.start}
+                            onChange={(event) => {
+                              const next = [...windows];
+                              next[windowIndex] = {
+                                ...window,
+                                start: event.target.value,
+                              };
+                              setSaved(false);
+                              setHours({ ...hours, [String(index)]: next });
+                            }}
+                          />
+                        </label>
+                        <label>
+                          تا{" "}
+                          <input
+                            type="time"
+                            value={window.end}
+                            onChange={(event) => {
+                              const next = [...windows];
+                              next[windowIndex] = {
+                                ...window,
+                                end: event.target.value,
+                              };
+                              setSaved(false);
+                              setHours({ ...hours, [String(index)]: next });
+                            }}
+                          />
+                        </label>
+                        <button
+                          type="button"
+                          className="button button-outline"
+                          onClick={() => {
+                            setSaved(false);
+                            setHours({
+                              ...hours,
+                              [String(index)]: windows.filter(
+                                (_, i) => i !== windowIndex,
+                              ),
+                            });
+                          }}
+                        >
+                          حذف
+                        </button>
+                      </div>
+                    ))}
+                    <button
+                      type="button"
+                      className="button button-outline"
+                      onClick={() => {
+                        setSaved(false);
+                        setHours({
+                          ...hours,
+                          [String(index)]: [
+                            ...windows,
+                            { start: "14:00", end: "20:00" },
+                          ],
+                        });
+                      }}
+                    >
+                      افزودن بازه
+                    </button>
                   </div>
                 ) : (
                   <strong className="closed-label">بسته</strong>

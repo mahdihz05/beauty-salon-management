@@ -147,7 +147,7 @@ export function MyBookingsPage() {
       setNotice(
         result.refund_amount
           ? `${toman(result.refund_amount)} به کیف پول شما بازگشت.`
-          : "رزرو لغو شد؛ به‌دلیل فاصله کمتر از ۲۴ ساعت، مبلغی بازپرداخت نشد.",
+          : "رزرو با موفقیت لغو شد.",
       );
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ["my-bookings"] }),

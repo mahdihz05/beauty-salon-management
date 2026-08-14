@@ -1,6 +1,7 @@
 """Django settings for the NobatAra salon booking API."""
 
 import os
+import sys
 from datetime import timedelta
 from pathlib import Path
 from tempfile import gettempdir
@@ -218,6 +219,9 @@ OTP_REQUEST_LIMIT_PER_HOUR = int(os.getenv("OTP_REQUEST_LIMIT_PER_HOUR", "5"))
 OTP_PROVIDER = os.getenv("OTP_PROVIDER", "mock")
 OTP_EXPOSE_MOCK_CODE = env_bool("OTP_EXPOSE_MOCK_CODE", DEBUG)
 PAYMENT_PROVIDER = os.getenv("PAYMENT_PROVIDER", "mock")
+ENABLE_LEGACY_PAYMENT_ENDPOINTS = env_bool(
+    "ENABLE_LEGACY_PAYMENT_ENDPOINTS", "test" in sys.argv or "pytest" in sys.modules
+)
 PLATFORM_COMMISSION_PERCENT = int(os.getenv("PLATFORM_COMMISSION_PERCENT", "10"))
 CANCELLATION_FREE_HOURS = int(os.getenv("CANCELLATION_FREE_HOURS", "24"))
 MAX_IMAGE_UPLOAD_BYTES = int(os.getenv("MAX_IMAGE_UPLOAD_BYTES", str(5 * 1024 * 1024)))

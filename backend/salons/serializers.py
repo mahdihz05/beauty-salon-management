@@ -134,31 +134,54 @@ class BranchSerializer(serializers.ModelSerializer):
             )
         normalized = {}
         for day in range(7):
-            raw = value.get(str(day), {"is_open": False, "start": "09:00", "end": "18:00"})
-            if isinstance(raw, list) and len(raw) == 2:
-                raw = {"is_open": True, "start": raw[0], "end": raw[1]}
-            if not isinstance(raw, dict):
+            raw = value.get(str(day), [])
+            if isinstance(raw, dict):
+                raw = [raw] if raw.get("is_open", False) else []
+            elif isinstance(raw, list) and len(raw) == 2 and all(isinstance(v, str) for v in raw):
+                raw = [{"start": raw[0], "end": raw[1]}]
+            if not isinstance(raw, list):
                 raise serializers.ValidationError(
                     {"working_hours": f"ساختار ساعات روز {day} معتبر نیست."}
                 )
-            is_open = bool(raw.get("is_open", False))
-            start = raw.get("start", "09:00")
-            end = raw.get("end", "18:00")
-            try:
-                from datetime import time
+            windows = []
+            for window in raw:
+                if not isinstance(window, dict):
+                    raise serializers.ValidationError(
+                        {"working_hours": f"بازه روز {day} معتبر نیست."}
+                    )
+                start, end = window.get("start"), window.get("end")
+                try:
+                    from datetime import time
 
-                start_value = time.fromisoformat(start)
-                end_value = time.fromisoformat(end)
-            except (TypeError, ValueError):
+                    start_value, end_value = time.fromisoformat(start), time.fromisoformat(end)
+                except (TypeError, ValueError):
+                    raise serializers.ValidationError(
+                        {"working_hours": "ساعت شروع و پایان باید معتبر باشد."}
+                    ) from None
+                if start_value >= end_value:
+                    raise serializers.ValidationError(
+                        {"working_hours": "ساعت پایان باید پس از ساعت شروع باشد."}
+                    )
+                windows.append((start_value, end_value, {"start": start[:5], "end": end[:5]}))
+            windows.sort(key=lambda item: item[0])
+            if any(
+                current[0] < previous[1]
+                for previous, current in zip(windows, windows[1:], strict=False)
+            ):
                 raise serializers.ValidationError(
-                    {"working_hours": "ساعت شروع و پایان باید معتبر باشد."}
-                ) from None
-            if is_open and start_value >= end_value:
-                raise serializers.ValidationError(
-                    {"working_hours": "ساعت پایان باید پس از ساعت شروع باشد."}
+                    {"working_hours": f"بازه‌های روز {day} نباید هم‌پوشانی داشته باشند."}
                 )
-            normalized[str(day)] = {"is_open": is_open, "start": start[:5], "end": end[:5]}
+            normalized[str(day)] = [item[2] for item in windows]
         return normalized
+
+
+class StaffBranchSerializer(serializers.ModelSerializer):
+    salon_name = serializers.CharField(source="salon.name", read_only=True)
+
+    class Meta:
+        model = Branch
+        fields = ("id", "salon", "salon_name", "name", "is_active")
+        read_only_fields = fields
 
 
 class BranchClosureSerializer(serializers.ModelSerializer):
@@ -256,6 +279,22 @@ class StaffShiftSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("برای روز کاری، ساعت شروع و پایان الزامی است.")
         if not is_off and start >= end:
             raise serializers.ValidationError("ساعت پایان باید پس از ساعت شروع باشد.")
+        staff = attrs.get("staff", getattr(self.instance, "staff", None))
+        day = attrs.get("day_of_week", getattr(self.instance, "day_of_week", None))
+        if staff and not is_off:
+            overlapping = StaffShift.objects.filter(
+                staff=staff,
+                day_of_week=day,
+                is_off=False,
+                start_time__lt=end,
+                end_time__gt=start,
+            )
+            if self.instance:
+                overlapping = overlapping.exclude(pk=self.instance.pk)
+            if overlapping.exists():
+                raise serializers.ValidationError(
+                    "بازه کاری با بازه دیگری در همان روز هم‌پوشانی دارد."
+                )
         return attrs
 
 
@@ -273,6 +312,10 @@ class StaffTimeOffSerializer(serializers.ModelSerializer):
 
 class StaffServiceSerializer(serializers.ModelSerializer):
     service_name = serializers.CharField(source="branch_service.service.name", read_only=True)
+    base_duration_minutes = serializers.IntegerField(
+        source="branch_service.duration_minutes", read_only=True
+    )
+    effective_duration_minutes = serializers.SerializerMethodField()
 
     class Meta:
         model = StaffService
@@ -281,10 +324,15 @@ class StaffServiceSerializer(serializers.ModelSerializer):
             "staff",
             "branch_service",
             "service_name",
-            "price_override",
+            "base_duration_minutes",
             "duration_override_minutes",
+            "effective_duration_minutes",
         )
         read_only_fields = ("id",)
+
+    @staticmethod
+    def get_effective_duration_minutes(obj) -> int:
+        return obj.duration_override_minutes or obj.branch_service.duration_minutes
 
     def validate(self, attrs):
         staff = attrs.get("staff", getattr(self.instance, "staff", None))

@@ -226,6 +226,11 @@ export default function App() {
                 </Suspense>
               </RoleRoute>
             </Route>
+            <Route path="/salon/finance">
+              <RoleRoute roles={["salon_owner", "branch_manager"]}>
+                <FinancePage />
+              </RoleRoute>
+            </Route>
             <Route path="/admin/dashboard">
               <RoleRoute roles={["admin"]}>
                 <AdminDashboardPage />

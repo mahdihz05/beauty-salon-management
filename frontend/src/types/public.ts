@@ -38,7 +38,7 @@ export interface PublicSalon {
   city: string;
   district: string;
   cover_image: string | null;
-  min_price: number | null;
+  min_price?: number | null;
   is_favorite: boolean;
   images?: { id: number; image: string; alt_text: string; is_cover: boolean }[];
   branches?: PublicBranch[];

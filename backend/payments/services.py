@@ -257,7 +257,7 @@ def record_remainder_payment(*, booking_id: int, method: str) -> Payment:
 
 
 @transaction.atomic
-def cancel_booking_with_policy(*, booking_id: int, reason: str) -> tuple[Booking, int]:
+def cancel_booking_with_policy(*, booking_id: int, reason: str, now=None) -> tuple[Booking, int]:
     booking = Booking.objects.select_for_update().get(pk=booking_id)
     if booking.status not in (
         Booking.Status.PENDING_PAYMENT,
@@ -268,7 +268,8 @@ def cancel_booking_with_policy(*, booking_id: int, reason: str) -> tuple[Booking
 
     refund_amount = 0
     free_hours = int(getattr(settings, "CANCELLATION_FREE_HOURS", 24))
-    eligible = booking.start_at - timezone.now() >= timedelta(hours=free_hours)
+    now = now or timezone.now()
+    eligible = booking.start_at - now >= timedelta(hours=free_hours)
     if not eligible:
         raise ValidationError("لغو نوبت فقط تا ۲۴ ساعت پیش از زمان شروع امکان‌پذیر است.")
     paid = list(
@@ -292,7 +293,7 @@ def cancel_booking_with_policy(*, booking_id: int, reason: str) -> tuple[Booking
         )
 
     booking.status = Booking.Status.CANCELLED
-    booking.cancelled_at = timezone.now()
+    booking.cancelled_at = now
     booking.cancellation_reason = reason[:500]
     booking.save(update_fields=("status", "cancelled_at", "cancellation_reason", "updated_at"))
     from notifications.models import Notification

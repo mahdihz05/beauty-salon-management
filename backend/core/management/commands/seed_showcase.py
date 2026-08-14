@@ -7,6 +7,7 @@ from django.core.files import File
 from django.core.management.base import BaseCommand
 from django.db import transaction
 from django.db.models import Count
+from django.db.models.deletion import ProtectedError
 from django.utils import timezone
 
 from accounts.models import BranchMembership, CustomerProfile, FavoriteSalon, User
@@ -100,18 +101,26 @@ SERVICE_CATALOG = {
 
 
 class Command(BaseCommand):
-    help = "Create a large, deterministic and relational showcase dataset."
+    help = "Create a compact, deterministic and safely replaceable showcase dataset."
 
     def add_arguments(self, parser):
-        parser.add_argument("--customers", type=int, default=600)
-        parser.add_argument("--salons", type=int, default=48)
-        parser.add_argument("--bookings-per-branch", type=int, default=36)
+        parser.add_argument("--customers", type=int, default=120)
+        parser.add_argument("--salons", type=int, default=12)
+        parser.add_argument("--bookings-per-branch", type=int, default=22)
+        parser.add_argument("--reset-showcase", action="store_true")
+        parser.add_argument("--dry-run", action="store_true")
 
     @transaction.atomic
     def handle(self, *args, **options):
         customer_count = max(100, min(options["customers"], 2_000))
         salon_count = max(12, min(options["salons"], 100))
         bookings_per_branch = max(20, min(options["bookings_per_branch"], 80))
+        if options["reset_showcase"]:
+            self._delete_safe_showcase()
+        if options["dry_run"]:
+            self.stdout.write(self.style.WARNING("Dry run: all database changes were rolled back."))
+            transaction.set_rollback(True)
+            return
         self._merge_legacy_demo_category()
         marker = AuditLog.objects.filter(action="showcase.seed_completed").first()
         if marker:
@@ -172,8 +181,59 @@ class Command(BaseCommand):
                 "bookings_per_branch": bookings_per_branch,
             },
         )
-        self.stdout.write(self.style.SUCCESS("Large showcase dataset is ready."))
+        self.stdout.write(self.style.SUCCESS("Compact showcase dataset is ready."))
         self._print_summary()
+
+    def _delete_safe_showcase(self):
+        """Remove only fully-marked showcase graphs; never delete a salon with real bookings."""
+        showcase_salons = Salon.objects.filter(slug__startswith="showcase-salon-")
+        safe_ids, retained_ids = [], []
+        for salon in showcase_salons:
+            has_real_booking = (
+                Booking.objects.filter(branch__salon=salon)
+                .exclude(notes__startswith="showcase-")
+                .exists()
+            )
+            (retained_ids if has_real_booking else safe_ids).append(salon.id)
+        bookings = Booking.objects.filter(
+            branch__salon_id__in=safe_ids, notes__startswith="showcase-"
+        )
+        booking_ids = list(bookings.values_list("id", flat=True))
+        Review.objects.filter(booking_id__in=booking_ids).delete()
+        Notification.objects.filter(booking_id__in=booking_ids).delete()
+        DiscountRedemption.objects.filter(booking_id__in=booking_ids).delete()
+        Payment.objects.filter(booking_id__in=booking_ids).delete()
+        WalletTransaction.objects.filter(related_booking_id__in=booking_ids).delete()
+        bookings.delete()
+        Settlement.objects.filter(salon_id__in=safe_ids).delete()
+        WalletTransaction.objects.filter(salon_id__in=safe_ids).delete()
+        Salon.objects.filter(id__in=safe_ids).delete()
+        AuditLog.objects.filter(action="showcase.seed_completed").delete()
+
+        removed_users = 0
+        generated = User.objects.filter(phone__regex=r"^099[1-5][0-9]{7}$").select_related("wallet")
+        for user in generated:
+            if (
+                user.bookings.exists()
+                or user.owned_salons.exists()
+                or Staff.objects.filter(user=user).exists()
+                or user.branch_memberships.exists()
+                or (
+                    hasattr(user, "wallet")
+                    and (user.wallet.transactions.exists() or user.wallet.settlements.exists())
+                )
+            ):
+                continue
+            try:
+                user.delete()
+            except ProtectedError:
+                continue
+            removed_users += 1
+        self.stdout.write(
+            f"Safe showcase reset: {len(safe_ids)} salons and {len(booking_ids)} bookings removed; "
+            f"{len(retained_ids)} salons retained because they contain unmarked data; "
+            f"{removed_users} unused users removed."
+        )
 
     def _create_locations(self):
         cities = []
@@ -312,7 +372,12 @@ class Command(BaseCommand):
         branches = []
         staff_by_branch = {}
         working_hours = {
-            str(day): {"start": "09:00", "end": "21:00", "is_open": day != 6} for day in range(7)
+            str(day): (
+                [{"start": "09:00", "end": "13:00"}, {"start": "15:00", "end": "21:00"}]
+                if day != 6
+                else []
+            )
+            for day in range(7)
         }
         for salon_index in range(salon_count):
             salon_type = (Salon.Type.WOMEN, Salon.Type.MEN, Salon.Type.UNISEX)[salon_index % 3]
@@ -320,7 +385,7 @@ class Command(BaseCommand):
                 slug=f"showcase-salon-{salon_index + 1}",
                 defaults={
                     "owner": owners[salon_index],
-                    "name": f"سالن {SALON_WORDS[salon_index % len(SALON_WORDS)]} {salon_index + 1}",
+                    "name": f"سالن {SALON_WORDS[salon_index % len(SALON_WORDS)]}",
                     "type": salon_type,
                     "description": "مجموعه حرفه‌ای زیبایی با تیم مجرب، رزرو فوری و خدمات متنوع.",
                     "status": Salon.Status.APPROVED,
@@ -342,9 +407,7 @@ class Command(BaseCommand):
                     defaults={
                         "city": city,
                         "district": district,
-                        "address": (
-                            f"{city.name}، {district.name}، خیابان نمونه، پلاک {branch_index + 10}"
-                        ),
+                        "address": (f"{city.name}، {district.name}، خیابان اصلی، مجتمع آفتاب"),
                         "phone": f"0218{branch_index:07d}",
                         "working_hours": working_hours,
                         "amenities": ["رزرو آنلاین", "پارکینگ", "پذیرایی", "وای‌فای"],

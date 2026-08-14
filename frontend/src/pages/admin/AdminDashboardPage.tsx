@@ -48,7 +48,7 @@ export function AdminDashboardPage() {
       value: stats.data?.approved_salons,
       icon: CheckCircle2,
     },
-    { label: "شعب فعال", value: stats.data?.branches, icon: Building2 },
+    { label: "شعب", value: stats.data?.branches, icon: Building2 },
     { label: "خدمات ثبت‌شده", value: stats.data?.services, icon: Scissors },
   ];
   return (
