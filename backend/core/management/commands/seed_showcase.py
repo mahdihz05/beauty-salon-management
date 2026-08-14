@@ -160,7 +160,7 @@ class Command(BaseCommand):
         self._ensure_product_salon_coverage()
         self._ensure_service_coverage()
         self._create_social_and_support(customers, salons, users["admin"], rng)
-        self._create_settlements(users["owners"], wallets, rng)
+        self._create_settlements(users["owners"], salons, wallets, rng)
         AuditLog.objects.create(
             actor=users["admin"],
             action="showcase.seed_completed",
@@ -275,9 +275,7 @@ class Command(BaseCommand):
                     user=customer,
                     email=f"customer{index + 1}@example.com",
                     gender=(
-                        CustomerProfile.Gender.WOMAN
-                        if index % 3
-                        else CustomerProfile.Gender.MAN
+                        CustomerProfile.Gender.WOMAN if index % 3 else CustomerProfile.Gender.MAN
                     ),
                 )
                 for index, customer in enumerate(customers)
@@ -314,8 +312,7 @@ class Command(BaseCommand):
         branches = []
         staff_by_branch = {}
         working_hours = {
-            str(day): {"start": "09:00", "end": "21:00", "is_open": day != 6}
-            for day in range(7)
+            str(day): {"start": "09:00", "end": "21:00", "is_open": day != 6} for day in range(7)
         }
         for salon_index in range(salon_count):
             salon_type = (Salon.Type.WOMEN, Salon.Type.MEN, Salon.Type.UNISEX)[salon_index % 3]
@@ -346,8 +343,7 @@ class Command(BaseCommand):
                         "city": city,
                         "district": district,
                         "address": (
-                            f"{city.name}، {district.name}، خیابان نمونه، "
-                            f"پلاک {branch_index + 10}"
+                            f"{city.name}، {district.name}، خیابان نمونه، پلاک {branch_index + 10}"
                         ),
                         "phone": f"0218{branch_index:07d}",
                         "working_hours": working_hours,
@@ -407,9 +403,7 @@ class Command(BaseCommand):
                                 "is_off": day == 6,
                             },
                         )
-                    for branch_service in branch_services[
-                        staff_number : staff_number + 6
-                    ]:
+                    for branch_service in branch_services[staff_number : staff_number + 6]:
                         StaffService.objects.get_or_create(
                             staff=staff, branch_service=branch_service
                         )
@@ -439,9 +433,7 @@ class Command(BaseCommand):
     def _services_for_salon(services, salon_type, offset, count):
         if salon_type == Salon.Type.MEN:
             men_categories = {"پیرایش مردانه", "پوست و زیبایی", "مراقبت مو", "ماساژ"}
-            preferred = [
-                service for service in services if service.category.name in men_categories
-            ]
+            preferred = [service for service in services if service.category.name in men_categories]
         elif salon_type == Salon.Type.WOMEN:
             preferred = [
                 service for service in services if service.category.name != "پیرایش مردانه"
@@ -550,6 +542,9 @@ class Command(BaseCommand):
                     branch=branch,
                     staff=staff,
                     status=status,
+                    source=(
+                        Booking.Source.WALK_IN if booking_index % 4 == 0 else Booking.Source.ONLINE
+                    ),
                     start_at=start,
                     end_at=start + timedelta(minutes=branch_service.duration_minutes),
                     total_price=branch_service.price,
@@ -563,9 +558,7 @@ class Command(BaseCommand):
                         else None
                     ),
                     cancelled_at=(
-                        now - timedelta(days=1)
-                        if status == Booking.Status.CANCELLED
-                        else None
+                        now - timedelta(days=1) if status == Booking.Status.CANCELLED else None
                     ),
                     cancellation_reason=(
                         "لغو نمونه توسط مشتری" if status == Booking.Status.CANCELLED else ""
@@ -602,6 +595,12 @@ class Command(BaseCommand):
                         amount=payable if full_payment else booking.deposit_amount,
                         type=Payment.Type.FULL if full_payment else Payment.Type.DEPOSIT,
                         status=Payment.Status.PAID,
+                        method=(
+                            Payment.Method.CARD_TO_CARD
+                            if index % 3 == 0
+                            else Payment.Method.IN_PERSON
+                        ),
+                        tracking_code=f"TRX{booking.id:08d}" if index % 3 == 0 else "",
                         gateway_ref=f"showcase-paid-{booking.id}",
                         paid_at=booking.start_at - timedelta(days=2),
                     )
@@ -695,6 +694,7 @@ class Command(BaseCommand):
                         amount=payable * 90 // 100,
                         type=WalletTransaction.Type.SALON_EARNING,
                         related_booking=booking,
+                        salon=booking.branch.salon,
                         description="درآمد سالن از رزرو تکمیل‌شده",
                     )
                 )
@@ -781,9 +781,7 @@ class Command(BaseCommand):
     def _ensure_service_coverage():
         branch_services = (
             BranchService.objects.select_related("branch__salon", "service")
-            .annotate(
-                customer_count=Count("booking_items__booking__customer", distinct=True)
-            )
+            .annotate(customer_count=Count("booking_items__booking__customer", distinct=True))
             .filter(customer_count__lt=3)
         )
         customers = list(User.objects.filter(role=User.Role.CUSTOMER).order_by("id")[:30])
@@ -826,18 +824,14 @@ class Command(BaseCommand):
                     )
             StaffService.objects.get_or_create(staff=staff, branch_service=branch_service)
             existing_customer_ids = set(
-                branch_service.booking_items.values_list(
-                    "booking__customer_id", flat=True
-                )
+                branch_service.booking_items.values_list("booking__customer_id", flat=True)
             )
             eligible_customers = [
                 customer for customer in customers if customer.id not in existing_customer_ids
             ]
             needed = 3 - branch_service.customer_count
             for index in range(needed):
-                customer = eligible_customers[
-                    (branch_service.id + index) % len(eligible_customers)
-                ]
+                customer = eligible_customers[(branch_service.id + index) % len(eligible_customers)]
                 start = (now - timedelta(days=200 + branch_service.id + index)).replace(
                     hour=11 + index * 2,
                     minute=0,
@@ -895,12 +889,13 @@ class Command(BaseCommand):
             refresh_salon_rating(branch.salon)
 
     @staticmethod
-    def _create_settlements(owners, wallets, rng):
+    def _create_settlements(owners, salons, wallets, rng):
         settlements = []
         for index, owner in enumerate(owners):
             settlements.append(
                 Settlement(
                     wallet=wallets[owner.id],
+                    salon=salons[index],
                     amount=500_000 + index % 8 * 250_000,
                     status=(
                         Settlement.Status.REQUESTED,

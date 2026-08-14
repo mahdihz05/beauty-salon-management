@@ -80,6 +80,7 @@ export interface Staff {
   id: number;
   branch: number;
   branch_name: string;
+  user: number | null;
   first_name: string;
   last_name: string;
   full_name: string;
@@ -87,6 +88,35 @@ export interface Staff {
   bio: string;
   experience_years: number;
   is_active: boolean;
+  shifts: StaffShift[];
+  staff_services: StaffService[];
+}
+
+export interface StaffShift {
+  id: number;
+  staff: number;
+  day_of_week: number;
+  day_label: string;
+  start_time: string | null;
+  end_time: string | null;
+  is_off: boolean;
+}
+
+export interface StaffService {
+  id: number;
+  staff: number;
+  branch_service: number;
+  service_name: string;
+  price_override: number | null;
+  duration_override_minutes: number | null;
+}
+
+export interface StaffTimeOff {
+  id: number;
+  staff: number;
+  starts_at: string;
+  ends_at: string;
+  reason: string;
 }
 
 export interface City {

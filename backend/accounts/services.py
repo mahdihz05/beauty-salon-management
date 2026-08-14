@@ -44,29 +44,46 @@ def verify_otp(*, phone: str, code: str) -> tuple[User, bool]:
     phone = normalize_iranian_phone(phone)
     invalid_code = False
     with transaction.atomic():
-        challenge = (
+        challenges = list(
             OTPChallenge.objects.select_for_update()
             .filter(phone=phone, purpose=OTPChallenge.Purpose.LOGIN, consumed_at__isnull=True)
-            .order_by("-created_at")
-            .first()
+            .order_by("-created_at")[: settings.OTP_REQUEST_LIMIT_PER_HOUR]
+        )
+        if not challenges:
+            raise ValidationError("کد فعالی برای این شماره وجود ندارد.")
+
+        now = timezone.now()
+        active_challenges = [
+            challenge
+            for challenge in challenges
+            if challenge.expires_at > now and challenge.attempts < challenge.max_attempts
+        ]
+        if not active_challenges:
+            latest = challenges[0]
+            if latest.expires_at <= now:
+                raise ValidationError("کد منقضی شده است؛ کد جدید دریافت کنید.")
+            raise ValidationError("تعداد تلاش‌های ناموفق بیش از حد مجاز است.")
+
+        challenge = next(
+            (
+                candidate
+                for candidate in active_challenges
+                if check_password(code, candidate.code_hash)
+            ),
+            None,
         )
         if challenge is None:
-            raise ValidationError("کد فعالی برای این شماره وجود ندارد.")
-        if challenge.expires_at <= timezone.now():
-            raise ValidationError("کد منقضی شده است؛ کد جدید دریافت کنید.")
-        if challenge.attempts >= challenge.max_attempts:
-            raise ValidationError("تعداد تلاش‌های ناموفق بیش از حد مجاز است.")
-        if not check_password(code, challenge.code_hash):
-            challenge.attempts += 1
-            challenge.save(update_fields=("attempts",))
+            latest = active_challenges[0]
+            latest.attempts += 1
+            latest.save(update_fields=("attempts",))
             invalid_code = True
         else:
-            challenge.consumed_at = timezone.now()
+            challenge.consumed_at = now
             challenge.save(update_fields=("consumed_at",))
             user, created = User.objects.get_or_create(phone=phone)
             CustomerProfile.objects.get_or_create(user=user)
             if user.phone_verified_at is None:
-                user.phone_verified_at = timezone.now()
+                user.phone_verified_at = now
                 user.save(update_fields=("phone_verified_at",))
     if invalid_code:
         raise ValidationError("کد واردشده صحیح نیست.")

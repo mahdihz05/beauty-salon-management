@@ -181,6 +181,7 @@ def get_available_slots(
             )
             .filter(
                 Q(status=Booking.Status.CONFIRMED)
+                | Q(status=Booking.Status.AWAITING_VERIFICATION)
                 | Q(status=Booking.Status.PENDING_PAYMENT, hold_expires_at__gt=now)
             )
             .only("start_at", "end_at")
@@ -240,6 +241,7 @@ def create_booking_hold(
     staff_id: int,
     start_at: datetime,
     notes: str = "",
+    source: str = Booking.Source.ONLINE,
 ) -> Booking:
     now = timezone.now()
     expire_stale_holds(now)
@@ -250,7 +252,11 @@ def create_booking_hold(
         Booking.objects.select_for_update().filter(
             staff_id=staff_id,
             start_at__date=start_at.date(),
-            status__in=(Booking.Status.PENDING_PAYMENT, Booking.Status.CONFIRMED),
+            status__in=(
+                Booking.Status.PENDING_PAYMENT,
+                Booking.Status.AWAITING_VERIFICATION,
+                Booking.Status.CONFIRMED,
+            ),
         )
     )
     available = get_available_slots(
@@ -268,6 +274,7 @@ def create_booking_hold(
         branch=branch,
         staff_id=staff_id,
         status=Booking.Status.PENDING_PAYMENT,
+        source=source,
         start_at=chosen.start_at,
         end_at=chosen.end_at,
         total_price=chosen.total_price,

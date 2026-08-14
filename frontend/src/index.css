@@ -875,7 +875,7 @@ p {
   }
 }
 
-@media (max-width: 760px) {
+@media (max-width: 900px) {
   .panel-sidebar {
     display: none;
   }
@@ -1544,7 +1544,7 @@ p {
   min-width: 850px;
 }
 
-@media (max-width: 800px) {
+@media (max-width: 900px) {
   .admin-sidebar {
     position: static;
     width: 100%;
@@ -4146,6 +4146,41 @@ p {
 .finance-section .admin-table-wrap {
   overflow-x: auto;
 }
+.finance-salon-grid button {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+  padding: 16px;
+  color: var(--ink);
+  font: inherit;
+  text-align: right;
+  border: 1px solid var(--outline);
+  border-radius: var(--radius-md);
+  background: white;
+  cursor: pointer;
+  transition:
+    border-color 160ms ease,
+    background-color 160ms ease,
+    box-shadow 160ms ease;
+}
+.finance-salon-grid button:hover,
+.finance-salon-grid button:focus-visible {
+  border-color: var(--primary);
+  box-shadow: 0 8px 22px rgb(67 48 21 / 8%);
+}
+.finance-salon-grid button.selected {
+  border-color: var(--primary);
+  background: var(--primary-soft);
+  box-shadow: inset 0 0 0 1px var(--primary);
+}
+.finance-salon-grid button span,
+.finance-salon-grid button small {
+  overflow-wrap: anywhere;
+  color: var(--ink-muted);
+}
+.finance-salon-grid button b {
+  font-size: 15px;
+}
 .finance-actions {
   display: flex;
   gap: 6px;
@@ -4599,5 +4634,34 @@ p {
   .manual-submit {
     width: 100%;
     min-width: 0;
+  }
+}
+@media (min-width: 769px) {
+  .booking-mobile-list {
+    display: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .booking-table-wrap {
+    display: none;
+  }
+}
+
+@media (max-width: 900px) {
+  .report-metrics.finance-salon-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 520px) {
+  .report-metrics.finance-salon-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 520px) {
+  .finance-salon-grid {
+    grid-template-columns: 1fr;
   }
 }

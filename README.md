@@ -55,7 +55,7 @@
 | رابط کاربری | React 19، TypeScript، Vite، TanStack Query |
 | بک‌اند | Django 5.2، Django REST Framework |
 | احراز هویت | OTP، JWT Access/Refresh و محدودسازی نرخ درخواست |
-| پایگاه داده | SQLite بدون نیاز به سرور دیتابیس جداگانه |
+| پایگاه داده | PostgreSQL در production؛ SQLite فقط برای توسعه و بسته سبک آزمایشی |
 | فایل‌ها | ذخیره محلی Media با کنترل نوع و سقف حجم |
 | API | OpenAPI و Swagger |
 | استقرار | Gunicorn، WhiteNoise، Passenger/cPanel یا سرویس systemd |
@@ -67,7 +67,7 @@ React / TypeScript
         ▼
 Django REST API ───── JWT / OTP
         │
-        ├── SQLite
+        ├── PostgreSQL / SQLite توسعه
         ├── Media files
         ├── SMS provider adapter
         └── Payment provider adapter
@@ -80,8 +80,8 @@ Django REST API ───── JWT / OTP
 | مدیر کل | دسترسی سراسری به آمار، سالن‌ها، جزئیات داده‌ها، تنظیمات، نظرات، مالی و پشتیبانی |
 | مالک سالن | مدیریت کامل همه شعب متعلق به سالن خود |
 | مدیر شعبه | مدیریت عملیات و گزارش‌های همان شعبه |
-| پذیرش | تقویم شعبه و ثبت/ویرایش/لغو نوبت؛ بدون دسترسی مالی و فهرست مشتریان |
-| آرایشگر | مشاهده نوبت‌های متصل به پروفایل خودش |
+| پذیرش | تقویم شعبه، پذیرش نوبت آنلاین، ثبت نوبت حضوری و دریافت پرداخت در محل؛ بدون مجوز لغو یا تغییر منشأ رزرو |
+| آرایشگر | مشاهده نوبت‌ها و مدیریت شیفت، مرخصی و مدت اختصاصی خدمات خودش؛ بدون دسترسی به تنظیمات سالن |
 | مشتری | اطلاعات، رزروها، پرداخت‌ها، نظرات و تیکت‌های شخصی |
 
 نقش‌های مستقل مالی و پشتیبانی حذف شده‌اند و امکانات آن‌ها به‌صورت دو تب داخل پنل مدیر کل قرار دارند.
@@ -173,9 +173,9 @@ npm --prefix frontend run dev -- --host 127.0.0.1 --port 5173
 - اعتبارسنجی OpenAPI و production check؛
 - Oxlint، TypeScript، Vitest و Prettier؛
 - build تولیدی و npm audit؛
-- سناریوهای واقعی Playwright در اندازه دسکتاپ و موبایل.
+- سناریوهای واقعی Playwright در اندازه دسکتاپ، تبلت ۷۶۸ پیکسل و موبایل؛ همراه با کنترل بیرون‌زدگی افقی صفحات عمومی و پنل‌ها.
 
-تعداد فعلی تست‌های بک‌اند: **۸۴ تست**. مجموعه مرورگری نیز جریان‌های مشتری، رزرو و پرداخت، مالک، مدیر کل، پذیرش، ساعات رزرو و واکنش‌گرایی را پوشش می‌دهد.
+تعداد فعلی تست‌های بک‌اند: **۹۰ تست**. مجموعه مرورگری نیز جریان‌های مشتری، رزرو و پرداخت، مالک، مدیر کل، پذیرش، آرایشگر، ساعات رزرو و واکنش‌گرایی را پوشش می‌دهد.
 
 ## کارهای زمان‌بندی‌شده
 
@@ -200,7 +200,7 @@ backend\.venv\Scripts\python.exe backend\manage.py process_booking_tasks
 - `DJANGO_SECRET_KEY` قوی و منحصربه‌فرد؛
 - `DJANGO_DEBUG=false`؛
 - دامنه‌های مجاز، CSRF و CORS؛
-- مسیر پایدار SQLite و Media؛
+- آدرس `DATABASE_URL` برای PostgreSQL و مسیر پایدار Media؛
 - سرویس پیامک واقعی و غیرفعال‌کردن نمایش OTP دمو؛
 - سرویس پرداخت واقعی؛
 - HTTPS و پشتیبان‌گیری منظم.
@@ -228,7 +228,7 @@ backend\.venv\Scripts\python.exe backend\manage.py process_booking_tasks
 
 ```text
 beauty-salon-management/
-├── backend/                 Django REST API و SQLite
+├── backend/                 Django REST API و PostgreSQL/SQLite توسعه
 ├── frontend/                React / TypeScript
 ├── docs/                    راهنماهای فنی و تحویل
 ├── delivery/                خروجی قابل‌ارسال برای کارفرما
@@ -247,6 +247,7 @@ beauty-salon-management/
 - [ممیزی نیازمندی‌ها](docs/REQUIREMENTS_AUDIT.md)
 - [نگاشت صفحات طراحی](docs/DESIGN_MAPPING.md)
 - [راهنمای هاست اشتراکی](docs/SHARED_HOSTING.md)
+- [راهنمای مهاجرت production به PostgreSQL](docs/POSTGRESQL_MIGRATION.md)
 - [برنامه پیاده‌سازی](IMPLEMENTATION_PLAN.md)
 
 ## موارد دمو که پیش از بهره‌برداری باید تغییر کنند

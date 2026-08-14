@@ -5,8 +5,13 @@ from salons.models import Branch, BranchService, Staff
 
 
 class Booking(models.Model):
+    class Source(models.TextChoices):
+        ONLINE = "online", "آنلاین"
+        WALK_IN = "walk_in", "حضوری"
+
     class Status(models.TextChoices):
         PENDING_PAYMENT = "pending_payment", "در انتظار پرداخت"
+        AWAITING_VERIFICATION = "awaiting_verification", "در انتظار تأیید واریز"
         CONFIRMED = "confirmed", "تأییدشده"
         COMPLETED = "completed", "انجام‌شده"
         CANCELLED = "cancelled", "لغوشده"
@@ -18,7 +23,10 @@ class Booking(models.Model):
     branch = models.ForeignKey(Branch, on_delete=models.PROTECT, related_name="bookings")
     staff = models.ForeignKey(Staff, on_delete=models.PROTECT, related_name="bookings")
     status = models.CharField(
-        max_length=20, choices=Status.choices, default=Status.PENDING_PAYMENT, db_index=True
+        max_length=24, choices=Status.choices, default=Status.PENDING_PAYMENT, db_index=True
+    )
+    source = models.CharField(
+        max_length=12, choices=Source.choices, default=Source.ONLINE, db_index=True
     )
     start_at = models.DateTimeField(db_index=True)
     end_at = models.DateTimeField(db_index=True)
@@ -36,6 +44,14 @@ class Booking(models.Model):
     hold_expires_at = models.DateTimeField(null=True, blank=True, db_index=True)
     cancelled_at = models.DateTimeField(null=True, blank=True)
     cancellation_reason = models.CharField(max_length=500, blank=True)
+    checked_in_at = models.DateTimeField(null=True, blank=True)
+    checked_in_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        related_name="checked_in_bookings",
+        null=True,
+        blank=True,
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

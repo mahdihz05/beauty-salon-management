@@ -52,7 +52,9 @@
 ## نتیجه نهایی
 
 - [x] Ruff: بدون خطا
-- [x] بک‌اند: ۸۴ تست موفق
+- [x] بک‌اند: ۹۰ تست موفق
+- [x] فهرست سالن‌های مدیر: کاهش از ۱۰۴ کوئری به ۵ کوئری
+- [x] bundle اصلی production: کاهش از ۵۰۴KB به حدود ۳۴۷KB با route splitting
 - [x] Django check و migration drift: بدون مشکل
 - [x] OpenAPI: معتبر و بدون warning
 - [x] Django deployment check: موفق

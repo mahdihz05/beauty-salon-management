@@ -24,6 +24,7 @@ import { SalonLayout } from "../../components/SalonLayout";
 import { formatPersianDate, toLocalIsoDate } from "../../lib/date";
 import { faNumber, toman } from "../../lib/format";
 import type { ReportSummary } from "../../types/booking";
+import type { Branch, Paginated } from "../../types/salon";
 
 export function ReportsPage() {
   const today = new Date();
@@ -32,9 +33,15 @@ export function ReportsPage() {
     from: toLocalIsoDate(monthAgo),
     to: toLocalIsoDate(today),
   });
-  const query = `date_from=${range.from}&date_to=${range.to}`;
+  const [branchId, setBranchId] = useState("");
+  const branches = useQuery({
+    queryKey: ["management", "branches"],
+    queryFn: async () =>
+      (await api.get<Paginated<Branch>>("/management/branches/")).data,
+  });
+  const query = `date_from=${range.from}&date_to=${range.to}${branchId ? `&branch=${branchId}` : ""}`;
   const report = useQuery({
-    queryKey: ["salon", "reports", range],
+    queryKey: ["salon", "reports", range, branchId],
     queryFn: async () =>
       (await api.get<ReportSummary>(`/reports/summary/?${query}`)).data,
   });
@@ -61,6 +68,20 @@ export function ReportsPage() {
       }
     >
       <div className="report-filters">
+        <label>
+          شعبه
+          <select
+            value={branchId}
+            onChange={(event) => setBranchId(event.target.value)}
+          >
+            <option value="">همه شعب مجاز</option>
+            {branches.data?.results.map((branch) => (
+              <option key={branch.id} value={branch.id}>
+                {branch.name}
+              </option>
+            ))}
+          </select>
+        </label>
         <label className="jalali-field-label">
           از تاریخ
           <JalaliDatePicker

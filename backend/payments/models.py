@@ -17,6 +17,9 @@ class Payment(models.Model):
         REFUNDED = "refunded", "بازپرداخت‌شده"
 
     class Method(models.TextChoices):
+        IN_PERSON = "in_person", "حضوری"
+        CARD_TO_CARD = "card_to_card", "کارت‌به‌کارت"
+        # Legacy values are intentionally retained for historical records.
         ONLINE = "online", "آنلاین"
         CASH = "cash", "نقدی"
         WALLET = "wallet", "کیف پول"
@@ -27,10 +30,20 @@ class Payment(models.Model):
     status = models.CharField(
         max_length=12, choices=Status.choices, default=Status.PENDING, db_index=True
     )
-    method = models.CharField(max_length=12, choices=Method.choices, default=Method.ONLINE)
+    method = models.CharField(max_length=16, choices=Method.choices, default=Method.IN_PERSON)
     gateway_ref = models.CharField(max_length=120, blank=True, db_index=True)
     provider = models.CharField(max_length=40, default="mock")
     provider_data = models.JSONField(default=dict, blank=True)
+    receipt = models.ImageField(upload_to="payments/receipts/", blank=True)
+    tracking_code = models.CharField(max_length=80, blank=True, db_index=True)
+    verified_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        related_name="verified_payments",
+        null=True,
+        blank=True,
+    )
+    verified_at = models.DateTimeField(null=True, blank=True)
     paid_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -77,6 +90,13 @@ class WalletTransaction(models.Model):
         null=True,
         blank=True,
     )
+    salon = models.ForeignKey(
+        "salons.Salon",
+        on_delete=models.PROTECT,
+        related_name="wallet_transactions",
+        null=True,
+        blank=True,
+    )
     description = models.CharField(max_length=300, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -103,6 +123,13 @@ class Settlement(models.Model):
         REJECTED = "rejected", "ردشده"
 
     wallet = models.ForeignKey(Wallet, on_delete=models.PROTECT, related_name="settlements")
+    salon = models.ForeignKey(
+        "salons.Salon",
+        on_delete=models.PROTECT,
+        related_name="settlements",
+        null=True,
+        blank=True,
+    )
     amount = models.PositiveBigIntegerField()
     status = models.CharField(
         max_length=12, choices=Status.choices, default=Status.REQUESTED, db_index=True

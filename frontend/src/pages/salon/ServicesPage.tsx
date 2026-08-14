@@ -87,6 +87,16 @@ export function ServicesPage() {
       setServerError(getApiError(error));
     },
   });
+  const durationMutation = useMutation({
+    mutationFn: async ({ id, duration }: { id: number; duration: number }) =>
+      api.patch(`/management/branch-services/${id}/`, {
+        duration_minutes: duration,
+      }),
+    onSuccess: () =>
+      queryClient.invalidateQueries({
+        queryKey: ["management", "branch-services"],
+      }),
+  });
 
   return (
     <SalonLayout
@@ -208,6 +218,25 @@ export function ServicesPage() {
                 {toman(service.price)}
               </strong>
             </div>
+            <form
+              className="inline-duration-form"
+              onSubmit={(event) => {
+                event.preventDefault();
+                const duration = Number(
+                  new FormData(event.currentTarget).get("duration"),
+                );
+                durationMutation.mutate({ id: service.id, duration });
+              }}
+            >
+              <input
+                aria-label={`مدت پایه ${service.service_name}`}
+                name="duration"
+                type="number"
+                min="5"
+                defaultValue={service.duration_minutes}
+              />
+              <button className="button button-outline">ثبت مدت پایه</button>
+            </form>
             <span
               className={`status-badge ${service.is_active ? "success" : "neutral"}`}
             >

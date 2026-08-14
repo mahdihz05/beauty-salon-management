@@ -53,9 +53,15 @@ class CreateHoldView(GenericAPIView):
 
     @extend_schema(request=CreateHoldSerializer, responses=BookingSerializer)
     def post(self, request):
+        if request.user.role != User.Role.CUSTOMER:
+            return Response({"detail": "رزرو آنلاین فقط از حساب مشتری امکان‌پذیر است."}, status=403)
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        booking = create_booking_hold(customer=request.user, **serializer.validated_data)
+        booking = create_booking_hold(
+            customer=request.user,
+            source=Booking.Source.ONLINE,
+            **serializer.validated_data,
+        )
         record_audit(
             request=request,
             actor=request.user,
@@ -92,7 +98,7 @@ class CreateManualBookingView(GenericAPIView):
             customer.name = customer_name
             customer.save(update_fields=("name",))
         CustomerProfile.objects.get_or_create(user=customer)
-        booking = create_booking_hold(customer=customer, **data)
+        booking = create_booking_hold(customer=customer, source=Booking.Source.WALK_IN, **data)
         booking.status = Booking.Status.CONFIRMED
         booking.hold_expires_at = None
         booking.save(update_fields=("status", "hold_expires_at", "updated_at"))
@@ -125,7 +131,7 @@ class BookingFilter(filters.FilterSet):
 
     class Meta:
         model = Booking
-        fields = ("branch", "staff", "status", "start_date", "end_date")
+        fields = ("branch", "staff", "status", "source", "start_date", "end_date")
 
 
 class BookingViewSet(viewsets.ReadOnlyModelViewSet):
@@ -152,9 +158,20 @@ class BookingViewSet(viewsets.ReadOnlyModelViewSet):
     def _can_manage(self, booking):
         user = self.request.user
         return bool(
-            user.is_superuser
-            or user.role == User.Role.ADMIN
-            or booking.branch_id in set(manageable_branch_ids(user, include_receptionist=True))
+            user.role in (User.Role.SALON_OWNER, User.Role.BRANCH_MANAGER)
+            and booking.branch_id in set(manageable_branch_ids(user))
+        )
+
+    def _can_check_in(self, booking):
+        user = self.request.user
+        return bool(
+            user.role
+            in (
+                User.Role.SALON_OWNER,
+                User.Role.BRANCH_MANAGER,
+                User.Role.RECEPTIONIST,
+            )
+            and booking.branch_id in set(manageable_branch_ids(user, include_receptionist=True))
         )
 
     @action(detail=True, methods=("post",))
@@ -179,6 +196,27 @@ class BookingViewSet(viewsets.ReadOnlyModelViewSet):
         response_data["refund_amount"] = refund_amount
         response_data["refund_destination"] = "wallet" if refund_amount else None
         return Response(response_data)
+
+    @action(detail=True, methods=("post",), url_path="check-in")
+    def check_in(self, request, pk=None):
+        booking = self.get_object()
+        if not self._can_check_in(booking):
+            return Response({"detail": "اجازه پذیرش این نوبت را ندارید."}, status=403)
+        if booking.status != Booking.Status.CONFIRMED:
+            return Response({"detail": "فقط نوبت تأییدشده قابل پذیرش است."}, status=400)
+        if booking.checked_in_at is None:
+            from django.utils import timezone
+
+            booking.checked_in_at = timezone.now()
+            booking.checked_in_by = request.user
+            booking.save(update_fields=("checked_in_at", "checked_in_by", "updated_at"))
+            record_audit(
+                request=request,
+                actor=request.user,
+                action="booking.checked_in",
+                target=booking,
+            )
+        return Response(self.get_serializer(booking).data)
 
     @action(detail=True, methods=("post",), url_path="set-status")
     def set_status(self, request, pk=None):

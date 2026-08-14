@@ -1,4 +1,4 @@
-from django.db.models import Q
+from django.db.models import Prefetch, Q
 from django.utils.text import slugify
 from rest_framework import mixins, viewsets
 from rest_framework.decorators import action
@@ -98,7 +98,17 @@ class SalonViewSet(viewsets.ModelViewSet):
             return queryset.none()
         if user.is_superuser or user.role == User.Role.ADMIN:
             return queryset
-        return queryset.filter(Q(owner=user) | Q(branches__memberships__user=user)).distinct()
+        if user.role == User.Role.SALON_OWNER:
+            return queryset.filter(owner=user)
+        allowed_branches = Branch.objects.filter(
+            memberships__user=user, memberships__is_active=True
+        ).select_related("city")
+        return (
+            Salon.objects.filter(branches__in=allowed_branches)
+            .select_related("owner")
+            .prefetch_related(Prefetch("branches", queryset=allowed_branches), "images")
+            .distinct()
+        )
 
     def perform_create(self, serializer):
         user = self.request.user
@@ -187,10 +197,13 @@ class ServiceViewSet(viewsets.ModelViewSet):
             return queryset.none()
         if user.is_superuser or user.role == User.Role.ADMIN:
             return queryset
-        salon_ids = Salon.objects.filter(
-            Q(owner=user) | Q(branches__memberships__user=user)
-        ).values_list("id", flat=True)
-        return queryset.filter(Q(salon__isnull=True) | Q(salon_id__in=salon_ids)).distinct()
+        if user.role == User.Role.SALON_OWNER:
+            return queryset.filter(Q(salon__isnull=True) | Q(salon__owner=user)).distinct()
+        branch_ids = accessible_branch_ids(user)
+        service_ids = BranchService.objects.filter(branch_id__in=branch_ids).values_list(
+            "service_id", flat=True
+        )
+        return queryset.filter(Q(salon__isnull=True) | Q(id__in=service_ids)).distinct()
 
     def perform_create(self, serializer):
         salon = serializer.validated_data.get("salon")
@@ -297,41 +310,87 @@ class StaffViewSet(BranchScopedViewSet):
     search_fields = ("first_name", "last_name")
 
     def get_queryset(self):
-        return (
-            Staff.objects.filter(branch_id__in=accessible_branch_ids(self.request.user))
-            .select_related("branch", "user")
-            .prefetch_related("shifts", "staff_services__branch_service__service")
+        queryset = Staff.objects.filter(branch_id__in=accessible_branch_ids(self.request.user))
+        if getattr(self.request.user, "role", None) == User.Role.STAFF:
+            queryset = queryset.filter(user=self.request.user)
+        return queryset.select_related("branch", "user").prefetch_related(
+            "shifts", "staff_services__branch_service__service"
         )
 
 
-class StaffShiftViewSet(BranchScopedViewSet):
+class SelfStaffWritableMixin:
+    def _is_own_staff(self, instance_or_staff):
+        staff = getattr(instance_or_staff, "staff", instance_or_staff)
+        return bool(
+            self.request.user.role == User.Role.STAFF and staff.user_id == self.request.user.id
+        )
+
+    def check_object_permissions(self, request, obj):
+        if request.method not in ("GET", "HEAD", "OPTIONS") and self._is_own_staff(obj):
+            return
+        return super().check_object_permissions(request, obj)
+
+    def perform_create(self, serializer):
+        staff = serializer.validated_data.get("staff")
+        if self._is_own_staff(staff):
+            serializer.save()
+            return
+        super().perform_create(serializer)
+
+    def perform_update(self, serializer):
+        if self._is_own_staff(serializer.instance):
+            serializer.save()
+            return
+        super().perform_update(serializer)
+
+
+class StaffShiftViewSet(SelfStaffWritableMixin, BranchScopedViewSet):
     serializer_class = StaffShiftSerializer
     filterset_fields = ("staff", "day_of_week", "is_off")
 
     def get_queryset(self):
-        return StaffShift.objects.filter(
+        queryset = StaffShift.objects.filter(
             staff__branch_id__in=accessible_branch_ids(self.request.user)
-        ).select_related("staff", "staff__branch")
+        )
+        if getattr(self.request.user, "role", None) == User.Role.STAFF:
+            queryset = queryset.filter(staff__user=self.request.user)
+        return queryset.select_related("staff", "staff__branch")
 
 
-class StaffServiceViewSet(BranchScopedViewSet):
+class StaffServiceViewSet(SelfStaffWritableMixin, BranchScopedViewSet):
     serializer_class = StaffServiceSerializer
     filterset_fields = ("staff", "branch_service")
 
     def get_queryset(self):
-        return StaffService.objects.filter(
+        queryset = StaffService.objects.filter(
             staff__branch_id__in=accessible_branch_ids(self.request.user)
-        ).select_related("staff", "branch_service", "branch_service__service")
+        )
+        if getattr(self.request.user, "role", None) == User.Role.STAFF:
+            queryset = queryset.filter(staff__user=self.request.user)
+        return queryset.select_related(
+            "staff", "branch_service", "branch_service__service"
+        ).order_by("id")
+
+    def perform_update(self, serializer):
+        if self._is_own_staff(serializer.instance):
+            if "price_override" in serializer.validated_data:
+                raise ValidationError("آرایشگر اجازه تغییر قیمت خدمت را ندارد.")
+            serializer.save()
+            return
+        super().perform_update(serializer)
 
 
-class StaffTimeOffViewSet(BranchScopedViewSet):
+class StaffTimeOffViewSet(SelfStaffWritableMixin, BranchScopedViewSet):
     serializer_class = StaffTimeOffSerializer
     filterset_fields = ("staff",)
 
     def get_queryset(self):
-        return StaffTimeOff.objects.filter(
+        queryset = StaffTimeOff.objects.filter(
             staff__branch_id__in=accessible_branch_ids(self.request.user)
-        ).select_related("staff")
+        )
+        if getattr(self.request.user, "role", None) == User.Role.STAFF:
+            queryset = queryset.filter(staff__user=self.request.user)
+        return queryset.select_related("staff")
 
 
 class SalonImageViewSet(

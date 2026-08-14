@@ -62,6 +62,26 @@ class OTPAuthenticationTests(APITestCase):
             status.HTTP_400_BAD_REQUEST,
         )
 
+    def test_two_concurrent_challenges_can_each_be_verified(self):
+        first = self.request_code()
+        second = self.request_code()
+
+        self.assertEqual(
+            self.client.post(
+                reverse("otp-verify"),
+                {"phone": self.phone, "code": first.data["debug_code"]},
+            ).status_code,
+            status.HTTP_200_OK,
+        )
+        self.assertEqual(
+            self.client.post(
+                reverse("otp-verify"),
+                {"phone": self.phone, "code": second.data["debug_code"]},
+            ).status_code,
+            status.HTTP_200_OK,
+        )
+        self.assertEqual(OTPChallenge.objects.filter(consumed_at__isnull=False).count(), 2)
+
     def test_expired_code_is_rejected(self):
         response = self.request_code()
         OTPChallenge.objects.update(expires_at=timezone.now())

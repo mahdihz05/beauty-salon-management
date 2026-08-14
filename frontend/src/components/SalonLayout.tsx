@@ -41,6 +41,12 @@ const navigation: Array<{
     roles: ["salon_owner", "branch_manager"],
   },
   {
+    href: "/salon/my-availability",
+    label: "زمان‌های من",
+    icon: Clock9,
+    roles: ["staff"],
+  },
+  {
     href: "/salon/services",
     label: "خدمات",
     icon: Scissors,

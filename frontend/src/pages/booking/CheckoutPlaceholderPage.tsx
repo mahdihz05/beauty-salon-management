@@ -21,6 +21,11 @@ export function CheckoutPlaceholderPage() {
   const [, navigate] = useLocation();
   const id = new URLSearchParams(window.location.search).get("booking");
   const [paymentType, setPaymentType] = useState<"deposit" | "full">("deposit");
+  const [paymentMethod, setPaymentMethod] = useState<
+    "in_person" | "card_to_card"
+  >("in_person");
+  const [trackingCode, setTrackingCode] = useState("");
+  const [receipt, setReceipt] = useState<File | null>(null);
   const [discountCode, setDiscountCode] = useState("");
   const booking = useQuery({
     queryKey: ["booking", id],
@@ -30,14 +35,14 @@ export function CheckoutPlaceholderPage() {
   });
   const payment = useMutation({
     mutationFn: async () => {
-      const started = (
-        await api.post<Payment>("/payments/start/", {
-          booking: Number(id),
-          type: paymentType,
-          discount_code: discountCode,
-        })
-      ).data;
-      return (await api.post<Payment>(`/payments/${started.id}/confirm/`)).data;
+      const formData = new FormData();
+      formData.set("booking", String(Number(id)));
+      formData.set("type", paymentType);
+      formData.set("method", paymentMethod);
+      formData.set("discount_code", discountCode);
+      if (trackingCode) formData.set("tracking_code", trackingCode);
+      if (receipt) formData.set("receipt", receipt);
+      return (await api.post<Payment>("/payments/submit/", formData)).data;
     },
     onSuccess(result) {
       bookingDraft.clear();
@@ -97,6 +102,59 @@ export function CheckoutPlaceholderPage() {
               </div>
               <div className="checkout-card">
                 <h2>روش پرداخت</h2>
+                <label
+                  className={`payment-option ${paymentMethod === "in_person" ? "selected" : ""}`}
+                >
+                  <input
+                    type="radio"
+                    name="payment-method"
+                    checked={paymentMethod === "in_person"}
+                    onChange={() => setPaymentMethod("in_person")}
+                  />
+                  <span>
+                    <strong>پرداخت حضوری</strong>
+                    <small>مبلغ در زمان مراجعه به سالن پرداخت می‌شود.</small>
+                  </span>
+                </label>
+                <label
+                  className={`payment-option ${paymentMethod === "card_to_card" ? "selected" : ""}`}
+                >
+                  <input
+                    type="radio"
+                    name="payment-method"
+                    checked={paymentMethod === "card_to_card"}
+                    onChange={() => setPaymentMethod("card_to_card")}
+                  />
+                  <span>
+                    <strong>کارت‌به‌کارت</strong>
+                    <small>رسید برای مدیر سالن ارسال و بررسی می‌شود.</small>
+                  </span>
+                </label>
+                {paymentMethod === "card_to_card" && (
+                  <div className="form-grid">
+                    <label>
+                      کد پیگیری
+                      <input
+                        dir="ltr"
+                        value={trackingCode}
+                        onChange={(event) =>
+                          setTrackingCode(event.target.value)
+                        }
+                      />
+                    </label>
+                    <label>
+                      تصویر رسید
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(event) =>
+                          setReceipt(event.target.files?.[0] ?? null)
+                        }
+                      />
+                    </label>
+                  </div>
+                )}
+                <h3>مبلغ رزرو</h3>
                 <label
                   className={`payment-option ${paymentType === "deposit" ? "selected" : ""}`}
                 >
@@ -176,9 +234,12 @@ export function CheckoutPlaceholderPage() {
                 ) : (
                   <LockKeyhole size={18} />
                 )}
-                پرداخت امن و ثبت نوبت
+                ثبت روش پرداخت و نوبت
               </button>
-              <small>درگاه فعلی آزمایشی است و مبلغ واقعی کسر نمی‌شود.</small>
+              <small>
+                در کارت‌به‌کارت، ارسال رسید در مهلت ده دقیقه برای حفظ نوبت
+                الزامی است.
+              </small>
             </aside>
           </div>
         )}

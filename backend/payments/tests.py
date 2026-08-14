@@ -143,14 +143,66 @@ class PaymentAPITests(APITestCase):
         self.assertEqual(booking.payments.get().status, Payment.Status.REFUNDED)
         self.assertEqual(wallet.transactions.get().type, WalletTransaction.Type.REFUND)
 
-    def test_late_cancellation_has_no_refund(self):
+    def test_late_cancellation_is_rejected(self):
         booking = self.make_booking(hours=2)
         self.pay(booking)
         response = self.client.post(reverse("booking-cancel", args=(booking.pk,)))
 
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertFalse(Wallet.objects.filter(user=self.customer).exists())
         self.assertEqual(booking.payments.get().status, Payment.Status.PAID)
+        booking.refresh_from_db()
+        self.assertEqual(booking.status, Booking.Status.CONFIRMED)
+
+    def test_receptionist_cannot_cancel_but_can_check_in(self):
+        receptionist = User.objects.create_user(phone="09120000106", role=User.Role.RECEPTIONIST)
+        BranchMembership.objects.create(
+            user=receptionist,
+            branch=self.branch,
+            role=BranchMembership.Role.RECEPTIONIST,
+        )
+        booking = self.make_booking()
+        booking.status = Booking.Status.CONFIRMED
+        booking.hold_expires_at = None
+        booking.save(update_fields=("status", "hold_expires_at"))
+        self.client.force_authenticate(receptionist)
+
+        cancelled = self.client.post(reverse("booking-cancel", args=(booking.pk,)))
+        checked_in = self.client.post(reverse("booking-check-in", args=(booking.pk,)))
+
+        self.assertEqual(cancelled.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(checked_in.status_code, status.HTTP_200_OK)
+        booking.refresh_from_db()
+        self.assertEqual(booking.checked_in_by, receptionist)
+
+    def test_card_to_card_receipt_requires_manager_verification(self):
+        manager = User.objects.create_user(phone="09120000107", role=User.Role.BRANCH_MANAGER)
+        BranchMembership.objects.create(
+            user=manager, branch=self.branch, role=BranchMembership.Role.MANAGER
+        )
+        booking = self.make_booking()
+        self.client.force_authenticate(self.customer)
+        submitted = self.client.post(
+            reverse("payment-submit"),
+            {
+                "booking": booking.pk,
+                "type": Payment.Type.DEPOSIT,
+                "method": Payment.Method.CARD_TO_CARD,
+                "tracking_code": "987654",
+            },
+        )
+        booking.refresh_from_db()
+        self.assertEqual(submitted.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(booking.status, Booking.Status.AWAITING_VERIFICATION)
+
+        self.client.force_authenticate(manager)
+        verified = self.client.post(
+            reverse("payment-verify-transfer", args=(submitted.data["id"],)),
+            {"status": Payment.Status.PAID},
+        )
+        booking.refresh_from_db()
+        self.assertEqual(verified.status_code, status.HTTP_200_OK)
+        self.assertEqual(booking.status, Booking.Status.CONFIRMED)
 
     @override_settings(PLATFORM_COMMISSION_PERCENT=10)
     def test_completion_credits_owner_once_after_commission(self):
@@ -228,7 +280,7 @@ class PaymentAPITests(APITestCase):
         self.assertEqual(Wallet.objects.get(user=self.owner).balance, 450_000)
         self.assertTrue(AuditLog.objects.filter(action="payment.remainder_recorded").exists())
 
-    def test_receptionist_cannot_record_remainder_or_view_financial_directory(self):
+    def test_receptionist_records_in_person_payment_but_cannot_view_customer_directory(self):
         receptionist = User.objects.create_user(phone="09120000105", role=User.Role.RECEPTIONIST)
         BranchMembership.objects.create(
             user=receptionist,
@@ -244,7 +296,7 @@ class PaymentAPITests(APITestCase):
         )
         customer_directory = self.client.get(reverse("customer-list"))
 
-        self.assertEqual(remainder.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(remainder.status_code, status.HTTP_201_CREATED)
         self.assertEqual(customer_directory.data["count"], 0)
 
     def test_admin_sees_payments_and_booking_directory(self):

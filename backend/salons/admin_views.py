@@ -1,4 +1,4 @@
-from django.db.models import Count, Max, Q, Sum
+from django.db.models import Count, Max, Prefetch, Q, Sum
 from drf_spectacular.utils import extend_schema
 from rest_framework import mixins, viewsets
 from rest_framework.decorators import action
@@ -52,7 +52,10 @@ class AdminSalonViewSet(
     permission_classes = [IsPlatformAdmin]
     serializer_class = SalonSerializer
     pagination_class = AdminSalonPagination
-    queryset = Salon.objects.select_related("owner").prefetch_related("branches", "images")
+    queryset = Salon.objects.select_related("owner").prefetch_related(
+        Prefetch("branches", queryset=Branch.objects.select_related("city", "district")),
+        "images",
+    )
     filterset_fields = ("status", "type")
     search_fields = ("name", "owner__name", "owner__phone")
     ordering_fields = ("created_at", "updated_at", "name")
@@ -157,11 +160,13 @@ class AdminSalonViewSet(
                 "staff": StaffSerializer(staff, many=True, context={"request": request}).data,
                 "customers": customers,
                 "bookings": BookingSerializer(
-                    bookings, many=True, context={"request": request}
+                    bookings.order_by("-start_at")[:20], many=True, context={"request": request}
                 ).data,
+                "bookings_total": booking_stats["booking_count"],
                 "payments": PaymentSerializer(
-                    payments, many=True, context={"request": request}
+                    payments.order_by("-created_at")[:20], many=True, context={"request": request}
                 ).data,
+                "payments_total": payments.count(),
                 "reviews": ReviewSerializer(reviews, many=True, context={"request": request}).data,
                 "discounts": DiscountCodeSerializer(
                     discounts, many=True, context={"request": request}

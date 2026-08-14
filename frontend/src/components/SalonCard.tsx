@@ -1,6 +1,6 @@
 import { BadgeCheck, Heart, MapPin, Star } from "lucide-react";
 import { Link } from "wouter";
-import { faNumber, toman } from "../lib/format";
+import { faNumber } from "../lib/format";
 import type { PublicSalon } from "../types/public";
 
 function fallbackImage(id: number) {
@@ -20,6 +20,8 @@ export function SalonCard({
         <img
           src={salon.cover_image || fallbackImage(salon.id)}
           alt={`نمای ${salon.name}`}
+          loading="lazy"
+          decoding="async"
         />
         <span className="rating-pill">
           <Star size={14} fill="currentColor" />{" "}
@@ -39,12 +41,7 @@ export function SalonCard({
           {salon.district ? `، ${salon.district}` : ""}
         </p>
         <div className="salon-card-footer">
-          <div>
-            <span>شروع قیمت از</span>
-            <strong>
-              {salon.min_price ? toman(salon.min_price) : "تماس بگیرید"}
-            </strong>
-          </div>
+          <span>قیمت خدمات پس از انتخاب سالن نمایش داده می‌شود.</span>
           <Link
             className="button button-primary"
             href={`/salons/${salon.slug}`}

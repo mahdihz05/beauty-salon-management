@@ -26,7 +26,13 @@ export interface Booking {
   staff: number;
   staff_name: string;
   status:
-    "pending_payment" | "confirmed" | "completed" | "cancelled" | "no_show";
+    | "pending_payment"
+    | "awaiting_verification"
+    | "confirmed"
+    | "completed"
+    | "cancelled"
+    | "no_show";
+  source: "online" | "walk_in";
   status_label: string;
   start_at: string;
   end_at: string;
@@ -40,6 +46,8 @@ export interface Booking {
   hold_expires_at: string | null;
   cancelled_at?: string | null;
   cancellation_reason?: string;
+  checked_in_at?: string | null;
+  checked_in_by?: number | null;
   refund_amount?: number;
   refund_destination?: "wallet" | null;
   items: BookingItem[];
@@ -60,7 +68,11 @@ export interface Payment {
   amount: number;
   type: "deposit" | "full" | "remainder";
   status: "pending" | "paid" | "failed" | "refunded";
-  method: "online" | "cash" | "wallet";
+  method: "in_person" | "card_to_card" | "online" | "cash" | "wallet";
+  tracking_code: string;
+  receipt: string | null;
+  verified_by: number | null;
+  verified_at: string | null;
   provider: string;
   gateway_ref: string;
   redirect_url: string;
@@ -71,6 +83,7 @@ export interface Payment {
 export interface Settlement {
   id: number;
   amount: number;
+  salon: number | null;
   status: "requested" | "paid" | "rejected";
   bank_account: string;
   note: string;

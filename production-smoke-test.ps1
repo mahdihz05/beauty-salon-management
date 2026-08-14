@@ -45,10 +45,22 @@ try {
     if (-not $assetPath) { throw 'Built JavaScript asset was not found in index.html.' }
     $asset = Invoke-WebRequest -UseBasicParsing ("http://127.0.0.1:8010$assetPath") -TimeoutSec 5
 
+    $durations = 1..20 | ForEach-Object {
+        $timer = [System.Diagnostics.Stopwatch]::StartNew()
+        $response = Invoke-WebRequest -UseBasicParsing `
+            'http://127.0.0.1:8010/api/public/salons/?ordering=-rating_average' -TimeoutSec 5
+        $timer.Stop()
+        if ($response.StatusCode -ne 200) { throw 'Public salon performance request failed.' }
+        $timer.Elapsed.TotalMilliseconds
+    } | Sort-Object
+    $p95 = $durations[[Math]::Ceiling($durations.Count * 0.95) - 1]
+    if ($p95 -gt 800) { throw "Public salon API p95 is $([Math]::Round($p95))ms; expected <= 800ms." }
+
     Write-Host "Production API health: $($health.StatusCode)" -ForegroundColor Green
     Write-Host "Production React root: $($rootResponse.StatusCode)" -ForegroundColor Green
     Write-Host "Production deep route: $($deepRoute.StatusCode)" -ForegroundColor Green
     Write-Host "Production asset: $($asset.StatusCode) $assetPath" -ForegroundColor Green
+    Write-Host "Public salon API p95: $([Math]::Round($p95))ms" -ForegroundColor Green
 }
 finally {
     if ($server -and -not $server.HasExited) { Stop-Process -Id $server.Id -Force }

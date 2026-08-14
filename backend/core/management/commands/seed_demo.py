@@ -94,8 +94,7 @@ class Command(BaseCommand):
             },
         )
         branch.working_hours = {
-            str(day): {"start": "09:00", "end": "20:00", "is_open": day != 6}
-            for day in range(7)
+            str(day): {"start": "09:00", "end": "20:00", "is_open": day != 6} for day in range(7)
         }
         branch.latitude = "35.7851000"
         branch.longitude = "51.3755000"
@@ -177,6 +176,9 @@ class Command(BaseCommand):
                 start_at=start,
                 defaults={
                     "status": booking_status,
+                    "source": (
+                        Booking.Source.WALK_IN if start.day % 2 == 0 else Booking.Source.ONLINE
+                    ),
                     "end_at": start + timedelta(minutes=branch_service.duration_minutes),
                     "total_price": branch_service.price,
                     "deposit_amount": branch_service.price // 5,
@@ -286,10 +288,15 @@ class Command(BaseCommand):
             wallet=owner_wallet,
             related_booking=completed,
             type=WalletTransaction.Type.SALON_EARNING,
-            defaults={"amount": 1_080_000, "description": "درآمد نمونه رزرو تکمیل‌شده"},
+            defaults={
+                "amount": 1_080_000,
+                "salon": salon,
+                "description": "درآمد نمونه رزرو تکمیل‌شده",
+            },
         )
         Settlement.objects.get_or_create(
             wallet=owner_wallet,
+            salon=salon,
             amount=750_000,
             bank_account="IR820540102680020817909002",
             defaults={"status": Settlement.Status.REQUESTED},

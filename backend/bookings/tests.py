@@ -344,6 +344,7 @@ class BookingAPITests(BookingEngineBase, APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response.data["status"], Booking.Status.CONFIRMED)
+        self.assertEqual(response.data["source"], Booking.Source.WALK_IN)
         self.assertIsNone(response.data["hold_expires_at"])
         self.assertEqual(User.objects.get(phone="09127777777").name, "مشتری حضوری")
 
@@ -357,6 +358,20 @@ class BookingAPITests(BookingEngineBase, APITestCase):
                 "staff_id": self.staff_one.pk,
                 "start_at": self.at(9).isoformat(),
                 "customer_phone": "09127777778",
+            },
+        )
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_staff_account_cannot_create_online_hold(self):
+        staff_user = User.objects.create_user(phone="09127777779", role=User.Role.STAFF)
+        self.client.force_authenticate(staff_user)
+        response = self.client.post(
+            reverse("booking-hold"),
+            {
+                "branch": self.branch.pk,
+                "service_ids": [self.service_one.pk],
+                "staff_id": self.staff_one.pk,
+                "start_at": self.at(9).isoformat(),
             },
         )
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)

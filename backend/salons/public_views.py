@@ -1,4 +1,6 @@
 from django.db.models import Count, Min, Prefetch, Q
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
 from rest_framework import mixins, viewsets
 from rest_framework.permissions import AllowAny, IsAuthenticated
 
@@ -15,6 +17,7 @@ from .public_serializers import (
 )
 
 
+@method_decorator(cache_page(60), name="list")
 class PublicCategoryViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = [AllowAny]
     serializer_class = PublicCategorySerializer

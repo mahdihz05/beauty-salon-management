@@ -83,22 +83,31 @@ TEMPLATES = [
 WSGI_APPLICATION = "config.wsgi.application"
 ASGI_APPLICATION = "config.asgi.application"
 
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": Path(os.getenv("SQLITE_PATH", BASE_DIR / "db.sqlite3")),
-        # IMMEDIATE prevents two concurrent OTP/payment requests from both
-        # taking a read lock and then deadlocking while upgrading to a write.
-        # WAL still lets normal readers continue while that short write runs.
-        "OPTIONS": {
-            "timeout": 30,
-            "transaction_mode": "IMMEDIATE",
-            "init_command": (
-                "PRAGMA journal_mode=WAL; PRAGMA synchronous=NORMAL; PRAGMA busy_timeout=30000;"
-            ),
-        },
+if os.getenv("DATABASE_URL"):
+    import dj_database_url
+
+    DATABASES = {
+        "default": dj_database_url.config(
+            env="DATABASE_URL", conn_max_age=60, conn_health_checks=True
+        )
     }
-}
+else:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": Path(os.getenv("SQLITE_PATH", BASE_DIR / "db.sqlite3")),
+            # IMMEDIATE prevents two concurrent OTP/payment requests from both
+            # taking a read lock and then deadlocking while upgrading to a write.
+            # WAL still lets normal readers continue while that short write runs.
+            "OPTIONS": {
+                "timeout": 30,
+                "transaction_mode": "IMMEDIATE",
+                "init_command": (
+                    "PRAGMA journal_mode=WAL; PRAGMA synchronous=NORMAL; PRAGMA busy_timeout=30000;"
+                ),
+            },
+        }
+    }
 
 AUTH_USER_MODEL = "accounts.User"
 AUTH_PASSWORD_VALIDATORS = [
@@ -154,6 +163,14 @@ REST_FRAMEWORK = {
     "TEST_REQUEST_DEFAULT_FORMAT": "json",
 }
 
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+        "LOCATION": "nobatara-public-cache",
+        "TIMEOUT": 60,
+    }
+}
+
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=30),
@@ -170,6 +187,8 @@ SPECTACULAR_SETTINGS = {
     "ENUM_NAME_OVERRIDES": {
         "SalonTypeEnum": "salons.models.Salon.Type",
         "PaymentTypeEnum": "payments.models.Payment.Type",
+        "PaymentSelectionTypeEnum": "payments.serializers.PAYMENT_SELECTION_CHOICES",
+        "DiscountTypeEnum": "bookings.models.DiscountCode.Type",
         "WalletTransactionTypeEnum": "payments.models.WalletTransaction.Type",
         "SalonStatusEnum": "salons.models.Salon.Status",
         "BookingStatusEnum": "bookings.models.Booking.Status",

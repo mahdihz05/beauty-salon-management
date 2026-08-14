@@ -83,6 +83,7 @@ class BookingSerializer(serializers.ModelSerializer):
             "staff_name",
             "status",
             "status_label",
+            "source",
             "start_at",
             "end_at",
             "total_price",
@@ -95,6 +96,8 @@ class BookingSerializer(serializers.ModelSerializer):
             "hold_expires_at",
             "cancelled_at",
             "cancellation_reason",
+            "checked_in_at",
+            "checked_in_by",
             "items",
             "created_at",
         )

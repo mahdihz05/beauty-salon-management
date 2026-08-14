@@ -34,7 +34,13 @@ type DetailTab =
   | "discounts";
 
 const paymentType = { deposit: "بیعانه", full: "کامل", remainder: "مانده" };
-const paymentMethod = { online: "آنلاین", cash: "نقدی", wallet: "کیف پول" };
+const paymentMethod = {
+  in_person: "حضوری",
+  card_to_card: "کارت‌به‌کارت",
+  online: "آنلاین (قدیمی)",
+  cash: "نقدی (قدیمی)",
+  wallet: "کیف پول (قدیمی)",
+};
 
 export function AdminSalonDetailPage() {
   const [, route] = useRoute("/admin/salons/:salonId");
@@ -153,7 +159,7 @@ export function AdminSalonDetailPage() {
         </article>
         <article>
           <Building2 />
-          <span>شعب فعال و غیرفعال</span>
+          <span>شعب</span>
           <strong>{faNumber.format(metrics.branch_count)}</strong>
           <small>همه شعب سالن</small>
         </article>

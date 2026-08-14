@@ -27,7 +27,7 @@ test("public customer journey renders live demo data", async ({
   page,
 }, testInfo) => {
   await page.goto("/");
-  if (testInfo.project.name === "desktop-edge") {
+  if (testInfo.project.name !== "mobile-edge") {
     await expect(page.locator(".public-logo .brand-logo-mark")).toBeVisible();
     await expect(page.locator(".public-logo")).toContainText("نوبت‌آرا");
   } else {
@@ -37,6 +37,9 @@ test("public customer journey renders live demo data", async ({
     await expect(page.locator(".mobile-home-brand")).toContainText("نوبت‌آرا");
   }
   await expect(page.locator(".home-salon-grid article").first()).toBeVisible();
+  await expect(page.locator(".home-salon-grid")).not.toContainText(
+    "شروع قیمت از",
+  );
   await expect(page.locator("body")).toContainText("سالن رزگلد");
   await expect
     .poll(() => page.locator(".category-strip a").count())
@@ -55,6 +58,10 @@ test("public customer journey renders live demo data", async ({
     "ثبت نشده",
   );
   await expectNoHorizontalOverflow(page);
+  await page.screenshot({
+    path: testInfo.outputPath("public-salon-profile.png"),
+    fullPage: true,
+  });
 });
 
 test("mock OTP opens the customer account", async ({ page }, testInfo) => {
@@ -117,6 +124,10 @@ test("owner dashboard uses live metrics instead of placeholders", async ({
     "با راه‌اندازی موتور رزرو فعال می‌شود",
   );
   await expectNoHorizontalOverflow(page);
+  await page.screenshot({
+    path: testInfo.outputPath("owner-dashboard.png"),
+    fullPage: true,
+  });
 });
 
 test("admin dashboard loads protected live statistics", async ({
@@ -138,9 +149,13 @@ test("admin dashboard loads protected live statistics", async ({
   await expect(page.locator(".admin-salon-metrics article")).toHaveCount(8);
   await expect(page.locator(".admin-detail-tabs button")).toHaveCount(7);
   await expectNoHorizontalOverflow(page);
+  await page.screenshot({
+    path: testInfo.outputPath("admin-salon-detail.png"),
+    fullPage: true,
+  });
 
   await page.goto("/admin/finance");
-  await expect(page.locator(".finance-section")).toHaveCount(2);
+  await expect(page.locator(".finance-section")).toHaveCount(3);
   await expect(
     page.locator('.panel-nav-item[href="/admin/finance"]'),
   ).toHaveClass(/active/);
@@ -171,6 +186,22 @@ test("receptionist can use calendar but cannot open financial or customer pages"
   ).toHaveCount(0);
 
   await page.goto("/salon/reports");
+  await expect(page).toHaveURL(/\/$/);
+});
+
+test("staff can open only their personal availability", async ({
+  page,
+}, testInfo) => {
+  test.skip(
+    testInfo.project.name !== "desktop-edge",
+    "Staff permissions are covered once on desktop.",
+  );
+  await loginWithMockOtp(page, "09120000008", "/salon/my-availability");
+  await expect(page.locator("h1")).toContainText("زمان‌های من");
+  await expect(
+    page.locator('.panel-nav-item[href="/salon/services"]'),
+  ).toHaveCount(0);
+  await page.goto("/salon/services");
   await expect(page).toHaveURL(/\/$/);
 });
 
@@ -206,6 +237,66 @@ test("mobile pages keep navigation visible without horizontal overflow", async (
   await expect(page.locator(".filter-card.open")).toHaveCount(0);
 });
 
+test("tablet keeps public and panel layouts usable without horizontal overflow", async ({
+  page,
+}, testInfo) => {
+  test.skip(
+    testInfo.project.name !== "tablet-edge",
+    "Tablet-only responsive assertions.",
+  );
+
+  for (const path of ["/", "/salons", "/salons/demo-rose-gold"]) {
+    await page.goto(path);
+    await expectNoHorizontalOverflow(page);
+  }
+  await expect(page.locator(".public-header")).toBeVisible();
+  await page.screenshot({
+    path: testInfo.outputPath("tablet-public-profile.png"),
+    fullPage: true,
+  });
+
+  await loginWithMockOtp(page, "09120000002", "/salon/dashboard");
+  for (const path of [
+    "/salon/dashboard",
+    "/salon/calendar",
+    "/salon/availability",
+    "/salon/finance",
+  ]) {
+    await page.goto(path);
+    await expect(page.locator("h1")).toBeVisible();
+    await expectNoHorizontalOverflow(page);
+    if (path === "/salon/calendar") {
+      await expect(page.locator(".calendar-board")).toBeVisible();
+      await page.screenshot({
+        path: testInfo.outputPath("tablet-owner-calendar.png"),
+        fullPage: true,
+      });
+    }
+  }
+
+  await page.evaluate(() => localStorage.clear());
+  await loginWithMockOtp(page, "09120000001", "/admin/dashboard");
+  for (const path of [
+    "/admin/dashboard",
+    "/admin/salons",
+    "/admin/finance",
+    "/admin/support",
+  ]) {
+    await page.goto(path);
+    await expectNoHorizontalOverflow(page);
+    if (path === "/admin/finance") {
+      await expect(page.locator(".finance-section")).toHaveCount(3);
+      await expect(
+        page.locator(".finance-salon-grid button").first(),
+      ).toBeVisible();
+      await page.screenshot({
+        path: testInfo.outputPath("tablet-admin-finance.png"),
+        fullPage: false,
+      });
+    }
+  }
+});
+
 test("admin finance and support tabs stay responsive on mobile", async ({
   page,
 }, testInfo) => {
@@ -223,8 +314,12 @@ test("admin finance and support tabs stay responsive on mobile", async ({
   await expectNoHorizontalOverflow(page);
 
   await page.goto("/admin/finance");
-  await expect(page.locator(".finance-section")).toHaveCount(2);
+  await expect(page.locator(".finance-section")).toHaveCount(3);
   await expectNoHorizontalOverflow(page);
+  await page.screenshot({
+    path: testInfo.outputPath("mobile-admin-finance.png"),
+    fullPage: false,
+  });
 
   await page.goto("/admin/support");
   await expect(page.locator("h1")).toContainText("پشتیبانی و تیکت‌ها");
@@ -251,4 +346,8 @@ test("salon availability settings are usable on mobile", async ({
   await createdClosure.getByRole("button", { name: "حذف بازه بسته" }).click();
   await expect(createdClosure).toHaveCount(0);
   await expectNoHorizontalOverflow(page);
+  await page.screenshot({
+    path: testInfo.outputPath("mobile-salon-availability.png"),
+    fullPage: true,
+  });
 });

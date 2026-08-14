@@ -21,6 +21,7 @@ type Tab = "upcoming" | "past" | "cancelled";
 
 const statusLabel: Record<Booking["status"], string> = {
   pending_payment: "در انتظار پرداخت",
+  awaiting_verification: "در انتظار تأیید واریز",
   confirmed: "تأییدشده",
   completed: "انجام‌شده",
   cancelled: "لغوشده",
@@ -158,7 +159,11 @@ export function MyBookingsPage() {
     () =>
       (bookings.data?.results || []).filter((booking) => {
         if (tab === "upcoming")
-          return ["pending_payment", "confirmed"].includes(booking.status);
+          return [
+            "pending_payment",
+            "awaiting_verification",
+            "confirmed",
+          ].includes(booking.status);
         if (tab === "cancelled") return booking.status === "cancelled";
         return ["completed", "no_show"].includes(booking.status);
       }),
@@ -243,18 +248,24 @@ export function MyBookingsPage() {
               </div>
               <div className="booking-card-bottom">
                 <strong>{toman(booking.total_price)}</strong>
-                {["pending_payment", "confirmed"].includes(booking.status) && (
-                  <button
-                    className="button reject-button"
-                    disabled={cancel.isPending}
-                    onClick={() => {
-                      if (window.confirm("از لغو این نوبت مطمئن هستید؟"))
-                        cancel.mutate(booking.id);
-                    }}
-                  >
-                    <XCircle size={17} /> لغو نوبت
-                  </button>
-                )}
+                {[
+                  "pending_payment",
+                  "awaiting_verification",
+                  "confirmed",
+                ].includes(booking.status) &&
+                  new Date(booking.start_at).getTime() - Date.now() >=
+                    24 * 60 * 60 * 1000 && (
+                    <button
+                      className="button reject-button"
+                      disabled={cancel.isPending}
+                      onClick={() => {
+                        if (window.confirm("از لغو این نوبت مطمئن هستید؟"))
+                          cancel.mutate(booking.id);
+                      }}
+                    >
+                      <XCircle size={17} /> لغو نوبت
+                    </button>
+                  )}
               </div>
               {booking.status === "cancelled" &&
                 booking.cancellation_reason && (

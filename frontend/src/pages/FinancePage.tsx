@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
 import {
   BadgeDollarSign,
   CheckCircle2,
@@ -13,16 +14,43 @@ import type { Paginated } from "../types/salon";
 
 const money = (value: number) =>
   `${new Intl.NumberFormat("fa-IR").format(value)} تومان`;
+interface SalonFinanceSummary {
+  id: number;
+  name: string;
+  branch_count: number;
+  gross_revenue: number;
+  refunded_amount: number;
+  commission: number;
+  net_revenue: number;
+  settled_amount: number;
+  requested_amount: number;
+  payment_count: number;
+}
 export function FinancePage() {
   const queryClient = useQueryClient();
+  const [salonId, setSalonId] = useState<number | null>(null);
+  const salonSummaries = useQuery({
+    queryKey: ["finance", "salons"],
+    queryFn: async () =>
+      (await api.get<SalonFinanceSummary[]>("/payments/salons/")).data,
+  });
   const payments = useQuery({
-    queryKey: ["finance", "payments"],
-    queryFn: async () => (await api.get<Paginated<Payment>>("/payments/")).data,
+    queryKey: ["finance", "payments", salonId],
+    queryFn: async () =>
+      (
+        await api.get<Paginated<Payment>>(
+          `/payments/${salonId ? `?booking__branch__salon=${salonId}` : ""}`,
+        )
+      ).data,
   });
   const settlements = useQuery({
-    queryKey: ["finance", "settlements"],
+    queryKey: ["finance", "settlements", salonId],
     queryFn: async () =>
-      (await api.get<Settlement[]>("/payments/settlements/")).data,
+      (
+        await api.get<Settlement[]>(
+          `/payments/settlements/${salonId ? `?salon=${salonId}` : ""}`,
+        )
+      ).data,
   });
   const processSettlement = useMutation({
     mutationFn: async ({
@@ -38,7 +66,27 @@ export function FinancePage() {
       });
     },
   });
-  const error = payments.error || settlements.error || processSettlement.error;
+  const verifyTransfer = useMutation({
+    mutationFn: async ({
+      id,
+      status,
+    }: {
+      id: number;
+      status: "paid" | "failed";
+    }) => api.post(`/payments/${id}/verify-transfer/`, { status }),
+    async onSuccess() {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["finance", "payments"] }),
+        queryClient.invalidateQueries({ queryKey: ["finance", "salons"] }),
+      ]);
+    },
+  });
+  const error =
+    salonSummaries.error ||
+    payments.error ||
+    settlements.error ||
+    processSettlement.error ||
+    verifyTransfer.error;
 
   return (
     <AdminLayout title="مالی و تسویه‌ها">
@@ -48,6 +96,31 @@ export function FinancePage() {
           <p>کنترل درخواست‌های تسویه و مشاهده همه پرداخت‌های سامانه</p>
         </div>
         {error && <p className="alert alert-error">{getApiError(error)}</p>}
+
+        <section className="panel-card finance-section">
+          <h2>سالن‌ها</h2>
+          <div className="report-metrics finance-salon-grid">
+            {salonSummaries.data?.map((salon) => (
+              <button
+                className={salonId === salon.id ? "selected" : ""}
+                key={salon.id}
+                onClick={() =>
+                  setSalonId(salonId === salon.id ? null : salon.id)
+                }
+              >
+                <strong>{salon.name}</strong>
+                <span>
+                  {salon.branch_count} شعبه · {salon.payment_count} پرداخت
+                </span>
+                <b>{money(salon.net_revenue)}</b>
+                <small>
+                  ناخالص {money(salon.gross_revenue)} · کارمزد{" "}
+                  {money(salon.commission)}
+                </small>
+              </button>
+            ))}
+          </div>
+        </section>
 
         <section className="panel-card finance-section">
           <h2>درخواست‌های تسویه</h2>
@@ -135,6 +208,7 @@ export function FinancePage() {
                   <th>روش</th>
                   <th>وضعیت</th>
                   <th>زمان</th>
+                  <th>عملیات</th>
                 </tr>
               </thead>
               <tbody>
@@ -147,11 +221,13 @@ export function FinancePage() {
                     <td dir="ltr">{item.customer_phone}</td>
                     <td>{money(item.amount)}</td>
                     <td>
-                      {item.method === "cash"
-                        ? "نقدی"
-                        : item.method === "wallet"
-                          ? "کیف پول"
-                          : "آنلاین"}
+                      {item.method === "in_person" || item.method === "cash"
+                        ? "حضوری"
+                        : item.method === "card_to_card"
+                          ? "کارت‌به‌کارت"
+                          : item.method === "wallet"
+                            ? "کیف پول"
+                            : "آنلاین"}
                     </td>
                     <td>
                       <span
@@ -167,6 +243,35 @@ export function FinancePage() {
                       </span>
                     </td>
                     <td>{formatPersianDateTime(item.created_at)}</td>
+                    <td>
+                      {item.method === "card_to_card" &&
+                        item.status === "pending" && (
+                          <div className="finance-actions">
+                            <button
+                              aria-label="تأیید رسید"
+                              onClick={() =>
+                                verifyTransfer.mutate({
+                                  id: item.id,
+                                  status: "paid",
+                                })
+                              }
+                            >
+                              <CheckCircle2 />
+                            </button>
+                            <button
+                              aria-label="رد رسید"
+                              onClick={() =>
+                                verifyTransfer.mutate({
+                                  id: item.id,
+                                  status: "failed",
+                                })
+                              }
+                            >
+                              <XCircle />
+                            </button>
+                          </div>
+                        )}
+                    </td>
                   </tr>
                 ))}
               </tbody>

@@ -1289,6 +1289,16 @@ paths:
         schema:
           type: string
       - in: query
+        name: source
+        schema:
+          type: string
+          enum:
+          - online
+          - walk_in
+        description: |-
+          * `online` - آنلاین
+          * `walk_in` - حضوری
+      - in: query
         name: staff
         schema:
           type: integer
@@ -1302,6 +1312,7 @@ paths:
         schema:
           type: string
           enum:
+          - awaiting_verification
           - cancelled
           - completed
           - confirmed
@@ -1309,6 +1320,7 @@ paths:
           - pending_payment
         description: |-
           * `pending_payment` - در انتظار پرداخت
+          * `awaiting_verification` - در انتظار تأیید واریز
           * `confirmed` - تأییدشده
           * `completed` - انجام‌شده
           * `cancelled` - لغوشده
@@ -1348,6 +1360,38 @@ paths:
   /api/bookings/items/{id}/cancel/:
     post:
       operationId: bookings_items_cancel_create
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: یک مقداد عدد یکتا که این رزرو را شناسایی میکند.
+        required: true
+      tags:
+      - bookings
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Booking'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Booking'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Booking'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Booking'
+          description: ''
+  /api/bookings/items/{id}/check-in/:
+    post:
+      operationId: bookings_items_check_in_create
       parameters:
       - in: path
         name: id
@@ -3352,14 +3396,22 @@ paths:
         schema:
           type: integer
       - in: query
+        name: booking__branch__salon
+        schema:
+          type: integer
+      - in: query
         name: method
         schema:
           type: string
           enum:
+          - card_to_card
           - cash
+          - in_person
           - online
           - wallet
         description: |-
+          * `in_person` - حضوری
+          * `card_to_card` - کارت‌به‌کارت
           * `online` - آنلاین
           * `cash` - نقدی
           * `wallet` - کیف پول
@@ -3471,6 +3523,38 @@ paths:
               schema:
                 $ref: '#/components/schemas/Payment'
           description: ''
+  /api/payments/{id}/verify-transfer/:
+    post:
+      operationId: payments_verify_transfer_create
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - payments
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VerifyTransfer'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/VerifyTransfer'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/VerifyTransfer'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VerifyTransfer'
+          description: ''
   /api/payments/remainder/:
     post:
       operationId: payments_remainder_create
@@ -3496,6 +3580,20 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Payment'
+          description: ''
+  /api/payments/salons/:
+    get:
+      operationId: payments_salons_retrieve
+      tags:
+      - payments
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SalonFinanceSummary'
           description: ''
   /api/payments/settlements/:
     get:
@@ -3593,6 +3691,32 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Payment'
+          description: ''
+  /api/payments/submit/:
+    post:
+      operationId: payments_submit_create
+      tags:
+      - payments
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubmitPayment'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/SubmitPayment'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SubmitPayment'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubmitPayment'
           description: ''
   /api/payments/wallet/:
     get:
@@ -4516,6 +4640,10 @@ components:
         status_label:
           type: string
           readOnly: true
+        source:
+          allOf:
+          - $ref: '#/components/schemas/SourceEnum'
+          readOnly: true
         start_at:
           type: string
           format: date-time
@@ -4559,6 +4687,15 @@ components:
         cancellation_reason:
           type: string
           readOnly: true
+        checked_in_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        checked_in_by:
+          type: integer
+          readOnly: true
+          nullable: true
         items:
           type: array
           items:
@@ -4573,6 +4710,8 @@ components:
       - branch_name
       - cancellation_reason
       - cancelled_at
+      - checked_in_at
+      - checked_in_by
       - created_at
       - customer
       - deposit_amount
@@ -4586,6 +4725,7 @@ components:
       - paid_amount
       - remaining_amount
       - salon_name
+      - source
       - staff
       - staff_name
       - start_at
@@ -4629,6 +4769,7 @@ components:
     BookingStatusEnum:
       enum:
       - pending_payment
+      - awaiting_verification
       - confirmed
       - completed
       - cancelled
@@ -4636,6 +4777,7 @@ components:
       type: string
       description: |-
         * `pending_payment` - در انتظار پرداخت
+        * `awaiting_verification` - در انتظار تأیید واریز
         * `confirmed` - تأییدشده
         * `completed` - انجام‌شده
         * `cancelled` - لغوشده
@@ -5042,7 +5184,7 @@ components:
           type: string
           readOnly: true
         type:
-          $ref: '#/components/schemas/DiscountCodeTypeEnum'
+          $ref: '#/components/schemas/DiscountTypeEnum'
         type_label:
           type: string
           readOnly: true
@@ -5094,7 +5236,7 @@ components:
       - type_label
       - used_count
       - value
-    DiscountCodeTypeEnum:
+    DiscountTypeEnum:
       enum:
       - percent
       - fixed
@@ -6125,7 +6267,7 @@ components:
           type: string
           readOnly: true
         type:
-          $ref: '#/components/schemas/DiscountCodeTypeEnum'
+          $ref: '#/components/schemas/DiscountTypeEnum'
         type_label:
           type: string
           readOnly: true
@@ -6517,6 +6659,23 @@ components:
         gateway_ref:
           type: string
           readOnly: true
+        tracking_code:
+          type: string
+          readOnly: true
+        receipt:
+          type: string
+          format: uri
+          nullable: true
+          readOnly: true
+        verified_by:
+          type: integer
+          readOnly: true
+          nullable: true
+        verified_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
         redirect_url:
           type: string
           readOnly: true
@@ -6540,20 +6699,36 @@ components:
       - method
       - paid_at
       - provider
+      - receipt
       - redirect_url
       - salon_name
       - status
+      - tracking_code
       - type
+      - verified_at
+      - verified_by
     PaymentMethodEnum:
       enum:
+      - in_person
+      - card_to_card
       - online
       - cash
       - wallet
       type: string
       description: |-
+        * `in_person` - حضوری
+        * `card_to_card` - کارت‌به‌کارت
         * `online` - آنلاین
         * `cash` - نقدی
         * `wallet` - کیف پول
+    PaymentSelectionTypeEnum:
+      enum:
+      - deposit
+      - full
+      type: string
+      description: |-
+        * `deposit` - بیعانه
+        * `full` - پرداخت کامل
     PaymentStatusEnum:
       enum:
       - pending
@@ -6916,14 +7091,17 @@ components:
         method:
           allOf:
           - $ref: '#/components/schemas/RecordRemainderPaymentMethodEnum'
-          default: cash
+          default: in_person
       required:
       - booking
     RecordRemainderPaymentMethodEnum:
       enum:
+      - in_person
       - cash
       type: string
-      description: '* `cash` - cash'
+      description: |-
+        * `in_person` - in_person
+        * `cash` - cash
     ReportSummary:
       type: object
       properties:
@@ -7179,6 +7357,40 @@ components:
       - type
       - type_label
       - updated_at
+    SalonFinanceSummary:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        branch_count:
+          type: integer
+        gross_revenue:
+          type: integer
+        refunded_amount:
+          type: integer
+        commission:
+          type: integer
+        net_revenue:
+          type: integer
+        settled_amount:
+          type: integer
+        requested_amount:
+          type: integer
+        payment_count:
+          type: integer
+      required:
+      - branch_count
+      - commission
+      - gross_revenue
+      - id
+      - name
+      - net_revenue
+      - payment_count
+      - refunded_amount
+      - requested_amount
+      - settled_amount
     SalonImage:
       type: object
       properties:
@@ -7327,6 +7539,9 @@ components:
           maximum: 9223372036854775807
           minimum: 0
           format: int64
+        salon:
+          type: integer
+          nullable: true
         status:
           allOf:
           - $ref: '#/components/schemas/SettlementStatusEnum'
@@ -7383,6 +7598,9 @@ components:
     SettlementRequest:
       type: object
       properties:
+        salon:
+          type: integer
+          minimum: 1
         amount:
           type: integer
           minimum: 1
@@ -7402,6 +7620,14 @@ components:
         * `requested` - درخواست‌شده
         * `paid` - واریزشده
         * `rejected` - ردشده
+    SourceEnum:
+      enum:
+      - online
+      - walk_in
+      type: string
+      description: |-
+        * `online` - آنلاین
+        * `walk_in` - حضوری
     Staff:
       type: object
       properties:
@@ -7577,21 +7803,45 @@ components:
           type: integer
           minimum: 1
         type:
-          $ref: '#/components/schemas/StartPaymentTypeEnum'
+          $ref: '#/components/schemas/PaymentSelectionTypeEnum'
         discount_code:
           type: string
           maxLength: 32
       required:
       - booking
       - type
-    StartPaymentTypeEnum:
+    SubmitPayment:
+      type: object
+      properties:
+        booking:
+          type: integer
+          minimum: 1
+        type:
+          $ref: '#/components/schemas/PaymentSelectionTypeEnum'
+        method:
+          $ref: '#/components/schemas/SubmitPaymentMethodEnum'
+        tracking_code:
+          type: string
+          maxLength: 80
+        receipt:
+          type: string
+          format: uri
+          nullable: true
+        discount_code:
+          type: string
+          maxLength: 32
+      required:
+      - booking
+      - method
+      - type
+    SubmitPaymentMethodEnum:
       enum:
-      - deposit
-      - full
+      - in_person
+      - card_to_card
       type: string
       description: |-
-        * `deposit` - deposit
-        * `full` - full
+        * `in_person` - in_person
+        * `card_to_card` - card_to_card
     SupportTicket:
       type: object
       properties:
@@ -7717,6 +7967,21 @@ components:
       - phone
       - role
       - role_label
+    VerifyTransfer:
+      type: object
+      properties:
+        status:
+          $ref: '#/components/schemas/VerifyTransferStatusEnum'
+      required:
+      - status
+    VerifyTransferStatusEnum:
+      enum:
+      - paid
+      - failed
+      type: string
+      description: |-
+        * `paid` - paid
+        * `failed` - failed
     Wallet:
       type: object
       properties:

@@ -2,10 +2,15 @@ from rest_framework import serializers
 
 from .models import Payment, Settlement, Wallet, WalletTransaction
 
+PAYMENT_SELECTION_CHOICES = (
+    (Payment.Type.DEPOSIT, "بیعانه"),
+    (Payment.Type.FULL, "پرداخت کامل"),
+)
+
 
 class StartPaymentSerializer(serializers.Serializer):
     booking = serializers.IntegerField(min_value=1)
-    type = serializers.ChoiceField(choices=(Payment.Type.DEPOSIT, Payment.Type.FULL))
+    type = serializers.ChoiceField(choices=PAYMENT_SELECTION_CHOICES)
     discount_code = serializers.CharField(required=False, allow_blank=True, max_length=32)
 
 
@@ -29,6 +34,10 @@ class PaymentSerializer(serializers.ModelSerializer):
             "method",
             "provider",
             "gateway_ref",
+            "tracking_code",
+            "receipt",
+            "verified_by",
+            "verified_at",
             "redirect_url",
             "paid_at",
             "created_at",
@@ -41,7 +50,51 @@ class PaymentSerializer(serializers.ModelSerializer):
 
 class RecordRemainderPaymentSerializer(serializers.Serializer):
     booking = serializers.IntegerField(min_value=1)
-    method = serializers.ChoiceField(choices=(Payment.Method.CASH,), default=Payment.Method.CASH)
+    method = serializers.ChoiceField(
+        choices=(Payment.Method.IN_PERSON, Payment.Method.CASH), default=Payment.Method.IN_PERSON
+    )
+
+    def validate_method(self, value):
+        return Payment.Method.IN_PERSON
+
+
+class SubmitPaymentSerializer(serializers.Serializer):
+    booking = serializers.IntegerField(min_value=1)
+    type = serializers.ChoiceField(choices=PAYMENT_SELECTION_CHOICES)
+    method = serializers.ChoiceField(
+        choices=(Payment.Method.IN_PERSON, Payment.Method.CARD_TO_CARD)
+    )
+    tracking_code = serializers.CharField(required=False, allow_blank=True, max_length=80)
+    receipt = serializers.ImageField(required=False, allow_null=True)
+    discount_code = serializers.CharField(required=False, allow_blank=True, max_length=32)
+
+    def validate(self, attrs):
+        if (
+            attrs["method"] == Payment.Method.CARD_TO_CARD
+            and not attrs.get("tracking_code")
+            and not attrs.get("receipt")
+        ):
+            raise serializers.ValidationError(
+                "برای کارت‌به‌کارت، تصویر رسید یا کد پیگیری الزامی است."
+            )
+        return attrs
+
+
+class VerifyTransferSerializer(serializers.Serializer):
+    status = serializers.ChoiceField(choices=(Payment.Status.PAID, Payment.Status.FAILED))
+
+
+class SalonFinanceSummarySerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    name = serializers.CharField()
+    branch_count = serializers.IntegerField()
+    gross_revenue = serializers.IntegerField()
+    refunded_amount = serializers.IntegerField()
+    commission = serializers.IntegerField()
+    net_revenue = serializers.IntegerField()
+    settled_amount = serializers.IntegerField()
+    requested_amount = serializers.IntegerField()
+    payment_count = serializers.IntegerField()
 
 
 class WalletTransactionSerializer(serializers.ModelSerializer):
@@ -77,6 +130,7 @@ class SettlementSerializer(serializers.ModelSerializer):
         fields = (
             "id",
             "amount",
+            "salon",
             "status",
             "bank_account",
             "note",
@@ -97,6 +151,7 @@ class SettlementSerializer(serializers.ModelSerializer):
 
 
 class SettlementRequestSerializer(serializers.Serializer):
+    salon = serializers.IntegerField(required=False, min_value=1)
     amount = serializers.IntegerField(min_value=1)
     bank_account = serializers.CharField(max_length=40)
 

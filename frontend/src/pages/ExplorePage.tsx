@@ -15,18 +15,13 @@ export function ExplorePage() {
   const [search, setSearch] = useState(initial.get("search") || "");
   const [type, setType] = useState(initial.get("type") || "");
   const [category, setCategory] = useState(initial.get("category") || "");
-  const [maxPrice, setMaxPrice] = useState(5_000_000);
   const [ordering, setOrdering] = useState("-rating_average");
   const [filtersOpen, setFiltersOpen] = useState(false);
-  const activeFilterCount =
-    Number(Boolean(type)) +
-    Number(Boolean(category)) +
-    Number(maxPrice < 5_000_000);
+  const activeFilterCount = Number(Boolean(type)) + Number(Boolean(category));
   const query = new URLSearchParams({ ordering });
   if (search) query.set("search", search);
   if (type) query.set("type", type);
   if (category) query.set("category", category);
-  if (maxPrice < 5_000_000) query.set("max_price", String(maxPrice));
   const salons = useQuery({
     queryKey: ["public", "salons", query.toString()],
     queryFn: async () =>
@@ -58,7 +53,6 @@ export function ExplorePage() {
               onChange={(event) => setOrdering(event.target.value)}
             >
               <option value="-rating_average">برترین</option>
-              <option value="min_price">کمترین قیمت</option>
               <option value="-created_at">جدیدترین</option>
             </select>
           </label>
@@ -125,21 +119,6 @@ export function ExplorePage() {
                 </label>
               ))}
             </fieldset>
-            <fieldset className="filter-price">
-              <legend>محدوده قیمت</legend>
-              <input
-                type="range"
-                min="100000"
-                max="5000000"
-                step="100000"
-                value={maxPrice}
-                onChange={(event) => setMaxPrice(Number(event.target.value))}
-              />
-              <div>
-                <span>ارزان</span>
-                <span>لوکس</span>
-              </div>
-            </fieldset>
             <div className="mobile-filter-actions">
               <button
                 type="button"
@@ -148,7 +127,6 @@ export function ExplorePage() {
                 onClick={() => {
                   setType("");
                   setCategory("");
-                  setMaxPrice(5_000_000);
                 }}
               >
                 <RotateCcw size={17} /> پاک‌کردن فیلترها
