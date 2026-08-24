@@ -168,7 +168,7 @@ export function LoginPage() {
                 {codeForm.formState.isSubmitting && (
                   <LoaderCircle className="spin" size={18} />
                 )}
-                ورود به نوبت‌آرا
+                ورود به Salovina
               </button>
               <button className="text-button" type="button" onClick={editPhone}>
                 <ArrowRight size={16} /> اصلاح شماره موبایل

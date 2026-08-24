@@ -1,8 +1,8 @@
 $ErrorActionPreference = 'Stop'
 $projectRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
 $buildRoot = Join-Path $projectRoot 'deployment-build'
-$stageRoot = Join-Path $buildRoot 'beauty-salon-management'
-$zipPath = Join-Path $buildRoot 'beauty-salon-shared-host.zip'
+$stageRoot = Join-Path $buildRoot 'salovina'
+$archivePath = Join-Path $buildRoot 'salovina-cpanel.tar.gz'
 
 $resolvedProject = [System.IO.Path]::GetFullPath($projectRoot)
 $resolvedBuild = [System.IO.Path]::GetFullPath($buildRoot)
@@ -20,9 +20,7 @@ if (Test-Path -LiteralPath $buildRoot) { Remove-Item -LiteralPath $buildRoot -Re
 New-Item -ItemType Directory -Path $stageRoot -Force | Out-Null
 
 $rootFiles = @(
-    'passenger_wsgi.py', 'deploy-shared-host.sh', 'README.md',
-    'IMPLEMENTATION_PLAN.md', 'quality-check.ps1', 'smoke-test.ps1',
-    'production-smoke-test.ps1', 'validate-deployment-package.ps1'
+    'salovina_wsgi.py', 'deploy-shared-host.sh'
 )
 foreach ($file in $rootFiles) {
     Copy-Item -LiteralPath (Join-Path $projectRoot $file) -Destination $stageRoot
@@ -48,12 +46,13 @@ Copy-DeploymentTree `
     -Destination (Join-Path $stageRoot 'backend') `
     -ExcludedDirectories @('.venv', '__pycache__', '.pytest_cache', '.ruff_cache', 'staticfiles', 'media', 'test-media') `
     -ExcludedFiles @('*.pyc', '*.pyo', 'db.sqlite3', '.env')
-Copy-DeploymentTree `
-    -Source (Join-Path $projectRoot 'frontend') `
-    -Destination (Join-Path $stageRoot 'frontend') `
-    -ExcludedDirectories @('node_modules', 'playwright-report', 'test-results') `
-    -ExcludedFiles @('*.tsbuildinfo')
-Copy-Item -LiteralPath (Join-Path $projectRoot 'docs') -Destination $stageRoot -Recurse
+$frontendStage = Join-Path $stageRoot 'frontend'
+New-Item -ItemType Directory -Path $frontendStage -Force | Out-Null
+Copy-Item -LiteralPath (Join-Path $projectRoot 'frontend\dist') -Destination $frontendStage -Recurse
 
-Compress-Archive -LiteralPath $stageRoot -DestinationPath $zipPath -CompressionLevel Optimal
-Write-Host "Deployment package created: $zipPath" -ForegroundColor Green
+if (Test-Path -LiteralPath $archivePath) {
+    Remove-Item -LiteralPath $archivePath -Force
+}
+& tar.exe -czf $archivePath -C $stageRoot .
+if ($LASTEXITCODE -ne 0) { throw 'Creating the deployment tar.gz failed.' }
+Write-Host "Deployment package created: $archivePath" -ForegroundColor Green

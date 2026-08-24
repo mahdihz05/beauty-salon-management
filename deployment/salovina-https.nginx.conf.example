@@ -1,5 +1,5 @@
 # Replace example.com and certificate paths, then merge these directives with
-# nobatara.nginx.conf after issuing a certificate (for example with Certbot).
+# salovina.nginx.conf after issuing a certificate (for example with Certbot).
 server {
     listen 80;
     server_name example.com www.example.com;
@@ -15,5 +15,5 @@ server {
     ssl_protocols TLSv1.2 TLSv1.3;
 
     # Copy the root, /api, /static, /media, /assets, /brand and /images
-    # locations from nobatara.nginx.conf into this server block.
+    # locations from salovina.nginx.conf into this server block.
 }

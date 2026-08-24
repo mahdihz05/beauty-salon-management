@@ -84,7 +84,7 @@ export function FoundationPage() {
         </section>
         {featured && (
           <section className="featured-section">
-            <h2>پیشنهاد ویژه نوبت‌آرا</h2>
+            <h2>پیشنهاد ویژه Salovina</h2>
             <Link className="featured-card" href={`/salons/${featured.slug}`}>
               <img
                 src={featured.cover_image || "/images/salon-03.jpg"}

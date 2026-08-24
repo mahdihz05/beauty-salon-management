@@ -4,9 +4,9 @@
 
 ## ساختار پیشنهادی در cPanel
 
-- Application root: پوشه استخراج‌شده `beauty-salon-management`
+- Application root: `apps/salovina`
 - Application URL: دامنه یا زیردامنه اصلی پروژه
-- Startup file: `passenger_wsgi.py`
+- Startup file: `salovina_wsgi.py`
 - Entry point: `application`
 - Python version: ترجیحاً 3.12؛ حداقل 3.10
 
@@ -14,14 +14,9 @@ React و API هر دو از یک دامنه سرو می‌شوند. مسیر API
 
 ## مراحل نصب روی هاست
 
-1. فایل `beauty-salon-shared-host.zip` را خارج از `public_html` آپلود و Extract کنید؛ Application URL را در بخش Python App هاست به همان پوشه متصل کنید.
+1. فایل `salovina-cpanel.tar.gz` را مستقیماً داخل Application root یعنی `apps/salovina` آپلود و Extract کنید؛ Application URL روی `saloniva.ir` باقی می‌ماند و Application root جابه‌جا نمی‌شود.
 2. یک Python Application با startup file و entry point بالا بسازید و وارد Terminal همان virtualenv شوید.
-3. فایل `backend/.env.production.example` را با نام `backend/.env` کپی کنید و فقط موارد زیر را با اطلاعات واقعی عوض کنید:
-   - `DJANGO_SECRET_KEY`: یک رشته تصادفی طولانی
-   - `DJANGO_ALLOWED_HOSTS`: دامنه بدون `https://`
-   - `CSRF_TRUSTED_ORIGINS` و `CORS_ALLOWED_ORIGINS`: آدرس کامل `https://...`
-   - `SQLITE_PATH` و `MEDIA_ROOT`: مسیر مطلق و قابل‌نوشتن داخل home هاست
-4. فرمان زیر را در ریشه پروژه اجرا کنید:
+3. فرمان زیر را در ریشه پروژه اجرا کنید؛ فایل `.env`، Secret Key و مسیرهای داده به‌صورت خودکار ساخته می‌شوند:
 
 ```bash
 bash deploy-shared-host.sh
@@ -29,13 +24,7 @@ bash deploy-shared-host.sh
 
 این فرمان وابستگی‌های production را نصب، migration و collectstatic را اجرا و Passenger را برای restart علامت‌گذاری می‌کند. چون frontend از قبل build شده، npm روی هاست اجرا نمی‌شود.
 
-## بازسازی اختیاری React روی هاست
-
-فقط در صورت تغییر کد frontend و وجود Node سازگار:
-
-```bash
-REBUILD_FRONTEND=true bash deploy-shared-host.sh
-```
+فرانت‌اند فقط روی سیستم محلی build می‌شود و این اسکریپت هیچ‌وقت npm را روی هاست اجرا نمی‌کند.
 
 ## کنترل بعد از نصب
 

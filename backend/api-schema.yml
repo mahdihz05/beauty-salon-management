@@ -1,8 +1,8 @@
 openapi: 3.0.3
 info:
-  title: NobatAra Salon Booking API
+  title: Salovina Salon Booking API
   version: 1.0.0
-  description: API سامانه نوبت‌دهی آنلاین آرایشگاه‌ها و سالن‌های زیبایی نوبت‌آرا
+  description: API سامانه نوبت‌دهی آنلاین آرایشگاه‌ها و سالن‌های زیبایی Salovina
 paths:
   /api/admin-panel/categories/:
     get:

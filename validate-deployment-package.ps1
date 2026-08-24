@@ -2,29 +2,30 @@ $ErrorActionPreference = 'Stop'
 $projectRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
 $buildRoot = [System.IO.Path]::GetFullPath((Join-Path $projectRoot 'deployment-build'))
 $validationRoot = [System.IO.Path]::GetFullPath((Join-Path $buildRoot 'package-validation'))
-$zipPath = Join-Path $buildRoot 'beauty-salon-shared-host.zip'
+$archivePath = Join-Path $buildRoot 'salovina-cpanel.tar.gz'
 $pythonPath = Join-Path $projectRoot 'backend\.venv\Scripts\python.exe'
 
 if (-not $validationRoot.StartsWith($buildRoot + [System.IO.Path]::DirectorySeparatorChar)) {
     throw 'Validation directory escaped deployment-build.'
 }
-if (-not (Test-Path -LiteralPath $zipPath)) { throw 'Deployment ZIP does not exist.' }
+if (-not (Test-Path -LiteralPath $archivePath)) { throw 'Deployment tar.gz does not exist.' }
 if (Test-Path -LiteralPath $validationRoot) {
     Remove-Item -LiteralPath $validationRoot -Recurse -Force
 }
 
 try {
-    Expand-Archive -LiteralPath $zipPath -DestinationPath $validationRoot
-    $appRoot = Join-Path $validationRoot 'beauty-salon-management'
+    New-Item -ItemType Directory -Path $validationRoot -Force | Out-Null
+    & tar.exe -xzf $archivePath -C $validationRoot
+    if ($LASTEXITCODE -ne 0) { throw 'Extracting the deployment tar.gz failed.' }
+    $appRoot = $validationRoot
     $dataRoot = Join-Path $appRoot 'data'
     New-Item -ItemType Directory -Path $dataRoot -Force | Out-Null
 
     $requiredFiles = @(
-        'passenger_wsgi.py',
+        'salovina_wsgi.py',
         'backend\requirements-production.txt',
-        'backend\.env.production.example',
         'frontend\dist\index.html',
-        'docs\SHARED_HOSTING.md'
+        'deploy-shared-host.sh'
     )
     foreach ($relativePath in $requiredFiles) {
         if (-not (Test-Path -LiteralPath (Join-Path $appRoot $relativePath))) {
@@ -78,8 +79,8 @@ assert statuses == [200, 200, 200, 200]
     & $pythonPath $managePath shell -c $shellCommand
     if ($LASTEXITCODE -ne 0) { throw 'Packaged runtime validation failed.' }
 
-    $sizeMb = [math]::Round((Get-Item -LiteralPath $zipPath).Length / 1MB, 2)
-    Write-Host "Deployment ZIP validation passed ($sizeMb MB)." -ForegroundColor Green
+    $sizeMb = [math]::Round((Get-Item -LiteralPath $archivePath).Length / 1MB, 2)
+    Write-Host "Deployment tar.gz validation passed ($sizeMb MB)." -ForegroundColor Green
 }
 finally {
     if (Test-Path -LiteralPath $validationRoot) {

@@ -29,12 +29,12 @@ test("public customer journey renders live demo data", async ({
   await page.goto("/");
   if (testInfo.project.name !== "mobile-edge") {
     await expect(page.locator(".public-logo .brand-logo-mark")).toBeVisible();
-    await expect(page.locator(".public-logo")).toContainText("نوبت‌آرا");
+    await expect(page.locator(".public-logo")).toContainText("Salovina");
   } else {
     await expect(
       page.locator(".mobile-home-brand .brand-logo-mark"),
     ).toBeVisible();
-    await expect(page.locator(".mobile-home-brand")).toContainText("نوبت‌آرا");
+    await expect(page.locator(".mobile-home-brand")).toContainText("Salovina");
   }
   await expect(page.locator(".home-salon-grid article").first()).toBeVisible();
   await expect(page.locator(".home-salon-grid")).not.toContainText(
@@ -221,7 +221,7 @@ test("mobile pages keep navigation visible without horizontal overflow", async (
   );
   await page.goto("/");
   await expect(page.locator(".customer-mobile-nav")).toBeVisible();
-  await expect(page.locator(".mobile-home-brand")).toContainText("نوبت‌آرا");
+  await expect(page.locator(".mobile-home-brand")).toContainText("Salovina");
   await expect(
     page.locator(".mobile-home-brand .brand-logo-mark"),
   ).toBeVisible();

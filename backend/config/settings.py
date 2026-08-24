@@ -1,4 +1,4 @@
-"""Django settings for the NobatAra salon booking API."""
+"""Django settings for the Salovina salon booking API."""
 
 import os
 import sys
@@ -169,7 +169,7 @@ if DEBUG:
     CACHES = {
         "default": {
             "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
-            "LOCATION": "nobatara-public-cache",
+            "LOCATION": "salovina-public-cache",
             "TIMEOUT": 60,
         }
     }
@@ -180,7 +180,7 @@ else:
             "BACKEND": "django.core.cache.backends.filebased.FileBasedCache",
             "LOCATION": os.getenv(
                 "DJANGO_CACHE_LOCATION",
-                str(Path(gettempdir()) / "nobatara-public-cache"),
+                str(Path(gettempdir()) / "salovina-public-cache"),
             ),
             "TIMEOUT": 60,
             "OPTIONS": {"MAX_ENTRIES": 500},
@@ -196,8 +196,8 @@ SIMPLE_JWT = {
 }
 
 SPECTACULAR_SETTINGS = {
-    "TITLE": "NobatAra Salon Booking API",
-    "DESCRIPTION": "API سامانه نوبت‌دهی آنلاین آرایشگاه‌ها و سالن‌های زیبایی نوبت‌آرا",
+    "TITLE": "Salovina Salon Booking API",
+    "DESCRIPTION": "API سامانه نوبت‌دهی آنلاین آرایشگاه‌ها و سالن‌های زیبایی Salovina",
     "VERSION": "1.0.0",
     "SERVE_INCLUDE_SCHEMA": False,
     "ENUM_NAME_OVERRIDES": {

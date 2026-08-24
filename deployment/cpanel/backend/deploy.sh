@@ -3,23 +3,16 @@ set -euo pipefail
 
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BACKEND_ROOT="$PROJECT_ROOT/backend"
-FRONTEND_ROOT="$PROJECT_ROOT/frontend"
 DATA_ROOT="$HOME/salovina-data"
 
 if [ -z "${VIRTUAL_ENV:-}" ]; then
-  ACTIVATE_PATH="$(find "$HOME/virtualenv/apps/salovina" -path '*/bin/activate' -print -quit 2>/dev/null || true)"
-  if [ -n "$ACTIVATE_PATH" ]; then
-    # shellcheck disable=SC1090
-    source "$ACTIVATE_PATH"
-  else
-    echo "Create the cPanel Python App with root apps/salovina before running this script." >&2
+  ACTIVATE_PATH="$(find "$HOME/virtualenv/apps/salovina-backend" -path '*/bin/activate' -print -quit 2>/dev/null || true)"
+  if [ -z "$ACTIVATE_PATH" ]; then
+    echo "Create the Python App with root apps/salovina-backend first." >&2
     exit 1
   fi
-fi
-
-if [ ! -f "$FRONTEND_ROOT/dist/index.html" ]; then
-  echo "Packaged frontend build is missing. Upload a fresh salovina-cpanel.zip file." >&2
-  exit 1
+  # shellcheck disable=SC1090
+  source "$ACTIVATE_PATH"
 fi
 
 mkdir -p "$DATA_ROOT/media" "$DATA_ROOT/cache"
@@ -31,8 +24,8 @@ if [ ! -f "$BACKEND_ROOT/.env" ]; then
   cat > "$BACKEND_ROOT/.env" <<EOF
 DJANGO_SECRET_KEY=$SECRET_KEY
 DJANGO_DEBUG=false
-DJANGO_ALLOWED_HOSTS=saloniva.ir,www.saloniva.ir
-CSRF_TRUSTED_ORIGINS=https://saloniva.ir,https://www.saloniva.ir
+DJANGO_ALLOWED_HOSTS=api.saloniva.ir,saloniva.ir,www.saloniva.ir
+CSRF_TRUSTED_ORIGINS=https://api.saloniva.ir,https://saloniva.ir,https://www.saloniva.ir
 CORS_ALLOWED_ORIGINS=https://saloniva.ir,https://www.saloniva.ir
 DJANGO_SECURE_SSL_REDIRECT=true
 SQLITE_PATH=$DATA_ROOT/db.sqlite3
@@ -55,14 +48,12 @@ set -a
 source "$BACKEND_ROOT/.env"
 set +a
 
-python -m pip install --disable-pip-version-check --no-cache-dir -r "$BACKEND_ROOT/requirements-production.txt"
-
-mkdir -p "$BACKEND_ROOT/media" "$(dirname "${SQLITE_PATH:-$BACKEND_ROOT/db.sqlite3}")"
+python -m pip install --disable-pip-version-check --no-cache-dir -r "$BACKEND_ROOT/requirements-shared-host.txt"
 python "$BACKEND_ROOT/manage.py" migrate --noinput
 python "$BACKEND_ROOT/manage.py" collectstatic --noinput
 python "$BACKEND_ROOT/manage.py" check --deploy
 
 mkdir -p "$PROJECT_ROOT/tmp"
 touch "$PROJECT_ROOT/tmp/restart.txt"
-echo "Shared-host deployment steps completed successfully."
-echo "Open https://saloniva.ir/ and https://saloniva.ir/api/health/."
+echo "Salovina backend deployment completed."
+echo "Open https://api.saloniva.ir/api/health/."

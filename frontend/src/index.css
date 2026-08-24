@@ -109,10 +109,11 @@ p {
 }
 .brand-logo {
   display: inline-flex;
+  max-width: 100%;
   min-width: 0;
   align-items: center;
   gap: 10px;
-  direction: rtl;
+  direction: ltr;
 }
 .brand-logo-mark {
   width: 52px;
@@ -128,17 +129,21 @@ p {
 }
 .brand-logo-copy strong {
   color: var(--ink);
-  font-size: 25px;
-  font-weight: 900;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 27px;
+  font-weight: 400;
+  letter-spacing: 0.2px;
+  direction: ltr;
   white-space: nowrap;
 }
 .brand-logo-copy small {
   margin-top: 7px;
   color: var(--primary);
-  font-size: 9px;
-  font-weight: 800;
-  letter-spacing: 3px;
+  font-size: 7px;
+  font-weight: 700;
+  letter-spacing: 1.7px;
   direction: ltr;
+  white-space: nowrap;
 }
 
 .eyebrow {
@@ -302,7 +307,7 @@ p {
   height: 68px;
 }
 .auth-card > .brand-mark .brand-logo-copy strong {
-  font-size: 31px;
+  font-size: 34px;
 }
 .auth-card h1 {
   margin: 18px 0 8px;
@@ -479,7 +484,7 @@ p {
 }
 .panel-brand .brand-logo-copy strong {
   color: #d7ac63;
-  font-size: 23px;
+  font-size: 25px;
 }
 .panel-brand .brand-logo-copy small {
   margin-top: 3px;
@@ -906,7 +911,7 @@ p {
   }
   .panel-mobile-header .panel-brand .brand-logo-copy strong {
     color: var(--ink);
-    font-size: 20px;
+    font-size: 22px;
   }
   .panel-content {
     width: calc(100% - 32px);
@@ -1963,7 +1968,7 @@ p {
   height: 48px;
 }
 .public-logo .brand-logo-copy strong {
-  font-size: 23px;
+  font-size: 25px;
 }
 .public-logo .brand-logo-copy small {
   margin-top: 4px;
@@ -2595,7 +2600,7 @@ p {
     height: 58px;
   }
   .mobile-home-brand .brand-logo-copy strong {
-    font-size: 27px;
+    font-size: 30px;
   }
   .customer-mobile-nav {
     position: fixed;
@@ -2983,7 +2988,7 @@ p {
   height: 42px;
 }
 .booking-logo .brand-logo-copy strong {
-  font-size: 21px;
+  font-size: 23px;
 }
 .booking-progress {
   width: min(560px, calc(100% - 32px));

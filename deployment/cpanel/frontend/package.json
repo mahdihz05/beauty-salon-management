@@ -1,0 +1,13 @@
+{
+  "name": "salovina-frontend-runtime",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Dependency-free Salovina frontend runtime for cPanel Passenger",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}
