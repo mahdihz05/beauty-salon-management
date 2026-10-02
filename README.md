@@ -1,3 +1,64 @@
+# Salovina — Multi-branch Salon Booking and Management
+
+A React/TypeScript frontend and Django REST API for customer booking, salon operations and platform administration. The product UI is Persian-first and RTL; this engineering overview is English-first. The detailed Persian installation, demo and operations guide is retained below.
+
+**Status:** a demo-oriented implementation with mock SMS/payment integrations, not a certified production service. The existing guide documents a demo endpoint; its availability and deployed configuration were not verified in this documentation review. Demo OTP codes are displayed on the login screen and must not be exposed in production.
+
+## Architecture and Engineering Evidence
+
+```text
+React / TypeScript / Vite / TanStack Query
+                    |
+             Django REST API
+                    |
+       +------------+------------+
+       |            |            |
+ PostgreSQL      Media       SMS/payment
+ (SQLite dev)    files        adapters
+```
+
+The backend separates accounts, salons, bookings, payments, notifications, reviews and reporting. The key review targets are domain rules and server-side boundaries, not just dashboard screens:
+
+| Concern | Mechanism and source |
+|---|---|
+| Availability calculation | The [booking engine](backend/bookings/engine.py) intersects configured branch opening windows with staff shifts, excludes closures/time off/active bookings, accounts for preparation buffers, and sums staff-specific service durations. |
+| Competing bookings | Hold creation uses `transaction.atomic`, locks a stable staff row with `select_for_update`, then rechecks availability before writing a ten-minute hold. Service price/duration are snapshotted into booking items. This is an inspectable concurrency mechanism, not a load-test result or a guarantee of equivalent SQLite/PostgreSQL locking behavior. |
+| Scoped permissions | [Account permissions](backend/accounts/permissions.py) resolve branch access through salon ownership or active memberships; management checks distinguish branch managers from other members. [Salon permissions](backend/salons/permissions.py) check ownership/admin access. These files are review entry points, not a complete authorization audit. |
+| Payment and wallet transitions | [Payment services](backend/payments/services.py) use atomic operations and row locks for payment confirmation, refunds and settlements. Current manual booking methods are in-person payment and card-transfer verification; the [gateway adapter](backend/payments/providers.py) implements only a mock provider. |
+
+## Verification Status
+
+As of October 2, 2026, no GitHub Actions workflows were present in the inspected tree and the repository Actions API returned zero runs. No passing-current-HEAD test result is claimed. The inspected source commit was `5568d9b336fe385d0f149413e69c4fd719ec97a6`.
+
+[quality-check.ps1](quality-check.ps1) defines local checks for Ruff, backend pytest, Django system/migration/schema checks, deployment settings checks, frontend lint/typecheck/tests/format/build, npm audit and Playwright. It is a check runner, not evidence that those checks have passed. Neither it nor application, build, smoke or deployment commands were executed for this README update. The older test count in the Persian guide is historical documentation, not a recounted or passing suite at this commit.
+
+## Local Development
+
+Use a disposable local environment, not an existing production database. Requirements documented by the project are Python 3.12+, Node.js 24+ and Microsoft Edge for the current Playwright configuration.
+
+From the repository root on Windows:
+
+```powershell
+.\setup.ps1
+.\start-dev.ps1
+```
+
+Setup prepares dependencies, migrations and demo/showcase data. The development launcher selects free frontend/backend ports. Manual commands, local API/Swagger routes, environment examples and quality-check instructions are preserved in the Persian guide below.
+
+## Demo and Production Boundaries
+
+Before real customer use: replace mock SMS/payment providers; disable demo OTP display; remove or replace demo accounts/data; configure strong secrets, allowed hosts, CSRF/CORS and HTTPS; persist media; arrange recurring booking tasks, monitoring and tested backups; and confirm cancellation, refund, commission and settlement policies. A settings check alone does not establish operational readiness.
+
+The [PostgreSQL migration guide](docs/POSTGRESQL_MIGRATION.md) requires maintenance mode, database/media backups, record comparison and smoke checks. Its exported data contains customer information and must remain protected. No migration, export or deployment was performed in this review.
+
+See also the [delivery checklist](docs/DELIVERY_CHECKLIST.md), [requirements audit](docs/REQUIREMENTS_AUDIT.md) and [user guide](docs/USER_GUIDE.md). These are project documentation, not independent production acceptance evidence.
+
+## License
+
+No project software license has been declared. Licensing remains an explicit owner decision; public repository visibility does not grant reuse rights.
+
+## Persian Product and Operations Guide
+
 <div align="center" dir="rtl">
   <img src="frontend/public/brand/salovina-logo.png" width="180" alt="لوگوی Salovina" />
   <h1>Salovina</h1>
@@ -185,7 +246,7 @@ npm --prefix frontend run dev -- --host 127.0.0.1 --port 5173
 - build تولیدی و npm audit؛
 - سناریوهای واقعی Playwright در اندازه دسکتاپ، تبلت ۷۶۸ پیکسل و موبایل؛ همراه با کنترل بیرون‌زدگی افقی صفحات عمومی و پنل‌ها.
 
-تعداد فعلی تست‌های بک‌اند: **۱۰۱ تست**. مجموعه مرورگری نیز جریان‌های مشتری، رزرو و پرداخت، مالک، مدیر کل، پذیرش، آرایشگر، ساعات رزرو و واکنش‌گرایی را پوشش می‌دهد.
+شمار **۱۰۱ تست** از مستندات قبلی پروژه نقل شده است؛ این عدد شمارش مجدد یا نتیجه اجرای موفق در HEAD فعلی نیست. مجموعه مرورگری سناریوهای مشتری، رزرو و پرداخت، مالک، مدیر کل، پذیرش، آرایشگر، ساعات رزرو و واکنش‌گرایی دارد؛ موفقیت این سناریوها در این بازبینی اجرا یا تأیید نشده است.
 
 ## کارهای زمان‌بندی‌شده
 
