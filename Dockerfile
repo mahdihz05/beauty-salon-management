@@ -13,6 +13,7 @@ COPY backend/requirements-production.txt /tmp/requirements.txt
 RUN pip install --no-cache-dir -r /tmp/requirements.txt
 COPY backend/ /app/backend/
 COPY --from=frontend /build/dist /app/frontend/dist
+COPY frontend/public/images/ /app/frontend/public/images/
 WORKDIR /app/backend
 RUN DJANGO_DEBUG=true python manage.py collectstatic --noinput
-CMD ["sh", "-ec", "mkdir -p /data/media; python manage.py migrate --noinput; if [ ! -f /data/.demo-seeded ]; then python manage.py seed_demo; python manage.py seed_showcase; touch /data/.demo-seeded; fi; exec gunicorn config.wsgi:application --bind 0.0.0.0:${PORT:-8000} --workers 2 --timeout 120 --access-logfile -"]
+CMD ["sh", "-ec", "mkdir -p /data/media; python manage.py migrate --noinput; if [ ! -f /data/.demo-seeded-with-images ]; then python manage.py seed_demo; python manage.py seed_showcase; touch /data/.demo-seeded-with-images; fi; exec gunicorn config.wsgi:application --bind 0.0.0.0:${PORT:-8000} --workers 2 --timeout 120 --access-logfile -"]
